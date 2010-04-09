@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/eiffel/!svn/ver/169/memcache/trunk/src/Clib
+END
+Makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/eiffel/!svn/ver/169/memcache/trunk/src/Clib/Makefile.in
+END
+memcache.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/eiffel/!svn/ver/169/memcache/trunk/src/Clib/memcache.h
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/eiffel/!svn/ver/169/memcache/trunk/src/Clib/Makefile.am
+END
+memcache.h.in
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/eiffel/!svn/ver/169/memcache/trunk/src/Clib/memcache.h.in
+END

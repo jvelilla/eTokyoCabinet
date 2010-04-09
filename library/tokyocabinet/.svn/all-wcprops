@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/eiffel/!svn/ver/169/memcache/trunk/src/memcached
+END
+memcache_constants.e
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/eiffel/!svn/ver/178/memcache/trunk/src/memcached/memcache_constants.e
+END
+memcache_return_type.e
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/eiffel/!svn/ver/178/memcache/trunk/src/memcached/memcache_return_type.e
+END
+enum.e
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/eiffel/!svn/ver/169/memcache/trunk/src/memcached/enum.e
+END
+memcache_api.e
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/eiffel/!svn/ver/175/memcache/trunk/src/memcached/memcache_api.e
+END
