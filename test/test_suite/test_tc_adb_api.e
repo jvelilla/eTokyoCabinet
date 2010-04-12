@@ -178,7 +178,6 @@ feature -- Test Store Records
 			create v.make ("hop")
 			b := tcadbput2 (adb, k.item,v.item)
 			assert ("Expected true", b = true)
-
 		end
 
 
