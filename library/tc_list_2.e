@@ -1,4 +1,4 @@
-class TCLIST
+class TC_LIST_2
 
 create
 make
