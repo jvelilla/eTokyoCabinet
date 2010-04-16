@@ -8,7 +8,6 @@ class
 	STRING_SERIALIZATION
 
 feature -- Access
-
 	serialize (a_object: ANY): STRING is
 			-- Serialize `a_object'.
 		require
@@ -18,7 +17,6 @@ feature -- Access
 			l_sed_ser: SED_INDEPENDENT_SERIALIZER
 			l_cstring: C_STRING
 			l_cnt: INTEGER
-			l_string : STRING
 		do
 			create l_sed_rw.make
 			l_sed_rw.set_for_writing
@@ -29,8 +27,6 @@ feature -- Access
 				-- we have to read and put into the string.
 			l_cnt := l_sed_rw.count
 			create l_cstring.make_by_pointer_and_count (l_sed_rw.buffer.item, l_cnt)
-
-			create l_string.make_from_c (l_sed_rw.buffer.item)
 			Result := l_cstring.substring (1, l_cnt)
 		ensure
 			serialize_not_void: Result /= Void
