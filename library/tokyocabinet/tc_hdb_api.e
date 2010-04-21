@@ -225,6 +225,46 @@ feature -- Error Message
 
 feature -- Database Control
 
+	tchdbpath (a_hdb : POINTER) : POINTER
+		--	/* Get the file path of a hash database object.
+		--   `hdb' specifies the hash database object.
+		--   The return value is the path of the database file or `NULL' if the object does not connect to
+		--   any database file. */
+		--const char *tchdbpath(TCHDB *hdb);
+		external
+			"C inline use <tchdb.h>"
+		alias
+			"{
+				tchdbpath((TCHDB *)$a_hdb)
+			}"
+		end
+
+	tchdboptimize (a_hdb : POINTER; a_bnum : INTEGER_64; an_apow : INTEGER_8; a_fpow: INTEGER_8; an_opts : NATURAL_8) : BOOLEAN
+		--/* Optimize the file of a hash database object.
+		--   `hdb' specifies the hash database object connected as a writer.
+		--   `bnum' specifies the number of elements of the bucket array.  If it is not more than 0, the
+		--   default value is specified.  The default value is two times of the number of records.
+		--   `apow' specifies the size of record alignment by power of 2.  If it is negative, the current
+		--   setting is not changed.
+		--   `fpow' specifies the maximum number of elements of the free block pool by power of 2.  If it
+		--   is negative, the current setting is not changed.
+		--   `opts' specifies options by bitwise-or: `HDBTLARGE' specifies that the size of the database
+		--   can be larger than 2GB by using 64-bit bucket array, `HDBTDEFLATE' specifies that each record
+		--   is compressed with Deflate encoding, `HDBTBZIP' specifies that each record is compressed with
+		--   BZIP2 encoding, `HDBTTCBS' specifies that each record is compressed with TCBS encoding.  If it
+		--   is `UINT8_MAX', the current setting is not changed.
+		--   If successful, the return value is true, else, it is false.
+		--   This function is useful to reduce the size of the database file with data fragmentation by
+		--   successive updating. */
+		--bool tchdboptimize(TCHDB *hdb, int64_t bnum, int8_t apow, int8_t fpow, uint8_t opts);
+		external
+			"C inline use <tchdb.h>"
+		alias
+			"{
+				tchdboptimize((TCHDB *)$a_hdb, (int64_t) $a_bnum, (int8_t) $an_apow, (int8_t) $a_fpow, (uint8_t)$an_opts)
+			}"
+		end
+
 	tchdbsetmutex (an_hdb : POINTER) : BOOLEAN
 		--/* Set mutual exclusion control of a hash database object for threading.
 		--   `hdb' specifies the hash database object which is not opened.
@@ -355,6 +395,24 @@ feature -- Database Control
 feature -- Store Records
 
 
+
+	tchdbput (a_hdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32; a_vbuf : POINTER; a_vsiz : INTEGER_32) : BOOLEAN
+		--`hdb' specifies the hash database object connected as a writer.
+		--`kbuf' specifies the pointer to the region of the key.
+		--`ksiz' specifies the size of the region of the key.
+		--`vbuf' specifies the pointer to the region of the value.
+		--`vsiz' specifies the size of the region of the value.
+		--If successful, the return value is true, else, it is false.
+		--If a record with the same key exists in the database, it is overwritten.
+		--bool tchdbput(TCHDB *hdb, const void *kbuf, int ksiz, const void *vbuf, int vsiz);
+		external
+			"C inline use <tchdb.h>"
+		alias
+			"{
+				tchdbput((TCHDB *)$a_hdb, (const void *)$a_kbuf, (int) $a_ksiz, (const void *)$a_vbuf, (int) $a_vsiz)
+			}"
+		end
+
 	tchdbput2(an_hdb : POINTER; a_kstr : POINTER; a_vstr : POINTER) : BOOLEAN
 		--/* Store a string record into a hash database object.
 		--   `hdb' specifies the hash database object connected as a writer.
@@ -368,6 +426,25 @@ feature -- Store Records
 		alias
 			"{
 				tchdbput2((TCHDB *)$an_hdb, (const char *)$a_kstr, (const char *)$a_vstr)
+			}"
+		end
+
+
+
+	tchdbputkeep (a_hdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32; a_vbuf : POINTER; a_vsiz : INTEGER_32) : BOOLEAN
+		--`hdb' specifies the hash database object connected as a writer.
+		--`kbuf' specifies the pointer to the region of the key.
+		--`ksiz' specifies the size of the region of the key.
+		--`vbuf' specifies the pointer to the region of the value.
+		--`vsiz' specifies the size of the region of the value.
+		--If successful, the return value is true, else, it is false.
+		--If a record with the same key exists in the database, this function has no effect.
+		--bool tchdbputkeep(TCHDB *hdb, const void *kbuf, int ksiz, const void *vbuf, int vsiz);
+		external
+			"C inline use <tchdb.h>"
+		alias
+			"{
+				tchdbputkeep((TCHDB *)$a_hdb, (const void *)$a_kbuf, (int) $a_ksiz, (const void *)$a_vbuf, (int) $a_vsiz)
 			}"
 		end
 
@@ -389,6 +466,23 @@ feature -- Store Records
 		end
 
 
+	tchdbputcat ( a_hdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32; a_vbuf : POINTER; a_vsiz: INTEGER_32)
+		--    `hdb' specifies the hash database object connected as a writer.
+		--    `kbuf' specifies the pointer to the region of the key.
+		--    `ksiz' specifies the size of the region of the key.
+		--    `vbuf' specifies the pointer to the region of the value.
+		--    `vsiz' specifies the size of the region of the value.
+		--    If successful, the return value is true, else, it is false.
+		--    If there is no corresponding record, a new record is created.
+		--	bool tchdbputcat(TCHDB *hdb, const void *kbuf, int ksiz, const void *vbuf, int vsiz);
+		external
+			"C inline use <tchdb.h>"
+		alias
+			"{
+				tchdbputcat((TCHDB *)$a_hdb, (const void *)$a_kbuf, (int) $a_ksiz, (const void *) $a_vbuf, (int) $a_vsiz)
+			}"
+		end
+
 	tchdbputcat2 (an_hdb : POINTER; a_kstr : POINTER; a_vstr : POINTER) : BOOLEAN
 		--	* Concatenate a string value at the end of the existing record in a hash database object.
 		--   `hdb' specifies the hash database object connected as a writer.
@@ -405,6 +499,23 @@ feature -- Store Records
 			}"
 		end
 
+
+	tchdbputasync (a_hdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32; a_vbuf : POINTER; a_vsiz : INTEGER_32)
+		--    `hdb' specifies the hash database object connected as a writer.
+		--    `kbuf' specifies the pointer to the region of the key.
+		--    `ksiz' specifies the size of the region of the key.
+		--    `vbuf' specifies the pointer to the region of the value.
+		--    `vsiz' specifies the size of the region of the value.
+		--    If successful, the return value is true, else, it is false.
+		--    If a record with the same key exists in the database, it is overwritten. Records passed to this function are accumulated into the inner buffer and wrote into the file at a blast.
+		--	bool tchdbputasync(TCHDB *hdb, const void *kbuf, int ksiz, const void *vbuf, int vsiz);
+		external
+			"C inline use <tchdb.h>"
+		alias
+			"{
+				tchdbputasync((TCHDB *)$a_hdb, (const void *)$a_kbuf, (int)$a_ksiz, (const void *)$a_vbuf, (int) $a_vsiz)
+			}"
+		end
 
 	tchdbputasync2 (an_hdb : POINTER; a_kstr : POINTER; a_vstr : POINTER) : BOOLEAN
 		--	/* Store a string record into a hash database object in asynchronous fashion.
@@ -462,7 +573,21 @@ feature -- Store Records
 
 feature -- Remove Records
 
-	 tchdbout2 (an_hdb : POINTER; a_kstr : POINTER) : BOOLEAN
+	tchdbout (a_hdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32) : BOOLEAN
+		--    `hdb' specifies the hash database object connected as a writer.
+		--    `kbuf' specifies the pointer to the region of the key.
+		--    `ksiz' specifies the size of the region of the key.
+		--    If successful, the return value is true, else, it is false.
+		--	bool tchdbout(TCHDB *hdb, const void *kbuf, int ksiz);
+		external
+			"C inline use <tchdb.h>"
+		alias
+			"{
+				tchdbout ((TCHDB *)$a_hdb, (const void *) $a_kbuf, (int) $a_ksiz)
+			}"
+		end
+
+	tchdbout2 (an_hdb : POINTER; a_kstr : POINTER) : BOOLEAN
 		--/* Remove a string record of a hash database object.
 		--   `hdb' specifies the hash database object connected as a writer.
 		--   `kstr' specifies the string of the key.
@@ -490,7 +615,32 @@ feature -- Remove Records
 			}"
 		end
 
-feature -- Retrieve Records
+feature -- Retrieve Records and Keys
+
+	tchdbget (a_hdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32; a_sp : TYPED_POINTER [INTEGER_32]) : POINTER
+		--/* Retrieve a record in a hash database object.
+		--   `hdb' specifies the hash database object.
+		--   `kbuf' specifies the pointer to the region of the key.
+		--   `ksiz' specifies the size of the region of the key.
+		--   `sp' specifies the pointer to the variable into which the size of the region of the return
+		--   value is assigned.
+		--   If successful, the return value is the pointer to the region of the value of the corresponding
+		--   record.  `NULL' is returned if no record corresponds.
+		--   Because an additional zero code is appended at the end of the region of the return value,
+		--   the return value can be treated as a character string.  Because the region of the return
+		--   value is allocated with the `malloc' call, it should be released with the `free' call when
+		--   it is no longer in use. */
+		--void *tchdbget(TCHDB *hdb, const void *kbuf, int ksiz, int *sp);
+		external
+			"C inline use <tchdb.h>"
+		alias
+			"[
+				int sp;
+				void *result = tchdbget((TCHDB *)$a_hdb, (const void *)$a_kbuf, (int)$a_ksiz, (int) &sp); 
+				*(EIF_INTEGER *) $a_sp = (EIF_INTEGER) sp;
+				return result;
+			]"
+		end
 
 
 	tchdbget2 (an_hdb : POINTER; a_kstr : POINTER) : POINTER
@@ -511,6 +661,23 @@ feature -- Retrieve Records
 		end
 
 
+	tchdbvsiz (a_hdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32) : INTEGER_32
+		--	/* Get the size of the value of a record in a hash database object.
+		--   `hdb' specifies the hash database object.
+		--   `kbuf' specifies the pointer to the region of the key.
+		--   `ksiz' specifies the size of the region of the key.
+		--   If successful, the return value is the size of the value of the corresponding record, else,
+		--   it is -1. */
+		--int tchdbvsiz(TCHDB *hdb, const void *kbuf, int ksiz);
+		external
+			"C inline use <tchdb.h>"
+		alias
+			"{
+				tchdbvsiz((TCHDB *)$a_hdb, (const void *)$a_kbuf, (int) $a_ksiz)
+			}"
+		end
+
+
 	tchdbvsiz2 (an_hdb : POINTER; a_kstr : POINTER) : INTEGER_32
 		--	/* Get the size of the value of a string record in a hash database object.
 		--   `hdb' specifies the hash database object.
@@ -525,9 +692,9 @@ feature -- Retrieve Records
 				tchdbvsiz2((TCHDB *)$an_hdb, (const char *)$a_kstr)
 			}"
 		end
-		
-	
-	
+
+
+
 	tchdbrnum (an_hdb : POINTER) : NATURAL_64
 		--	/* Get the number of records of a hash database object.
 		--   `hdb' specifies the hash database object.
@@ -556,6 +723,48 @@ feature -- Retrieve Records
 				tchdbfsiz((TCHDB *)$an_hdb)
 			}"
 		end
+
+	tchdbfwmkeys (a_hdb : POINTER; a_pbuf : POINTER; a_psiz:INTEGER_32; a_max : INTEGER_32) : POINTER
+		--/* Get forward matching keys in a hash database object.
+		--   `hdb' specifies the hash database object.
+		--   `pbuf' specifies the pointer to the region of the prefix.
+		--   `psiz' specifies the size of the region of the prefix.
+		--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is
+		--   specified.
+		--   The return value is a list object of the corresponding keys.  This function does never fail.
+		--   It returns an empty list even if no key corresponds.
+		--   Because the object of the return value is created with the function `tclistnew', it should be
+		--   deleted with the function `tclistdel' when it is no longer in use.  Note that this function
+		--   may be very slow because every key in the database is scanned. */
+		--TCLIST *tchdbfwmkeys(TCHDB *hdb, const void *pbuf, int psiz, int max);
+		external
+			"C inline use <tchdb.h>"
+		alias
+			"{
+				tchdbfwmkeys((TCHDB *)$a_hdb, (const void *)$a_pbuf, (int) $a_psiz, (int) $a_max)
+			}"
+		end
+
+	tchdbfwmkeys2 (a_hdb : POINTER; a_pstr : POINTER; a_max : INTEGER_32) : POINTER
+		--/* Get forward matching string keys in a hash database object.
+		--   `hdb' specifies the hash database object.
+		--   `pstr' specifies the string of the prefix.
+		--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is
+		--   specified.
+		--   The return value is a list object of the corresponding keys.  This function does never fail.
+		--   It returns an empty list even if no key corresponds.
+		--   Because the object of the return value is created with the function `tclistnew', it should be
+		--   deleted with the function `tclistdel' when it is no longer in use.  Note that this function
+		--   may be very slow because every key in the database is scanned. */
+		--TCLIST *tchdbfwmkeys2(TCHDB *hdb, const char *pstr, int max);
+		external
+			"C inline use <tchdb.h>"
+		alias
+			"{
+				tchdbfwmkeys2((TCHDB *)$a_hdb, (const char *)$a_pstr, (int) $a_max)
+			}"
+		end
+
 feature -- Iterator
 
 
@@ -574,6 +783,32 @@ feature -- Iterator
 		end
 
 
+	tchdbiternext (a_hdb : POINTER; a_sp : TYPED_POINTER[INTEGER_32]) : POINTER
+		--/* Get the next key of the iterator of a hash database object.
+		--   `hdb' specifies the hash database object.
+		--   `sp' specifies the pointer to the variable into which the size of the region of the return
+		--   value is assigned.
+		--   If successful, the return value is the pointer to the region of the next key, else, it is
+		--   `NULL'.  `NULL' is returned when no record is to be get out of the iterator.
+		--   Because an additional zero code is appended at the end of the region of the return value, the
+		--   return value can be treated as a character string.  Because the region of the return value is
+		--   allocated with the `malloc' call, it should be released with the `free' call when it is no
+		--   longer in use.  It is possible to access every record by iteration of calling this function.
+		--   It is allowed to update or remove records whose keys are fetched while the iteration.
+		--   However, it is not assured if updating the database is occurred while the iteration.  Besides,
+		--   the order of this traversal access method is arbitrary, so it is not assured that the order of
+		--   storing matches the one of the traversal access. */
+		--void *tchdbiternext(TCHDB *hdb, int *sp);
+		external
+			"C inline use <tchdb.h>"
+		alias
+			"[
+				int sp;
+				void *result = tchdbiternext((TCHDB *)$a_hdb, (int)&sp);
+				*(EIF_INTEGER *) $a_sp = (EIF_INTEGER) sp;
+				return result;
+			]"
+		end
 
 	tchdbiternext2 (an_hdb : POINTER) : POINTER
 		--/* Get the next key string of the iterator of a hash database object.
