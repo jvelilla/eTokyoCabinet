@@ -1,16 +1,16 @@
 note
-	description: "Summary description for {HDB_API}."
+	description: "Summary description for {FDB_API}."
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	HDB_API
+	FDB_API
 
 inherit
 	DBM
 
-	TC_HDB_API
+	TC_FDB_API
 
 create
 	make
@@ -20,23 +20,22 @@ feature {NONE} -- Initialization
 	make
 			-- Create a hash database object
 		do
-			hdb := tchdbnew
+			fdb := tcfdbnew
 			is_open := False
 			status_error := False
 		end
-
 feature -- Open Database
 
 	open (a_path : STRING; o_mode : INTEGER_32)
-		-- Open a  database file and connect a hash database object.
+		-- Open a database file and connect a fixed-length database object.
 		--   `a_path' specifies the path of the database file.
-		--   `o_mode' specifies the connection mode: `HDBOWRITER' as a writer, `HDBOREADER' as a reader.
-		--   If the mode is `HDBOWRITER', the following may be added by bitwise-or: `HDBOCREAT', which
-		--   means it creates a new database if not exist, `HDBOTRUNC', which means it creates a new
-		--   database regardless if one exists, `HDBOTSYNC', which means every transaction synchronizes
-		--   updated contents with the device.  Both of `HDBOREADER' and `HDBOWRITER' can be added to by
-		--   bitwise-or: `HDBONOLCK', which means it opens the database file without file locking, or
-		--   `HDBOLCKNB', which means locking is performed without blocking.
+		--   `o_mode' specifies the connection mode: `FDBOWRITER' as a writer, `FDBOREADER' as a reader.
+		--   If the mode is `FDBOWRITER', the following may be added by bitwise-or: `FDBOCREAT', which
+		--   means it creates a new database if not exist, `FDBOTRUNC', which means it creates a new
+		--   database regardless if one exists, `FDBOTSYNC', which means every transaction synchronizes
+		--   updated contents with the device.  Both of `FDBOREADER' and `FDBOWRITER' can be added to by
+		--   bitwise-or: `FDBONOLCK', which means it opens the database file without file locking, or
+		--   `FDBOLCKNB', which means locking is performed without blocking.
 		require
 			is_database_closed : not is_open
 			is_valid_path : a_path /= Void and not a_path.is_empty
@@ -45,7 +44,7 @@ feature -- Open Database
 			l_b : BOOLEAN
 		do
 			create c_path.make (a_path)
-			l_b := tchdbopen (hdb,c_path.item,o_mode)
+			l_b := tcfdbopen (fdb,c_path.item,o_mode)
 			if not l_b then
 				status_error := True
 			else
@@ -56,13 +55,13 @@ feature -- Open Database
 feature -- Close and Delete
 
 	close
-		-- Close a Hash Database
+		-- Close a Fixed Database
 		require
 			is_database_open : is_open
 		local
 			l_b : BOOLEAN
 		do
-			l_b := tchdbclose (hdb)
+			l_b := tcfdbclose (fdb)
 			if not l_b then
 				status_error := True
 			else
@@ -73,15 +72,14 @@ feature -- Close and Delete
 		end
 
 	delete
-		-- Delete a Hash Database
+		-- Delete an Fixed Database
 		do
-			tchdbdel (hdb)
+			tcfdbdel (fdb)
 			is_open := False
 		ensure
 			is_database_closed : not is_open
 
 		end
-
 
 feature -- Error Messages
 
@@ -111,74 +109,71 @@ feature {NONE} -- Implementation
 			Result := error_message (error_code)
 		end
 
-
 	get_string_implementation (a_key: POINTER): POINTER
 			-- Deferred implementation of get_string
-			-- Retrieve a string record in a Hash database object. 	
+			-- Retrieve a string record in a Fixed database object. 	
 		do
-			Result := tchdbget2 (hdb, a_key)
+			Result := tcfdbget3 (fdb, a_key)
 		end
 
 	records_number_implementation: NATURAL_64
 			-- Deferred implementation of records_number
 		do
-			Result := tchdbrnum (hdb)
+			Result := tcfdbrnum (fdb)
 		end
 
 	put_string_implementation (a_key: POINTER; a_value: POINTER): BOOLEAN
 			-- deferred implementation of put_string
 		do
-			Result := tchdbput2 (hdb, a_key, a_value)
+			Result := tcfdbput3 (fdb, a_key, a_value)
 		end
 
 	put_keep_string_implementation (a_key: POINTER; a_value: POINTER): BOOLEAN
 			-- deferred implementation of put_keep_string
 		do
-			Result := tchdbputkeep2 (hdb, a_key, a_value)
+			Result := tcfdbputkeep3 (fdb, a_key, a_value)
 		end
 
 	out_string_implementation (a_key: POINTER): BOOLEAN
 			-- Deferred implementation of out_string
 		do
-			Result := tchdbout2 (hdb, a_key)
+			Result := tcfdbout3 (fdb, a_key)
 		end
 
 	error_message_implementation (a_code: INTEGER_32): POINTER
 			-- Deferred Implementation of error message
 		do
-			Result := tchdberrmsg (a_code)
+			Result := tcfdberrmsg (a_code)
 		end
 
 	error_code_implementation: INTEGER_32
 			-- Deferred implementation of error_code
 		do
-			Result := tchdbecode (hdb)
+			Result := tcfdbecode (fdb)
 		end
 
 	file_size_implementation: NATURAL_64
 			-- Deferred implementation of full_size
 		do
-			Result := tchdbfsiz (hdb)
+			Result := tcfdbfsiz (fdb)
 		end
 
 	iterator_next_string_implementation: POINTER
 			-- deferred implementation
 		do
-			Result := tchdbiternext2 (hdb)
+			Result := tcfdbiternext3 (fdb)
 		end
 
 	iterator_init_implementation: BOOLEAN
 		do
-			Result := tchdbiterinit (hdb)
+			Result := tcfdbiterinit (fdb)
 		end
 
-	hdb: POINTER
-		-- Hast database object
-
+	fdb : POINTER
+		-- Fixed Database Object
 
 invariant
-	hash_database_created: hdb /= default_pointer
+	fixed_database_created: fdb /= default_pointer
 
 
-end -- class HDB_API
-
+end

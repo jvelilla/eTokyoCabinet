@@ -260,7 +260,7 @@ feature -- Database Control
 		end
 
 
-	tcfdboptimize (an_fdb : POINTER; a_width : INTEGER_32; a_limsiz : INTEGER_64)
+	tcfdboptimize (an_fdb : POINTER; a_width : INTEGER_32; a_limsiz : INTEGER_64) : BOOLEAN
 		--/* Optimize the file of a fixed-length database object.
 		--   `fdb' specifies the fixed-length database object connected as a writer.
 		--   `width' specifies the width of the value of each record.  If it is not more than 0, the current
@@ -276,9 +276,9 @@ feature -- Database Control
 				tcfdboptimize((TCFDB *)$an_fdb, (int32_t)$a_width, (int64_t)$a_limsiz)
 			}"
 		end
-		
-	
-	
+
+
+
 	tcfdbcopy (an_fdb : POINTER; a_path : POINTER ) : BOOLEAN
 		--	/* Copy the database file of a fixed-length database object.
 		--   `fdb' specifies the fixed-length database object.
@@ -513,6 +513,42 @@ feature -- Iterator
 
 feature -- Store Records
 
+	tcfdbput (a_fdb : POINTER; an_id : INTEGER_64; a_vbuf : POINTER; a_vsiz : INTEGER_32)
+		--/* Store a record into a fixed-length database object.
+		--   `fdb' specifies the fixed-length database object connected as a writer.
+		--   `id' specifies the ID number.  It should be more than 0.  If it is `FDBIDMIN', the minimum ID
+		--   number of existing records is specified.  If it is `FDBIDPREV', the number less by one than
+		--   the minimum ID number of existing records is specified.  If it is `FDBIDMAX', the maximum ID
+		--   number of existing records is specified.  If it is `FDBIDNEXT', the number greater by one than
+		--   the maximum ID number of existing records is specified.
+		--   `vbuf' specifies the pointer to the region of the value.
+		--   `vsiz' specifies the size of the region of the value.  If the size of the value is greater
+		--   than the width tuning parameter of the database, the size is cut down to the width.
+		--   If successful, the return value is true, else, it is false.
+		--   If a record with the same key exists in the database, it is overwritten. */
+		--bool tcfdbput(TCFDB *fdb, int64_t id, const void *vbuf, int vsiz);
+		external
+				"C inline use <tcfdb.h>"
+		alias
+			"{
+				tcfdbput((TCFDB *)$a_fdb, (int64_t) $an_id, (const void *)$a_vbuf, (int) $a_vsiz)
+			}"
+		end
+
+		--/* Store a record with a decimal key into a fixed-length database object.
+		--   `fdb' specifies the fixed-length database object connected as a writer.
+		--   `kbuf' specifies the pointer to the region of the decimal key.  It should be more than 0.  If
+		--   it is "min", the minimum ID number of existing records is specified.  If it is "prev", the
+		--   number less by one than the minimum ID number of existing records is specified.  If it is
+		--   "max", the maximum ID number of existing records is specified.  If it is "next", the number
+		--   greater by one than the maximum ID number of existing records is specified.
+		--   `ksiz' specifies the size of the region of the key.
+		--   `vbuf' specifies the pointer to the region of the value.
+		--   `vsiz' specifies the size of the region of the value.  If the size of the value is greater
+		--   than the width tuning parameter of the database, the size is cut down to the width.
+		--   If successful, the return value is true, else, it is false.
+		--   If a record with the same key exists in the database, it is overwritten. */
+		--bool tcfdbput2(TCFDB *fdb, const void *kbuf, int ksiz, const void *vbuf, int vsiz);
 
 	tcfdbput3 (an_fdb : POINTER; a_kstr : POINTER;  a_vstr : POINTER) : BOOLEAN
 		--/* Store a string record with a decimal key into a fixed-length database object.

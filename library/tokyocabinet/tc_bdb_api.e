@@ -6,11 +6,10 @@ note
 
 deferred class
 	TC_BDB_API
-		inherit ANY undefine is_equal, copy end
-				TC_CONSTANTS
-				    undefine default_create end
 
-
+inherit
+	ANY undefine is_equal, copy end
+	TC_CONSTANTS undefine default_create end
 
 feature -- Create
 
@@ -25,6 +24,7 @@ feature -- Create
 				tcbdbnew()
 			}"
 		end
+
 feature -- Delete
 
 	tcbdbdel(an_bdb:POINTER)
@@ -84,6 +84,24 @@ feature -- Close
 
 feature -- Store records
 
+	tcbdbput (a_bdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32; a_vbuf : POINTER; a_vsiz : POINTER) : BOOLEAN
+		--/* Store a record into a B+ tree database object.
+		--   `bdb' specifies the B+ tree database object connected as a writer.
+		--   `kbuf' specifies the pointer to the region of the key.
+		--   `ksiz' specifies the size of the region of the key.
+		--   `vbuf' specifies the pointer to the region of the value.
+		--   `vsiz' specifies the size of the region of the value.
+		--   If successful, the return value is true, else, it is false.
+		--   If a record with the same key exists in the database, it is overwritten. */
+		--bool tcbdbput(TCBDB *bdb, const void *kbuf, int ksiz, const void *vbuf, int vsiz);
+		external
+			"C inline use <tcbdb.h>"
+		alias
+			"{
+				tcbdbput((TCBDB *)$a_bdb, (const void *)$a_kbuf, (int) $a_ksiz, (const void *)$a_vbuf, (int) $a_vsiz)
+			}"
+		end
+
 	tcbdbput2(an_bdb:POINTER; a_kstr:POINTER; a_vstr:POINTER) : BOOLEAN
 		--/* Store a string record into a B+ tree database object.
 		--   `bdb' specifies the B+ tree database object connected as a writer.
@@ -97,6 +115,25 @@ feature -- Store records
 		alias
 			"{
 				tcbdbput2((TCBDB *)$an_bdb, (const char *)$a_kstr, (const char *)$a_vstr)
+			}"
+		end
+
+
+	tcbdbputkeep (a_bdb : POINTER; a_kbuf : POINTER; a_ksiz: INTEGER_32; a_vbuf : POINTER; a_vsiz : INTEGER_32) : BOOLEAN
+		--/* Store a new record into a B+ tree database object.
+		--   `bdb' specifies the B+ tree database object connected as a writer.
+		--   `kbuf' specifies the pointer to the region of the key.
+		--   `ksiz' specifies the size of the region of the key.
+		--   `vbuf' specifies the pointer to the region of the value.
+		--   `vsiz' specifies the size of the region of the value.
+		--   If successful, the return value is true, else, it is false.
+		--   If a record with the same key exists in the database, this function has no effect. */
+		--bool tcbdbputkeep(TCBDB *bdb, const void *kbuf, int ksiz, const void *vbuf, int vsiz);
+		external
+			"C inline use <tcbdb.h>"
+		alias
+			"{
+				tcbdbputkeep((TCBDB *)$a_bdb, (const void *)$a_kbuf, (int) $a_ksiz, (const void *)$a_vbuf, (int) $a_vsiz)
 			}"
 		end
 
@@ -118,6 +155,24 @@ feature -- Store records
 		end
 
 
+	tcbdbputcat (a_bdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32; a_vbuf: POINTER; a_vsiz : INTEGER_32) : BOOLEAN
+		--/* Concatenate a value at the end of the existing record in a B+ tree database object.
+		--   `bdb' specifies the B+ tree database object connected as a writer.
+		--   `kbuf' specifies the pointer to the region of the key.
+		--   `ksiz' specifies the size of the region of the key.
+		--   `vbuf' specifies the pointer to the region of the value.
+		--   `vsiz' specifies the size of the region of the value.
+		--   If successful, the return value is true, else, it is false.
+		--   If there is no corresponding record, a new record is created. */
+		--bool tcbdbputcat(TCBDB *bdb, const void *kbuf, int ksiz, const void *vbuf, int vsiz)
+		external
+			"C inline use <tcbdb.h>"
+		alias
+			"{
+				tcbdbputcat((TCBDB *)$a_bdb, (const void *)$a_kbuf, (int) $a_ksiz, (const void *)$a_vbuf, (int) $a_vsiz)
+			}"
+		end
+
 	tcbdbputcat2 (an_bdb : POINTER; a_kstr : POINTER; a_vstr : POINTER) : BOOLEAN
 		--	/* Concatenate a string value at the end of the existing record in a B+ tree database object.
 		--   `bdb' specifies the B+ tree database object connected as a writer.
@@ -135,7 +190,27 @@ feature -- Store records
 		end
 
 
-	tcbdbputdup2(an_bdb : POINTER; a_kstr : POINTER;  a_vstr : POINTER) : BOOLEAN
+	tcbdbputdup (a_bdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32; a_vbuf: POINTER; a_vsiz : INTEGER_32) : BOOLEAN
+		--/* Store a record into a B+ tree database object with allowing duplication of keys.
+		--   `bdb' specifies the B+ tree database object connected as a writer.
+		--   `kbuf' specifies the pointer to the region of the key.
+		--   `ksiz' specifies the size of the region of the key.
+		--   `vbuf' specifies the pointer to the region of the value.
+		--   `vsiz' specifies the size of the region of the value.
+		--   If successful, the return value is true, else, it is false.
+		--   If a record with the same key exists in the database, the new record is placed after the
+		--   existing one. */
+		--bool tcbdbputdup(TCBDB *bdb, const void *kbuf, int ksiz, const void *vbuf, int vsiz);
+		external
+			"C inline use <tcbdb.h>"
+		alias
+			"{
+				tcbdbputdup((TCBDB *)$a_bdb, (const void *)$a_kbuf, (int) $a_ksiz, (const void *)$a_vbuf, (int) $a_vsiz)
+			}"
+		end
+
+
+	tcbdbputdup2 (an_bdb : POINTER; a_kstr : POINTER;  a_vstr : POINTER) : BOOLEAN
 		--	/* Store a string record into a B+ tree database object with allowing duplication of keys.
 		--   `bdb' specifies the B+ tree database object connected as a writer.
 		--   `kstr' specifies the string of the key.
@@ -151,6 +226,28 @@ feature -- Store records
 				tcbdbputdup2((TCBDB *)$an_bdb, (const char *)$a_kstr, (const char *)$a_vstr)
 			}"
 		end
+
+
+
+	tcbdbputdup3 ( a_bdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32; a_vals : POINTER) : BOOLEAN
+		--/* Store records into a B+ tree database object with allowing duplication of keys.
+		--   `bdb' specifies the B+ tree database object connected as a writer.
+		--   `kbuf' specifies the pointer to the region of the common key.
+		--   `ksiz' specifies the size of the region of the common key.
+		--   `vals' specifies a list object containing values.
+		--   If successful, the return value is true, else, it is false.
+		--   If a record with the same key exists in the database, the new records are placed after the
+		--   existing one. */
+		--bool tcbdbputdup3(TCBDB *bdb, const void *kbuf, int ksiz, const TCLIST *vals);
+		external
+			"C inline use <tcbdb.h>"
+		alias
+			"{
+				tcbdbputdup3((TCBDB *)$a_bdb, (const void *)$a_kbuf, (int) $a_ksiz, (const TCLIST *)$a_vals)
+			}"
+		end
+
+
 
 	tcbdbaddint(an_bdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER; a_num : INTEGER) : INTEGER
 		--/* Add an integer to a record in a B+ tree database object.
@@ -189,8 +286,25 @@ feature -- Store records
 				tcbdbadddouble((TCBDB *)$an_bdb, (const void *)$a_kbuf, (int)$a_ksiz, (double)$a_num)
 			}"
 		end
-		
+
 feature -- Remove a Record
+
+	tcbdbout (a_bdb : POINTER; a_kbuf : POINTER; a_ksiz:INTEGER_32) : BOOLEAN
+		--/* Remove a record of a B+ tree database object.
+		--   `bdb' specifies the B+ tree database object connected as a writer.
+		--   `kbuf' specifies the pointer to the region of the key.
+		--   `ksiz' specifies the size of the region of the key.
+		--   If successful, the return value is true, else, it is false.
+		--   If the key of duplicated records is specified, the first one is selected. */
+		--bool tcbdbout(TCBDB *bdb, const void *kbuf, int ksiz);
+		external
+			"C inline use <tcbdb.h>"
+		alias
+			"{
+				tcbdbout((TCBDB *)$a_bdb, (const void *)$a_kbuf, (int) $a_ksiz)
+			}"
+		end
+
 
 	 tcbdbout2 (an_bdb : POINTER; a_kstr : POINTER) : BOOLEAN
 		--/* Remove a string record of a B+ tree database object.
@@ -208,6 +322,23 @@ feature -- Remove a Record
 		end
 
 
+	tcbdbout3 (a_bdb:POINTER; a_kbuf:POINTER; a_ksiz : INTEGER_32) : BOOLEAN
+		--/* Remove records of a B+ tree database object.
+		--   `bdb' specifies the B+ tree database object connected as a writer.
+		--   `kbuf' specifies the pointer to the region of the key.
+		--   `ksiz' specifies the size of the region of the key.
+		--   If successful, the return value is true, else, it is false.
+		--   If the key of duplicated records is specified, all of them are removed. */
+		--bool tcbdbout3(TCBDB *bdb, const void *kbuf, int ksiz);
+		external
+			"C inline use <tcbdb.h>"
+		alias
+			"{
+				tcbdbout3((TCBDB *)$a_bdb, (const void *)$a_kbuf, (int) $a_ksiz)
+			}"
+		end
+
+
 	tcbdbvanish(an_bdb : POINTER) : BOOLEAN
 		--	/* Remove all records of a B+ tree database object.
 		--   `bdb' specifies the B+ tree database object connected as a writer.
@@ -221,6 +352,34 @@ feature -- Remove a Record
 			}"
 		end
 feature -- Retrieve Records
+
+
+
+	tcbdbget (a_bdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER; a_sp : TYPED_POINTER[INTEGER_32]) : POINTER
+		--/* Retrieve a record in a B+ tree database object.
+		--   `bdb' specifies the B+ tree database object.
+		--   `kbuf' specifies the pointer to the region of the key.
+		--   `ksiz' specifies the size of the region of the key.
+		--   `sp' specifies the pointer to the variable into which the size of the region of the return
+		--   value is assigned.
+		--   If successful, the return value is the pointer to the region of the value of the corresponding
+		--   record.  `NULL' is returned if no record corresponds.
+		--   If the key of duplicated records is specified, the first one is selected.  Because an
+		--   additional zero code is appended at the end of the region of the return value, the return
+		--   value can be treated as a character string.  Because the region of the return value is
+		--   allocated with the `malloc' call, it should be released with the `free' call when it is no
+		--   longer in use. */
+		--void *tcbdbget(TCBDB *bdb, const void *kbuf, int ksiz, int *sp);
+		external
+			"C inline use <tcutil.h>"
+		alias
+			"[
+				int sp;
+				void *result = tcbdbget((TCBDB *)$a_bdb, (const void *)$a_kbuf, (int) $a_ksiz, (int) &sp);
+				*(EIF_INTEGER *) $a_sp = (EIF_INTEGER) sp;
+				return result;
+			]"
+		end
 
 	tcbdbget2 (an_bdb:POINTER; a_kstr:POINTER): POINTER
 		--/* Retrieve a string record in a B+ tree database object.
@@ -241,6 +400,68 @@ feature -- Retrieve Records
 		end
 
 
+	tcbdbget3 (a_bdb : POINTER; a_kbuf:POINTER; a_ksiz : INTEGER_32; a_sp : TYPED_POINTER[INTEGER_32]) : POINTER
+		--/* Retrieve a record in a B+ tree database object as a volatile buffer.
+		--   `bdb' specifies the B+ tree database object.
+		--   `kbuf' specifies the pointer to the region of the key.
+		--   `ksiz' specifies the size of the region of the key.
+		--   `sp' specifies the pointer to the variable into which the size of the region of the return
+		--   value is assigned.
+		--   If successful, the return value is the pointer to the region of the value of the corresponding
+		--   record.  `NULL' is returned if no record corresponds.
+		--   If the key of duplicated records is specified, the first one is selected.  Because an
+		--   additional zero code is appended at the end of the region of the return value, the return
+		--   value can be treated as a character string.  Because the region of the return value is
+		--   volatile and it may be spoiled by another operation of the database, the data should be copied
+		--   into another involatile buffer immediately. */
+		--const void *tcbdbget3(TCBDB *bdb, const void *kbuf, int ksiz, int *sp);
+		external
+			"C inline use <tcutil.h>"
+		alias
+			"[
+				int sp;
+				void *result = tcbdbget3((TCBDB *)$a_bdb, (const void *)$a_kbuf, (int) $a_ksiz, (int) &sp);
+				*(EIF_INTEGER *) $a_sp = (EIF_INTEGER) sp;
+				return result;
+			]"
+		end
+
+
+
+	tcbdbget4 (a_bdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32) : BOOLEAN
+		--/* Retrieve records in a B+ tree database object.
+		--   `bdb' specifies the B+ tree database object.
+		--   `kbuf' specifies the pointer to the region of the key.
+		--   `ksiz' specifies the size of the region of the key.
+		--   If successful, the return value is a list object of the values of the corresponding records.
+		--   `NULL' is returned if no record corresponds.
+		--   Because the object of the return value is created with the function `tclistnew', it should
+		--   be deleted with the function `tclistdel' when it is no longer in use. */
+		--TCLIST *tcbdbget4(TCBDB *bdb, const void *kbuf, int ksiz);
+		external
+			"C inline use <tcbdb.h>"
+		alias
+			"{
+				tcbdbget4((TCBDB *)$a_bdb, (const void *)$a_kbuf, (int) $a_ksiz)
+			}"
+		end
+
+
+	tcbdbvnum (a_bdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32) : INTEGER_32
+		--* Get the number of records corresponding a key in a B+ tree database object.
+		--   `bdb' specifies the B+ tree database object.
+		--   `kbuf' specifies the pointer to the region of the key.
+		--   `ksiz' specifies the size of the region of the key.
+		--   If successful, the return value is the number of the corresponding records, else, it is 0. */
+		--int tcbdbvnum(TCBDB *bdb, const void *kbuf, int ksiz);
+		external
+			"C inline use <tcbdb.h>"
+		alias
+			"{
+				tcbdbvnum((TCBDB *)$a_bdb, (const void *)$a_kbuf, (int) $a_ksiz)
+			}"
+		end
+
 
 	tcbdbvnum2 (an_bdb : POINTER; a_kstr : POINTER) : INTEGER_32
 		--/* Get the number of records corresponding a string key in a B+ tree database object.
@@ -255,8 +476,26 @@ feature -- Retrieve Records
 				tcbdbvnum2((TCBDB *)$an_bdb, (const char *)$a_kstr)
 			}"
 		end
-		
-	
+
+
+	tcbdbvsiz (a_bdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32) : INTEGER_32
+		--/* Get the size of the value of a record in a B+ tree database object.
+		--   `bdb' specifies the B+ tree database object.
+		--   `kbuf' specifies the pointer to the region of the key.
+		--   `ksiz' specifies the size of the region of the key.
+		--   If successful, the return value is the size of the value of the corresponding record, else,
+		--   it is -1.
+		--   If the key of duplicated records is specified, the first one is selected. */
+		--int tcbdbvsiz(TCBDB *bdb, const void *kbuf, int ksiz);
+		external
+			"C inline use <tcbdb.h>"
+		alias
+			"{
+				tcbdbvsiz((TCBDB *)$a_bdb, (const void *)$a_kbuf, (int) $a_ksiz)
+			}"
+		end
+
+
 	tcbdbvsiz2 (an_bdb : POINTER; a_kstr : POINTER) : INTEGER_32
 		--	/* Get the size of the value of a string record in a B+ tree database object.
 		--   `bdb' specifies the B+ tree database object.
@@ -289,7 +528,7 @@ feature -- Retrieve Records
 		end
 
 
-	tcbdbrnum (an_bdb : POINTER) : INTEGER_64
+	tcbdbrnum (an_bdb : POINTER) : NATURAL_64
 		--/* Get the number of records of a B+ tree database object.
 		--   `bdb' specifies the B+ tree database object.
 		--   The return value is the number of records or 0 if the object does not connect to any database
@@ -374,7 +613,7 @@ feature-- Mutual Exclusion
 				tcbdbsetmutex((TCBDB *)$an_bdb)
 			}"
 		end
-		
+
 feature -- Database Control
 
 

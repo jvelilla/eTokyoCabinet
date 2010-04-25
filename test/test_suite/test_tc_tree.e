@@ -37,6 +37,32 @@ feature {NONE} -- Events
 		end
 
 feature -- Test routines
+	test_delete
+		local
+			k : C_STRING
+			v : C_STRING
+			r : POINTER
+		do
+			assert ("Empty Tree", tctreernum (tc_tree) = 0)
+			create k.make ("key")
+			create v.make ("value")
+			tctreeput2 (tc_tree, k.item, v.item)
+
+			create k.make ("key1")
+			create v.make ("value1")
+			tctreeput2 (tc_tree, k.item, v.item)
+
+			create k.make ("key2")
+			create v.make ("value2")
+			tctreeput2 (tc_tree, k.item, v.item)
+			assert ("Tree with three records", tctreernum (tc_tree) = 3)
+			tctreedel (tc_tree)
+			rescue
+				assert ("database_closed",true)
+
+		end
+
+
 
 	test_iterator
 		local

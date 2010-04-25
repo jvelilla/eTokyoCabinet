@@ -7,6 +7,54 @@ note
 deferred class
 	TC_CONSTANTS
 
+
+--  EINVALID
+--    ENOFILE
+--    ETHREAD
+--    ENOPERM
+--    EMETA
+--    ERHEAD
+--    EOPEN
+--    ECLOSE
+--    ETRUNC
+--    ESYNC
+--     ESTAT
+--    ESEEK
+--    EREAD
+--    EWRITE
+--    EMMAP
+--    ELOCK
+--      EUNLINK
+--    ERENAME
+--    EMKDIR
+--    ERMDIR
+--    EKEEP
+--    ENOREC
+--    EMISC
+--    OREADER
+--    OWRITER
+--    OCREAT
+--    OTRUNC
+--    ONOLCK
+--    OLCKNB
+--    OTSYNC
+--    CMPLEXICAL
+--    CMPDECIMAL
+--     CMPINT32
+--    CMPINT64
+--    TLARGE
+--    TDEFLATE
+--    TBZIP
+--    TTCBS
+--    TEXCODEC
+--    ITLEXICA
+--    ITDECIMA
+--    ITTOKEN
+--    ITQGRAM
+--    ITOPT
+--    ITVOID
+--    ITKEEP
+
 feature -- Enumeration for tuning options
 	BDBTLARGE : INTEGER
  		-- BDBTLARGE = 1 << 0,
