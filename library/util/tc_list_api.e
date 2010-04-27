@@ -217,9 +217,9 @@ feature -- Remove
 		    class_name := l_internal.type_name (Current)
 
 			if class_name.is_equal("TC_LIST_API [STRING_8]") then
-                last_shift ?= internal_remove_string (index - 1)
+                last_remove ?= internal_remove_string (index - 1)
             else
-            	last_shift ?= internal_remove (index - 1)
+            	last_remove ?= internal_remove (index - 1)
             end
 		ensure
 			remove_one_element : old elements -1 = elements

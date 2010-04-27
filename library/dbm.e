@@ -12,9 +12,6 @@ feature -- Access
 	is_open: BOOLEAN
 			-- is the database open?
 
-	status_error: BOOLEAN
-			-- True if there was an error with a TokyoCabinet db, False in otherwise
-
 	error_description: STRING
 			-- Textual description of error
 		require
@@ -75,7 +72,7 @@ feature -- Change Element
 			create c_value.make (a_value)
 			l_b := put_string_implementation (c_key.item, c_value.item)
 			if not l_b then
-				status_error := True
+				has_error := True
 			end
 		end
 
@@ -95,7 +92,7 @@ feature -- Change Element
 			create c_value.make (a_value)
 			l_b := put_keep_string_implementation (c_key.item, c_value.item)
 			if not l_b then
-				status_error := True
+				has_error := True
 			end
 		end
 
@@ -123,7 +120,7 @@ feature -- Iterator
 		do
 			l_b := iterator_init_implementation
 			if not l_b then
-				status_error := True
+				has_error := True
 			end
 		end
 
@@ -144,9 +141,6 @@ feature -- Status Report
 
 	has_error: BOOLEAN
 			-- Did an error occur?
-		do
-			Result := status_error
-		end
 
 
 feature {DBM} -- Implementation
@@ -213,7 +207,6 @@ feature {DBM} -- Implementation
 		end
 
 invariant
-	error_constraint: status_error implies has_error
 	non_empty_description: has_error implies (error_description /= Void and not error_description.is_empty)
 
 end -- class DBM

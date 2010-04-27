@@ -21,7 +21,7 @@ feature {NONE} -- Initialization
 		do
 			adb := tcadbnew
 			is_open := False
-			status_error := False
+			has_error := False
 		end
 feature -- Open Database
 
@@ -59,7 +59,7 @@ feature -- Open Database
 			create c_name.make (a_name)
 			l_b := tcadbopen (adb,c_name.item)
 			if not l_b then
-				status_error := True
+				has_error := True
 				internal_message := "Open Abstract Database Error"
 			else
 				is_open := True
@@ -77,7 +77,7 @@ feature -- Close and Delete
 		do
 			l_b := tcadbclose (adb)
 			if not l_b then
-				status_error := True
+				has_error := True
 				internal_message := "Close Abstract Database Error"
 			else
 				is_open := False

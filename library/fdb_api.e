@@ -22,7 +22,7 @@ feature {NONE} -- Initialization
 		do
 			fdb := tcfdbnew
 			is_open := False
-			status_error := False
+			has_error := False
 		end
 feature -- Open Database
 
@@ -46,7 +46,7 @@ feature -- Open Database
 			create c_path.make (a_path)
 			l_b := tcfdbopen (fdb,c_path.item,o_mode)
 			if not l_b then
-				status_error := True
+				has_error := True
 			else
 				is_open := True
 			end
@@ -63,7 +63,7 @@ feature -- Close and Delete
 		do
 			l_b := tcfdbclose (fdb)
 			if not l_b then
-				status_error := True
+				has_error := True
 			else
 				is_open := False
 			end
@@ -92,7 +92,7 @@ feature -- Error Messages
 			if r /= default_pointer then
 				create Result.make_from_c (r)
 			else
-				status_error := True
+				has_error := True
 			end
 		end
 
