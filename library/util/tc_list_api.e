@@ -12,7 +12,8 @@ inherit
 
 	TC_SERIALIZATION
 create
-	make
+	make,
+	make_by_pointer
 
 feature -- Initialization
 	make
@@ -20,6 +21,15 @@ feature -- Initialization
 			list := tclistnew
 		ensure
 			empty_list : is_empty
+		end
+
+	make_by_pointer ( p : POINTER )
+		require
+			is_valid_pointer : p /= default_pointer
+		do
+			list := p
+		ensure
+			assigned_list : list = p
 		end
 
 feature -- Access
