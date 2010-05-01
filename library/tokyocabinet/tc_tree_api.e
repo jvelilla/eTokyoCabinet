@@ -1,11 +1,11 @@
 note
-	description: "Summary description for {TC_TREE}. API of Ordered Tree TokyoCabinet"
+	description: "Summary description for {TC_TREE_API}. API of Ordered Tree TokyoCabinet"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
 deferred class
-	TC_TREE
+	TC_TREE_API
 
 feature -- Create
 

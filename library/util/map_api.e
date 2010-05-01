@@ -1,14 +1,14 @@
 note
-	description: "Summary description for {TC_MAP_API}."
+	description: "Summary description for {MAP_API}."
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	TC_MAP_API [V,K]
+	MAP_API [V,K]
 
 inherit
-	TC_MAP
+	TC_MAP_API
 
 	TC_SERIALIZATION
 
@@ -17,7 +17,7 @@ create
 
 feature {NONE} -- Initialization
 	make
-			-- Create a TC_MAP_API object
+			-- Create a MAP_API object
 		do
 			map := tcmapnew
 		end
@@ -39,7 +39,7 @@ feature -- Access
 		    create l_internal
 		    class_name := l_internal.type_name (Current)
 
-			if class_name.is_equal("TC_MAP_API [STRING_8, STRING_8]") then
+			if class_name.is_equal("MAP_API [STRING_8, STRING_8]") then
                 s8 ?= a_key
                 Result ?= internal_get_string (s8)
             else
@@ -75,7 +75,7 @@ feature -- Access
 			Result := tcmapmsiz (map)
 		end
 
-	map_keys : TC_LIST_API[K]
+	map_keys : LIST_API[K]
 			--  Create a list object containing all keys in a map object.
 		local
 			r : POINTER
@@ -87,7 +87,7 @@ feature -- Access
 			end
 		end
 
-	map_values : TC_LIST_API[V]
+	map_values : LIST_API[V]
 			-- Create a list object containing all values in a map object
 		local
 			r: POINTER
@@ -111,7 +111,7 @@ feature -- Element Change
 		    create l_internal
 		    class_name := l_internal.type_name (Current)
 
-			if class_name.is_equal("TC_MAP_API [STRING_8, STRING_8]") then
+			if class_name.is_equal("MAP_API [STRING_8, STRING_8]") then
                 k8 ?= a_key
                 v8 ?= a_value
                 internal_put_string (k8 , v8)
@@ -136,7 +136,7 @@ feature -- Element Change
 		    create l_internal
 		    class_name := l_internal.type_name (Current)
 
-			if class_name.is_equal("TC_MAP_API [STRING_8, STRING_8]") then
+			if class_name.is_equal("MAP_API [STRING_8, STRING_8]") then
                 k8 ?= a_key
                 v8 ?= a_value
                 internal_put_keep_string (k8 , v8)
@@ -157,7 +157,7 @@ feature -- Element Change
 		    create l_internal
 		    class_name := l_internal.type_name (Current)
 
-			if class_name.is_equal("TC_MAP_API [STRING_8, STRING_8]") then
+			if class_name.is_equal("MAP_API [STRING_8, STRING_8]") then
                 k8 ?= a_key
                 v8 ?= a_value
                 internal_put_cat_string (k8 , v8)
@@ -191,13 +191,11 @@ feature -- Removal
 			l_internal : INTERNAL
 			class_name : STRING
 			k8 : STRING
-			c_key : C_STRING
-			l_b : BOOLEAN
 		do
 			create l_internal
 		    class_name := l_internal.type_name (Current)
 
-			if class_name.is_equal("TC_MAP_API [STRING_8, STRING_8]") then
+			if class_name.is_equal("MAP_API [STRING_8, STRING_8]") then
                 k8 ?= a_key
                 internal_remove_string (k8 )
             else
@@ -329,7 +327,6 @@ feature {NONE} -- Implementation
 			c_str_k : C_STRING
 			str_v : STRING
 			c_str_v : C_STRING
-			l_b : BOOLEAN
 		do
 			str_k := serialize (a_key)
 			create c_str_k.make (str_k)

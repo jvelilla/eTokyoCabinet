@@ -8,7 +8,7 @@ note
 	testing: "type/manual"
 
 class
-	TEST_TC_TREE
+	TEST_TC_TREE_API
 
 inherit
 	EQA_TEST_SET
@@ -16,7 +16,7 @@ inherit
 			on_prepare,
 			on_clean
 		end
-	TC_TREE
+	TC_TREE_API
 		undefine
 			default_create
 		end

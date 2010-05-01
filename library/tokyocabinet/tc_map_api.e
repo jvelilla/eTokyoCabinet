@@ -1,11 +1,11 @@
 note
-	description: "Summary description for {TC_MAP}. API of Hash Map of TokyoCabinet"
+	description: "Summary description for {TC_MAP_API}. API of Hash Map of TokyoCabinet"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
 deferred class
-	TC_MAP
+	TC_MAP_API
 
 feature -- Create Map
 

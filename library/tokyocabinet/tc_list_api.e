@@ -1,11 +1,11 @@
 note
-	description: "{TC_LIST}.  array list of tokyo cabinet"
+	description: "{TC_LIST_API}.  array list of tokyo cabinet"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
 deferred class
-	TC_LIST
+	TC_LIST_API
 
 feature -- Create List
 

@@ -1,14 +1,14 @@
 note
-	description: "Summary description for {TC_LIST_API}."
+	description: "Summary description for {LIST_API}."
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
-	TC_LIST_API [G]
+	LIST_API [G]
 
 inherit
-	TC_LIST
+	TC_LIST_API
 
 	TC_SERIALIZATION
 create
@@ -51,7 +51,7 @@ feature -- Access
 		    create l_internal
 		    class_name := l_internal.type_name (Current)
 
-			if class_name.is_equal("TC_LIST_API [STRING_8]") then
+			if class_name.is_equal("LIST_API [STRING_8]") then
                 Result ?= internal_value_string (i-1)
             else
             	Result ?= internal_value (i-1)
@@ -181,7 +181,7 @@ feature -- Remove
 			create l_internal
 		    class_name := l_internal.type_name (Current)
 
-			if class_name.is_equal("TC_LIST_API [STRING_8]") then
+			if class_name.is_equal("LIST_API [STRING_8]") then
                 last_pop ?= internal_pop_string
             else
             	last_pop ?= internal_pop
@@ -203,7 +203,7 @@ feature -- Remove
 			create l_internal
 		    class_name := l_internal.type_name (Current)
 
-			if class_name.is_equal("TC_LIST_API [STRING_8]") then
+			if class_name.is_equal("LIST_API [STRING_8]") then
                 last_shift ?= internal_shift_string
             else
             	last_shift ?= internal_shift
@@ -226,7 +226,7 @@ feature -- Remove
 			create l_internal
 		    class_name := l_internal.type_name (Current)
 
-			if class_name.is_equal("TC_LIST_API [STRING_8]") then
+			if class_name.is_equal("LIST_API [STRING_8]") then
                 last_remove ?= internal_remove_string (index - 1)
             else
             	last_remove ?= internal_remove (index - 1)
