@@ -11,6 +11,7 @@ inherit
 
 	TC_TDB_API
 
+	TC_SERIALIZATION
 create
 	make
 
@@ -92,6 +93,36 @@ feature -- Error Messages
 			Result := error_code_implementation
 		end
 
+feature -- Access
+	get_map ( a_key : STRING ) : POINTER
+			-- Retrieve a record in a table database object.
+			-- The return value is a pointer to a map object of the columns of the corresponding record `a_key'.
+		require
+			is_open : is_open
+		local
+			r : POINTER
+			c_key : C_STRING
+		do
+			create c_key.make (a_key)
+			Result := tctdbget (tdb, c_key.item, a_key.count)
+		end
+
+feature -- Element Change
+	put_map ( a_key : ANY; a_map : MAP_API[ANY,ANY])
+			-- Store a record into a table database object.
+			-- `a_map' specifies a map object containing columns
+		require
+			is_open : is_open
+		local
+			s8 : STRING
+		do
+			if a_key.conforms_to (a_string_8) then
+				s8 ?= a_key
+                internal_put_map_string (s8,a_map)
+            else
+            	internal_put_map (a_key, a_map)
+            end
+		end
 
 feature {NONE} -- Implementation
 
@@ -159,6 +190,39 @@ feature {NONE} -- Implementation
 		do
 			Result := tctdbiterinit (tdb)
 		end
+
+
+
+	internal_put_map_string ( a_key : STRING; a_map : MAP_API [ANY,ANY])
+		local
+			c_key : C_STRING
+			b : BOOLEAN
+		do
+			create c_key.make (a_key)
+			b := tctdbput (tdb, c_key.item, a_key.count, a_map.map)
+			if not b then
+				has_error := true
+			end
+		end
+
+	internal_put_map ( a_key : ANY; a_map : MAP_API [ANY,ANY])
+		local
+			str : STRING
+			c_key : C_STRING
+			b : BOOLEAN
+		do
+			str := serialize (a_key)
+			create c_key.make (str)
+			b := tctdbput (tdb, c_key.item, str.count, a_map.map)
+			if not b then
+				has_error := true
+			end
+		end
+
+	a_string_8: STRING_8 is
+        once
+            Result := ""
+        end
 
 	tdb: POINTER
 		-- Table database object

@@ -52,6 +52,7 @@ feature -- Test Open Database
 
 
 
+
 feature -- Implementation
 	tdb : POINTER
 		-- Table Database Object

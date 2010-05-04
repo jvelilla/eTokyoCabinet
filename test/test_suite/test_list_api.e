@@ -30,6 +30,39 @@ feature {NONE} -- Events
 		end
 
 feature -- Test
+
+	test_linear_search
+		local
+			p : PERSON
+		do
+			assert ("Empty list", list2.elements = 0)
+			create p.make ("javier", "velilla")
+			list2.push (p)
+			create p.make ("placido", "domingo")
+			list2.push (p)
+			create p.make ("jose", "gimenez")
+			list2.push (p)
+			assert ("three elements list", list2.elements = 3)
+			assert ("Last Element", list2.value (3).first_name.is_equal ("jose"))
+
+			create p.make ("placido", "domingo")
+			assert ("Second Element",list2.linear_search (p) = 2)
+			create p.make ("luciano", "domingo")
+			assert ("No Element",list2.linear_search (p) = -1)
+		end
+
+
+	test_linear_search_string
+		do
+			assert ("Empty list", list1.elements = 0)
+			list1.push ("Element1")
+			list1.push ("Element2")
+			list1.push ("Element3")
+			assert ("three elements list", list1.elements = 3)
+			assert ("First Element",list1.linear_search ("Element1") = 1)
+			assert ("No Element", list1.linear_search ("Element10") = -1)
+		end
+
 	test_push
 		local
 			p : PERSON

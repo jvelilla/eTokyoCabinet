@@ -11,6 +11,7 @@ inherit
 	TC_LIST_API
 
 	TC_SERIALIZATION
+
 create
 	make,
 	make_by_pointer
@@ -59,6 +60,13 @@ feature -- Access
 		end
 
 feature -- Change Element
+
+	duplicate : LIST_API [G]
+			-- Copy a list object.
+			-- The return value is the new list object equivalent to the Current object.
+		do
+			Result.make_by_pointer (tclistdup (list))
+		end
 
 	push ( v : like value )
 			-- Add an element at the end of a list object.
@@ -128,6 +136,8 @@ feature -- Change Element
 		end
 
 feature -- Status Report
+	is_lexical_order : BOOLEAN
+		-- is the list sorted in lexical order?
 
 	firt_element : G
 		require
@@ -243,9 +253,53 @@ feature -- Sort
 			not_empty_list : not is_empty
 		do
 			tclistsort (list)
+			is_lexical_order := true
+		ensure
+			sorted_in_lexical_order : is_lexical_order
 		end
 
+feature -- Search
+	linear_search (a_val : G) : INTEGER
+			--  Search a list object for an element using liner search.
+			--  The return value is the index of a corresponding element or -1 if there is no corresponding
+  			--  element.
+		local
+			s8 : STRING
+		do
+			if a_val.conforms_to (a_string_8) then
+                s8 ?= a_val
+                Result := internal_linear_search (s8)
+            else
+            	s8 := serialize (a_val)
+            	Result := internal_linear_search (s8)
+            end
 
+           if Result /= -1 then
+           		Result := Result + 1
+           end
+		end
+
+	binary_search (a_val : G) : INTEGER
+			--  Search a list object for an element using binary search.
+			--  The return value is the index of a corresponding element or -1 if there is no corresponding
+  			--  element.
+  		require
+  			sorted_in_lexical_order : is_lexical_order
+		local
+			s8 : STRING
+		do
+			if a_val.conforms_to (a_string_8) then
+                s8 ?= a_val
+                Result := internal_binary_search (s8)
+            else
+            	s8 := serialize (a_val)
+            	Result := internal_binary_search (s8)
+            end
+
+           if Result /= -1 then
+           		Result := Result + 1
+           end
+		end
 feature {NONE}-- implementation
 
 	internal_push_string ( v : STRING)
@@ -379,7 +433,7 @@ feature {NONE}-- implementation
 			r : POINTER
 		do
 			r := tclistremove2 (list, index)
-			if r /= void then
+			if r /= default_pointer then
 				create Result.make_from_c (r)
 			end
 		end
@@ -419,6 +473,21 @@ feature {NONE}-- implementation
 			tclistover (list, an_index, str_p.item, str.count)
 		end
 
+	internal_linear_search ( a_val : STRING) : INTEGER
+		local
+			c_val : C_STRING
+		do
+			create c_val.make (a_val)
+			Result := tclistlsearch (list, c_val.item, a_val.count)
+		end
+
+	internal_binary_search ( a_val : STRING) : INTEGER
+		local
+			c_val : C_STRING
+		do
+			create c_val.make (a_val)
+			Result := tclistbsearch (list, c_val.item, a_val.count)
+		end
 
 	list : POINTER
 		-- tc_list object

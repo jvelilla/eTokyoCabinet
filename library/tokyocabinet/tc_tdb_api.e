@@ -346,9 +346,9 @@ feature -- Error Message
 				tctdberrmsg((int)$an_ecode)
 			}"
 		end
-		
-	
-	tctdbecode (an_tdb : POINTER) : INTEGER_32	
+
+
+	tctdbecode (an_tdb : POINTER) : INTEGER_32
 		--	/* Get the last happened error code of a table database object.
 		--   `tdb' specifies the table database object.
 		--   The return value is the last happened error code.
@@ -369,7 +369,7 @@ feature -- Error Message
 				tctdbecode((TCTDB *)$an_tdb)
 			}"
 		end
-	
+
 
 feature -- Create Database
 
@@ -403,6 +403,23 @@ feature -- Delete Database
 
 feature -- Store Records
 
+	tctdbput(a_tdb : POINTER; a_pkbuf : POINTER; a_pksiz : INTEGER; a_cols : POINTER) : BOOLEAN
+		--	/* Store a record into a table database object.
+		--   `tdb' specifies the table database object connected as a writer.
+		--   `pkbuf' specifies the pointer to the region of the primary key.
+		--   `pksiz' specifies the size of the region of the primary key.
+		--   `cols' specifies a map object containing columns.
+		--   If successful, the return value is true, else, it is false.
+		--   If a record with the same key exists in the database, it is overwritten. */
+		--bool tctdbput(TCTDB *tdb, const void *pkbuf, int pksiz, TCMAP *cols);
+		external
+			"C inline use <tctdb.h>"
+		alias
+			"{
+				tctdbput((TCTDB *)$a_tdb, (const void *)$a_pkbuf, (int) $a_pksiz, (TCMAP *)$a_cols)
+			}"
+		end
+
 	tctdbput3 (an_tdb : POINTER; a_pkstr : POINTER; a_cstr : POINTER) : BOOLEAN
 		--/* Store a string record into a table database object with a tab separated column string.
 		--   `tdb' specifies the table database object connected as a writer.
@@ -419,7 +436,7 @@ feature -- Store Records
 				tctdbput3((TCTDB *)$an_tdb, (const char *)$a_pkstr, (const char *)$a_cstr)
 			}"
 		end
-		
+
 
 
 	tctdbputkeep3 (an_tdb : POINTER; a_pkstr: POINTER; a_cstr : POINTER) : BOOLEAN
@@ -438,8 +455,8 @@ feature -- Store Records
 				tctdbputkeep3((TCTDB *)$an_tdb, (const char *)$a_pkstr, (const char *)$a_cstr)
 			}"
 		end
-		
-	
+
+
 	tctdbputcat3 (an_tdb : POINTER; a_pkstr : POINTER; a_cstr : POINTER) : BOOLEAN
 		--	/* Concatenate columns in a table database object with with a tab separated column string.
 		--   `tdb' specifies the table database object connected as a writer.
@@ -547,6 +564,23 @@ feature -- Remove Records
 		end
 
 feature -- Retrieve Records
+	tctdbget (a_tdb : POINTER; a_pkbuf : POINTER; a_pksiz : INTEGER) : POINTER
+		--/* Retrieve a record in a table database object.
+		--   `tdb' specifies the table database object.
+		--   `pkbuf' specifies the pointer to the region of the primary key.
+		--   `pksiz' specifies the size of the region of the primary key.
+		--   If successful, the return value is a map object of the columns of the corresponding record.
+		--   `NULL' is returned if no record corresponds.
+		--   Because the object of the return value is created with the function `tcmapnew', it should be
+		--   deleted with the function `tcmapdel' when it is no longer in use. */
+		--TCMAP *tctdbget(TCTDB *tdb, const void *pkbuf, int pksiz);
+		external
+			"C inline use <tctdb.h>"
+		alias
+			"{
+				tctdbget((TCTDB *)$a_tdb, (const void *)$a_pkbuf, (int)$a_pksiz)
+			}"
+		end
 
 	tctdbget3 (an_tdb : POINTER; a_pkstr : POINTER) : POINTER
 		--/* Retrieve a string record in a table database object as a tab separated column string.
@@ -564,7 +598,7 @@ feature -- Retrieve Records
 				tctdbget3((TCTDB *)$an_tdb, (const char *)$a_pkstr)
 			}"
 		end
-		
+
 
 	tctdbvsiz2 (an_tdb : POINTER; a_pkstr : POINTER) : INTEGER_32
 		--/* Get the size of the value of a string record in a table database object.
@@ -580,8 +614,8 @@ feature -- Retrieve Records
 				tctdbvsiz2((TCTDB *)$an_tdb, (const char *)$a_pkstr)
 			}"
 		end
-		
-		
+
+
 
 
 	tctdbrnum (an_tdb : POINTER) : NATURAL_64
@@ -631,8 +665,8 @@ feature -- Iterator
 				tctdbiterinit((TCTDB *)$an_tdb)
 			}"
 		end
-		
-	
+
+
 	tctdbiternext2 (an_tdb : POINTER) : POINTER
 		--	/* Get the next primary key string of the iterator of a table database object.
 		--   `tdb' specifies the table database object.
