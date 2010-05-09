@@ -72,6 +72,21 @@ feature -- Close and Delete
 
 		end
 
+feature -- Access
+
+	generate_unique_id : INTEGER_64
+		--Generate a unique ID number of a table database object.
+		--   The return value is the new unique ID number or -1 on failure. */
+		require
+			is_database_open : is_open
+		do
+			Result := tctdbgenuid (tdb)
+			if Result = -1 then
+				has_error := true
+			end
+		end
+
+
 feature -- Error Messages
 
 	error_message (a_code: INTEGER_32): STRING
@@ -106,6 +121,8 @@ feature -- Access
 			create c_key.make (a_key)
 			Result := tctdbget (tdb, c_key.item, a_key.count)
 		end
+
+
 
 feature -- Element Change
 	put_map ( a_key : ANY; a_map : MAP_API[ANY,ANY])
@@ -224,6 +241,7 @@ feature {NONE} -- Implementation
             Result := ""
         end
 
+feature -- Representation
 	tdb: POINTER
 		-- Table database object
 

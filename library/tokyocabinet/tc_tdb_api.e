@@ -137,8 +137,24 @@ feature -- Constants
 		-- index type: keep existing index
 
 
+
+
 feature -- Database Control
 
+
+
+	tctdbgenuid (a_tdb : POINTER) : INTEGER_64
+		--/* Generate a unique ID number of a table database object.
+		--   `tdb' specifies the table database object connected as a writer.
+		--   The return value is the new unique ID number or -1 on failure. */
+		--int64_t tctdbgenuid(TCTDB *tdb)
+		external
+			"C inline use <tctdb.h>"
+		alias
+			"{
+				tctdbgenuid((TCTDB *)$a_tdb)
+			}"
+		end
 
 	tctdbpath (an_tdb : POINTER) : POINTER
 		--/* Get the file path of a table database object.
@@ -420,6 +436,26 @@ feature -- Store Records
 			}"
 		end
 
+	tctdbput2 (a_tdb : POINTER; a_pkbuf : POINTER; a_pksiz : INTEGER; a_cbuf: POINTER; a_csiz: INTEGER): BOOLEAN
+		--/* Store a string record into a table database object with a zero separated column string.
+		--   `tdb' specifies the table database object connected as a writer.
+		--   `pkbuf' specifies the pointer to the region of the primary key.
+		--   `pksiz' specifies the size of the region of the primary key.
+		--   `cbuf' specifies the pointer to the region of the zero separated column string where the name
+		--   and the value of each column are situated one after the other.
+		--   `csiz' specifies the size of the region of the column string.
+		--   If successful, the return value is true, else, it is false.
+		--   If a record with the same key exists in the database, it is overwritten. */
+		--bool tctdbput2(TCTDB *tdb, const void *pkbuf, int pksiz, const void *cbuf, int csiz);
+		external
+			"C inline use <tctdb.h>"
+		alias
+			"{
+				tctdbput2((TCTDB *)$a_tdb, (const void *)$a_pkbuf, (int) $a_pksiz, (const void *)$a_cbuf, (int) $a_csiz)
+			}"
+		end
+
+
 	tctdbput3 (an_tdb : POINTER; a_pkstr : POINTER; a_cstr : POINTER) : BOOLEAN
 		--/* Store a string record into a table database object with a tab separated column string.
 		--   `tdb' specifies the table database object connected as a writer.
@@ -436,6 +472,46 @@ feature -- Store Records
 				tctdbput3((TCTDB *)$an_tdb, (const char *)$a_pkstr, (const char *)$a_cstr)
 			}"
 		end
+
+
+	tctdbputkeep (a_tdb : POINTER; a_pkbuf:POINTER; a_pksiz: INTEGER; a_cols : POINTER) : BOOLEAN
+		--/* Store a new record into a table database object.
+		--   `tdb' specifies the table database object connected as a writer.
+		--   `pkbuf' specifies the pointer to the region of the primary key.
+		--   `pksiz' specifies the size of the region of the primary key.
+		--   `cols' specifies a map object containing columns.
+		--   If successful, the return value is true, else, it is false.
+		--   If a record with the same key exists in the database, this function has no effect. */
+		--bool tctdbputkeep(TCTDB *tdb, const void *pkbuf, int pksiz, TCMAP *cols);
+		external
+			"C inline use <tctdb.h>"
+		alias
+			"{
+				tctdbputkeep((TCTDB *)$a_tdb, (const void *)$a_pkbuf, (int)$a_pksiz, (TCMAP *)$a_cols)
+			}"
+		end
+
+
+	tctdbputkeep2 (a_tdb : POINTER; a_pkbuf : POINTER; a_pksiz : INTEGER; a_cbuf : POINTER; a_csiz: INTEGER) : BOOLEAN
+		--/* Store a new string record into a table database object with a zero separated column string.
+		--   `tdb' specifies the table database object connected as a writer.
+		--   `pkbuf' specifies the pointer to the region of the primary key.
+		--   `pksiz' specifies the size of the region of the primary key.
+		--   `cbuf' specifies the pointer to the region of the zero separated column string where the name
+		--   and the value of each column are situated one after the other.
+		--   `csiz' specifies the size of the region of the column string.
+		--   If successful, the return value is true, else, it is false.
+		--   If a record with the same key exists in the database, this function has no effect. */
+		--bool tctdbputkeep2(TCTDB *tdb, const void *pkbuf, int pksiz, const void *cbuf, int csiz);
+		external
+			"C inline use <tctdb.h>"
+		alias
+			"{
+				tctdbputkeep2((TCTDB *)$a_tdb, (const void *)$a_pkbuf, (int)$a_pksiz, (const void *)$a_cbuf, (int)$a_csiz)
+			}"
+		end
+
+
 
 
 
@@ -456,6 +532,42 @@ feature -- Store Records
 			}"
 		end
 
+
+	tctdbputcat (a_tdb:POINTER; a_pkbuf : POINTER; a_pksiz : INTEGER; a_cols : POINTER) : BOOLEAN
+		--/* Concatenate columns of the existing record in a table database object.
+		--   `tdb' specifies the table database object connected as a writer.
+		--   `pkbuf' specifies the pointer to the region of the primary key.
+		--   `pksiz' specifies the size of the region of the primary key.
+		--   `cols' specifies a map object containing columns.
+		--   If successful, the return value is true, else, it is false.
+		--   If there is no corresponding record, a new record is created. */
+		--bool tctdbputcat(TCTDB *tdb, const void *pkbuf, int pksiz, TCMAP *cols);
+		external
+			"C inline use <tctdb.h>"
+		alias
+			"{
+				tctdbputcat((TCTDB *)$a_tdb, (const void *)$a_pkbuf, (int)$a_pksiz, (TCMAP *)$a_cols)
+			}"
+		end
+
+	tctdbputcat2 (a_tdb : POINTER; a_pkbuf : POINTER; a_pksiz: INTEGER; a_cbuf : POINTER; a_csiz : INTEGER) : BOOLEAN
+		--/* Concatenate columns in a table database object with a zero separated column string.
+		--   `tdb' specifies the table database object connected as a writer.
+		--   `pkbuf' specifies the pointer to the region of the primary key.
+		--   `pksiz' specifies the size of the region of the primary key.
+		--   `cbuf' specifies the pointer to the region of the zero separated column string where the name
+		--   and the value of each column are situated one after the other.
+		--   `csiz' specifies the size of the region of the column string.
+		--   If successful, the return value is true, else, it is false.
+		--   If there is no corresponding record, a new record is created. */
+		--bool tctdbputcat2(TCTDB *tdb, const void *pkbuf, int pksiz, const void *cbuf, int csiz);
+		external
+			"C inline use <tctdb.h>"
+		alias
+			"{
+				tctdbputcat2((TCTDB *)$a_tdb, (const void *)$a_pkbuf, (int) $a_pksiz, (const void *)$a_cbuf, (int) $a_csiz)
+			}"
+		end
 
 	tctdbputcat3 (an_tdb : POINTER; a_pkstr : POINTER; a_cstr : POINTER) : BOOLEAN
 		--	/* Concatenate columns in a table database object with with a tab separated column string.
@@ -512,6 +624,23 @@ feature -- Store Records
 			}"
 		end
 feature -- Remove Records
+
+	tctdbout (a_tdb : POINTER; a_pkbuf : POINTER; a_pksiz : INTEGER) : BOOLEAN
+		--/* Remove a record of a table database object.
+		--   `tdb' specifies the table database object connected as a writer.
+		--   `pkbuf' specifies the pointer to the region of the primary key.
+		--   `pksiz' specifies the size of the region of the primary key.
+		--   If successful, the return value is true, else, it is false. */
+		--bool tctdbout(TCTDB *tdb, const void *pkbuf, int pksiz);
+		external
+			"C inline use <tctdb.h>"
+		alias
+			"{
+				tctdbout((TCTDB *)$a_tdb, (const void *)$a_pkbuf, (int) $a_pksiz)
+			}"
+		end
+
+
 
 	tctdbout2 (an_tdb : POINTER; a_pkstr : POINTER) : BOOLEAN
 		--/* Remove a string record of a table database object.
@@ -582,6 +711,24 @@ feature -- Retrieve Records
 			}"
 		end
 
+
+
+		--/* Retrieve a record in a table database object as a zero separated column string.
+		--   `tdb' specifies the table database object.
+		--   `pkbuf' specifies the pointer to the region of the primary key.
+		--   `pksiz' specifies the size of the region of the primary key.
+		--   `sp' specifies the pointer to the variable into which the size of the region of the return
+		--   value is assigned.
+		--   If successful, the return value is the pointer to the region of the column string of the
+		--   corresponding record.  `NULL' is returned if no record corresponds.
+		--   Because an additional zero code is appended at the end of the region of the return value,
+		--   the return value can be treated as a character string.  Because the region of the return
+		--   value is allocated with the `malloc' call, it should be released with the `free' call when
+		--   it is no longer in use. */
+		--char *tctdbget2(TCTDB *tdb, const void *pkbuf, int pksiz, int *sp);
+
+
+
 	tctdbget3 (an_tdb : POINTER; a_pkstr : POINTER) : POINTER
 		--/* Retrieve a string record in a table database object as a tab separated column string.
 		--   `tdb' specifies the table database object.
@@ -599,6 +746,22 @@ feature -- Retrieve Records
 			}"
 		end
 
+
+	tctdbvsiz (a_tdb : POINTER; a_pkbuf : POINTER; a_pksiz : INTEGER) : INTEGER
+		--/* Get the size of the value of a record in a table database object.
+		--   `tdb' specifies the table database object.
+		--   `kbuf' specifies the pointer to the region of the primary key.
+		--   `ksiz' specifies the size of the region of the primary key.
+		--   If successful, the return value is the size of the value of the corresponding record, else,
+		--   it is -1. */
+		--int tctdbvsiz(TCTDB *tdb, const void *pkbuf, int pksiz);
+		external
+			"C inline use <tctdb.h>"
+		alias
+			"{
+				tctdbvsiz((TCTDB *)$a_tdb, (const void *)$a_pkbuf, (int) $a_pksiz)
+			}"
+		end
 
 	tctdbvsiz2 (an_tdb : POINTER; a_pkstr : POINTER) : INTEGER_32
 		--/* Get the size of the value of a string record in a table database object.
@@ -648,6 +811,47 @@ feature -- Retrieve Records
 		end
 
 
+	tctdbfwmkeys (a_tdb : POINTER; a_pbuf : POINTER; a_psiz : INTEGER; a_max : INTEGER) : POINTER
+		--/* Get forward matching primary keys in a table database object.
+		--   `tdb' specifies the table database object.
+		--   `pbuf' specifies the pointer to the region of the prefix.
+		--   `psiz' specifies the size of the region of the prefix.
+		--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is
+		--   specified.
+		--   The return value is a list object of the corresponding keys.  This function does never fail.
+		--   It returns an empty list even if no key corresponds.
+		--   Because the object of the return value is created with the function `tclistnew', it should be
+		--   deleted with the function `tclistdel' when it is no longer in use.  Note that this function
+		--   may be very slow because every key in the database is scanned. */
+		--TCLIST *tctdbfwmkeys(TCTDB *tdb, const void *pbuf, int psiz, int max);
+		external
+			"C inline use <tctdb.h>"
+		alias
+			"{
+				tctdbfwmkeys((TCTDB *)$a_tdb, (const void *)$a_pbuf, (int)$a_psiz, (int)$a_max)
+			}"
+		end
+
+
+	tctdbfwmkeys2 (a_tdb : POINTER; a_pstr : POINTER; a_max : INTEGER) : POINTER
+		--/* Get forward matching string primary keys in a table database object.
+		--   `tdb' specifies the table database object.
+		--   `pstr' specifies the string of the prefix.
+		--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is
+		--   specified.
+		--   The return value is a list object of the corresponding keys.  This function does never fail.
+		--   It returns an empty list even if no key corresponds.
+		--   Because the object of the return value is created with the function `tclistnew', it should be
+		--   deleted with the function `tclistdel' when it is no longer in use.  Note that this function
+		--   may be very slow because every key in the database is scanned. */
+		--TCLIST *tctdbfwmkeys2(TCTDB *tdb, const char *pstr, int max);
+		external
+			"C inline use <tctdb.h>"
+		alias
+			"{
+				tctdbfwmkeys2((TCTDB *)$a_tdb, (const char *)$a_pstr, (int)$a_max)
+			}"
+		end
 
 feature -- Iterator
 
@@ -665,6 +869,23 @@ feature -- Iterator
 				tctdbiterinit((TCTDB *)$an_tdb)
 			}"
 		end
+
+
+--/* Get the next primary key of the iterator of a table database object.
+--   `tdb' specifies the table database object.
+--   `sp' specifies the pointer to the variable into which the size of the region of the return
+--   value is assigned.
+--   If successful, the return value is the pointer to the region of the next primary key, else, it
+--   is `NULL'.  `NULL' is returned when no record is to be get out of the iterator.
+--   Because an additional zero code is appended at the end of the region of the return value, the
+--   return value can be treated as a character string.  Because the region of the return value is
+--   allocated with the `malloc' call, it should be released with the `free' call when it is no
+--   longer in use.  It is possible to access every record by iteration of calling this function.
+--   It is allowed to update or remove records whose keys are fetched while the iteration.
+--   However, it is not assured if updating the database is occurred while the iteration.  Besides,
+--   the order of this traversal access method is arbitrary, so it is not assured that the order of
+--   storing matches the one of the traversal access. */
+--void *tctdbiternext(TCTDB *tdb, int *sp);
 
 
 	tctdbiternext2 (an_tdb : POINTER) : POINTER
@@ -686,6 +907,20 @@ feature -- Iterator
 				tctdbiternext2((TCTDB *)$an_tdb)
 			}"
 		end
+
+--/* Get the columns of the next record of the iterator of a table database object.
+--   `tdb' specifies the table database object.
+--   If successful, the return value is a map object of the columns of the next record, else, it is
+--   `NULL'.  `NULL' is returned when no record is to be get out of the iterator.  The primary key
+--   is added into the map as a column of an empty string key.
+--   Because the object of the return value is created with the function `tcmapnew', it should be
+--   deleted with the function `tcmapdel' when it is no longer in use.  It is possible to access
+--   every record by iteration of calling this function.  However, it is not assured if updating
+--   the database is occurred while the iteration.  Besides, the order of this traversal access
+--   method is arbitrary, so it is not assured that the order of storing matches the one of the
+--   traversal access. */
+--TCMAP *tctdbiternext3(TCTDB *tdb);
+
 
 feature -- Transaction
 
