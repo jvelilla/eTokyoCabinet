@@ -72,21 +72,135 @@ feature -- Close and Delete
 
 		end
 
-feature -- Access
+feature -- Database Control
 
-	generate_unique_id : INTEGER_64
-		--Generate a unique ID number of a table database object.
-		--   The return value is the new unique ID number or -1 on failure. */
-		require
-			is_database_open : is_open
+	synchronize
+			--Synchronize updated contents of a table database object with the file and the device.
+		local
+			b : BOOLEAN
 		do
-			Result := tctdbgenuid (tdb)
-			if Result = -1 then
+			b := tctdbsync (tdb)
+			if not b then
+				has_error := True
+			end
+		end
+
+	optimize (a_bnum : INTEGER_64; an_apow: INTEGER_8; a_fpow : INTEGER_8; an_opts : NATURAL_8)
+			-- Optimize the file of a table database object.
+			-- `a_bnum' specifies the number of elements of the bucket array.  If it is not more than 0, the
+			--   default value is specified.  The default value is two times of the number of records.
+			-- `an_apow' specifies the size of record alignment by power of 2.  If it is negative, the current
+			--   setting is not changed.
+			--  `a_fpow' specifies the maximum number of elements of the free block pool by power of 2.  If it
+			--   is negative, the current setting is not changed.
+			--  `an_opts' specifies options by bitwise-or: `BDBTLARGE' specifies that the size of the database
+			--   can be larger than 2GB by using 64-bit bucket array, `BDBTDEFLATE' specifies that each record
+			--   is compressed with Deflate encoding, `BDBTBZIP' specifies that each record is compressed with
+			--   BZIP2 encoding, `BDBTTCBS' specifies that each record is compressed with TCBS encoding.  If it
+			--   is `UINT8_MAX', the current setting is not changed.
+			--   This function is useful to reduce the size of the database file with data fragmentation by
+			--   successive updating
+		local
+			b : BOOLEAN
+		do
+			b := tctdboptimize (tdb, a_bnum, an_apow, a_fpow, an_opts)
+			if not b then
+				has_error := true
+			end
+		end
+
+	default_optimize
+			-- Optimize the database file.
+			-- Call optimize(-1, -1, -1, 0xff)
+		do
+			optimize(-1, -1, -1, 0xff)
+		end
+
+	path  : STRING
+			--Get the file path of a table database object.
+			--  The return value is the path of the database file or `NULL' if the object does not connect to
+			--  any database file.
+		local
+			r : POINTER
+		do
+			r := tctdbpath (tdb)
+			if r /= default_pointer then
+				create Result.make_from_c (r)
+			end
+		end
+
+	tune (a_bnum : INTEGER_64; an_apow : INTEGER_8; a_fpow : INTEGER_8; an_opts : NATURAL_8)
+			-- Set the tuning parameters of a table database object.
+			-- `a_bnum' specifies the number of elements of the bucket array.  If it is not more than 0, the
+			--   default value is specified.  The default value is 131071.  Suggested size of the bucket array
+			--   is about from 0.5 to 4 times of the number of all records to be stored.
+			-- `an_apow' specifies the size of record alignment by power of 2.  If it is negative, the default
+			--   value is specified.  The default value is 4 standing for 2^4=16.
+			-- `an_fpow' specifies the maximum number of elements of the free block pool by power of 2.  If it
+			--  is negative, the default value is specified.  The default value is 10 standing for 2^10=1024.
+			--  `an_opts' specifies options by bitwise-or: `TDBTLARGE' specifies that the size of the database
+			--   can be larger than 2GB by using 64-bit bucket array, `TDBTDEFLATE' specifies that each record
+			--   is compressed with Deflate encoding, `TDBTBZIP' specifies that each record is compressed with
+			--   BZIP2 encoding, `TDBTTCBS' specifies that each record is compressed with TCBS encoding.
+		require
+			is_database_close : not is_open
+		local
+			b:  BOOLEAN
+		do
+			b := tctdbtune (tdb, a_bnum, an_apow, a_fpow, an_opts)
+			if not b then
 				has_error := true
 			end
 		end
 
 
+	set_cache ( a_rcnum : INTEGER_32; a_lcnum : INTEGER_32; a_ncnum : INTEGER_32)
+			--Set the caching parameters of a table database object.
+			-- `a_rcnum' specifies the maximum number of records to be cached.  If it is not more than 0, the
+			--   record cache is disabled.  It is disabled by default.
+			--  `a_lcnum' specifies the maximum number of leaf nodes to be cached.  If it is not more than 0,
+			--   the default value is specified.  The default value is 4096.
+			--  `a_ncnum' specifies the maximum number of non-leaf nodes to be cached.  If it is not more than 0,
+			--   the default value is specified.  The default value is 512.
+		require
+			is_dabastabase_close : not is_open
+		local
+			b : BOOLEAN
+		do
+			b := tctdbsetcache (tdb, a_rcnum, a_lcnum, a_ncnum)
+			if not b then
+				has_error := true
+			end
+		end
+
+
+	set_extra_mapped_memory (a_xmsiz : INTEGER_64)
+			-- Set the size of the extra mapped memory of a table database object.
+			-- `a_xmsiz' specifies the size of the extra mapped memory.  If it is not more than 0, the extra
+			--  mapped memory is disabled.  The default size is 67108864.
+		require
+			is_database_close : not is_open
+		local
+			b : BOOLEAN
+		do
+			b := tctdbsetxmsiz (tdb, a_xmsiz)
+		end
+
+
+	set_defragmentation_unit (a_dfunit : INTEGER_32)
+			--Set the unit step number of auto defragmentation of a table database object.
+			--`a_dfunit' specifie the unit step number.  If it is not more than 0, the auto defragmentation
+			-- is disabled.  It is disabled by default.
+		require
+			is_database_close : not is_open
+		local
+			b: BOOLEAN
+		do
+			b := tctdbsetdfunit (tdb, a_dfunit)
+			if not b then
+				has_error := true
+			end
+		end
 feature -- Error Messages
 
 	error_message (a_code: INTEGER_32): STRING
@@ -122,6 +236,17 @@ feature -- Access
 			Result := tctdbget (tdb, c_key.item, a_key.count)
 		end
 
+	generate_unique_id : INTEGER_64
+		--Generate a unique ID number of a table database object.
+		--   The return value is the new unique ID number or -1 on failure. */
+		require
+			is_database_open : is_open
+		do
+			Result := tctdbgenuid (tdb)
+			if Result = -1 then
+				has_error := true
+			end
+		end
 
 
 feature -- Element Change
@@ -141,6 +266,41 @@ feature -- Element Change
             end
 		end
 
+
+	put_cat_string (a_key: STRING; a_value: STRING)
+		--	Concatenate columns in a table database object with with a tab separated column string.
+		--  `a_key' specifies the string of the primary key.
+		--  `a_value' specifies the string of the the tab separated column string where the name and the
+		--   value of each column are situated one after the other.
+		require
+			is_open_database: is_open
+			is_valid_key: a_key /= Void and (not a_key.is_empty)
+			is_valid_value: a_value /= Void and (not a_value.is_empty)
+		local
+			c_key: C_STRING
+			c_value: C_STRING
+			l_b: BOOLEAN
+		do
+			create c_key.make (a_key)
+			create c_value.make (a_value)
+			l_b := tctdbputcat3 (tdb, c_key.item, c_value.item)
+			if not l_b then
+				has_error := True
+			end
+		end
+feature -- Remove
+	vanish
+		--Remove all records of a table database object.
+		require
+			is_database_open : is_open
+		local
+			b : BOOLEAN
+		do
+		 	b := tctdbvanish (tdb)
+		 	if not b then
+		 		has_error := True
+		 	end
+		end
 feature {NONE} -- Implementation
 
 	full_message_implementation : STRING

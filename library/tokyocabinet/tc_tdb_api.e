@@ -280,7 +280,7 @@ feature -- Database Control
 		end
 
 
-	tctdboptimize (an_tdb : POINTER; a_bnum : INTEGER_64; an_apow: INTEGER_8; a_fpow : INTEGER_8; an_opts : NATURAL_8)
+	tctdboptimize (an_tdb : POINTER; a_bnum : INTEGER_64; an_apow: INTEGER_8; a_fpow : INTEGER_8; an_opts : NATURAL_8) : BOOLEAN
 		--/* Optimize the file of a table database object.
 		--   `tdb' specifies the table database object connected as a writer.
 		--   `bnum' specifies the number of elements of the bucket array.  If it is not more than 0, the

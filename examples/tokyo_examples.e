@@ -6,18 +6,21 @@ create
 feature -- Initialization
 
 	make
+		local
+			l_tdb_example : TABLE_DATABASE_EXAMPLE
 		do
-			print ("%N================ Abstract Database Example ======================%N")
-			adb_example
-			print ("%N================ Fixed Database Example ======================%N")
-			fdb_example
-			print ("%N================ B-Tree Database Example ======================%N")
-			bdb_example
-			print ("%N================ Hash Database Example ======================%N")
-			hdb_example
-			print ("%N================ Table Database Example ======================%N")
-			tdb_example
-
+			create l_tdb_example
+			l_tdb_example.example
+--			print ("%N================ Abstract Database Example ======================%N")
+--			adb_example
+--			print ("%N================ Fixed Database Example ======================%N")
+--			fdb_example
+--			print ("%N================ B-Tree Database Example ======================%N")
+--			bdb_example
+--			print ("%N================ Hash Database Example ======================%N")
+--			hdb_example
+--			print ("%N================ Table Database Example ======================%N")
+--			tdb_example
 		end
 
 	adb_example
