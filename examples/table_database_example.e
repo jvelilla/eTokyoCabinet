@@ -21,7 +21,7 @@ feature
 		    create tdb.make
 
 			--  open the database
-			tdb.open ("tabledb.tct", tdb.owriter.bit_or (tdb.ocreat))
+			tdb.open_writer_create ("tabledb.tct")
 
 			-- remove all records
 			tdb.vanish

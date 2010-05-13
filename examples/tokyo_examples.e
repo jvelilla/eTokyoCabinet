@@ -203,7 +203,7 @@ feature -- Initialization
 			create tdb.make
 
 			print ("%N================ open database ======================%N")
-			tdb.open ("casket.tct",tdb.owriter.bit_or (tdb.ocreat))
+			tdb.open_writer_create ("casket.tct")
 			check not tdb.has_error	end
 
 			print ("%N================ store records ======================%N")

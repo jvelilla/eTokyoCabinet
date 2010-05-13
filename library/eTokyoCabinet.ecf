@@ -22,6 +22,7 @@
 			<option syntax="standard">
 			</option>
 		</library>
+		<library name="gobo_kernel" location="$ISE_LIBRARY\library\gobo\gobo_kernel.ecf"/>
 		<library name="time" location="$ISE_LIBRARY\library\time\time.ecf" readonly="true"/>
 		<cluster name="etokyocabinet" location=".\" recursive="true">
 			<option debug="true">

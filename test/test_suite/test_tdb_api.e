@@ -42,7 +42,7 @@ feature -- Test routines
 			str : STRING
 		do
 
-			tdb.open ("casket.tct", tdb.owriter.bit_or (tdb.ocreat))
+			tdb.open_writer_create ("casket.tct")
 			assert ("Empty Database", tdb.records_number = 0)
 			create cols.make
 			cols.put ("name", "javier")
@@ -78,7 +78,7 @@ feature -- Test routines
 			l_list : LIST_API[STRING]
 		do
 
-			tdb.open ("casket.tct", tdb.owriter.bit_or (tdb.ocreat))
+			tdb.open_writer_create ("casket.tct")
 			assert ("Empty Database", tdb.records_number = 0)
 			create cols.make
 			cols.put ("name", "javier")

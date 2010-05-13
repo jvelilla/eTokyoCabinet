@@ -11,6 +11,8 @@ inherit
 
 	TC_TDB_API
 
+	KL_SHARED_FILE_SYSTEM
+
 	TC_SERIALIZATION
 create
 	make
@@ -26,21 +28,217 @@ feature {NONE} -- Initialization
 		end
 feature -- Open Database
 
-	open (a_path : STRING; o_mode : INTEGER_32)
+	open_writer (a_path : STRING)
+		require
+			is_database_closed : not is_open
+			is_valid_path : a_path /= Void and not a_path.is_empty
+			exist_file : is_valid_path (a_path)
+		local
+			c_path : C_STRING
+			l_b : BOOLEAN
+		do
+			create c_path.make (a_path)
+			set_current_open_mode (owriter)
+			l_b := tctdbopen (tdb,c_path.item,owriter)
+			if not l_b then
+				has_error := True
+			else
+				is_open := True
+			end
+		ensure
+			valid_open_mode: is_valid_open_mode (current_open_mode)
+		end
+
+	open_writer_create (a_path : STRING)
+			-- Creates a new database if not exist
 		require
 			is_database_closed : not is_open
 			is_valid_path : a_path /= Void and not a_path.is_empty
 		local
 			c_path : C_STRING
 			l_b : BOOLEAN
+			l_om : INTEGER
 		do
+			l_om := owriter.bit_or (ocreat)
 			create c_path.make (a_path)
-			l_b := tctdbopen (tdb,c_path.item,o_mode)
+			set_current_open_mode (l_om)
+			l_b := tctdbopen (tdb,c_path.item,l_om)
 			if not l_b then
 				has_error := True
 			else
 				is_open := True
 			end
+		ensure
+			valid_open_mode: is_valid_open_mode (current_open_mode)
+		end
+
+
+	open_writer_truncate (a_path : STRING)
+			-- Creates a new database regardless if one exists
+		require
+			is_database_closed : not is_open
+			is_valid_path : a_path /= Void and not a_path.is_empty
+			exist_file : is_valid_path (a_path)
+		local
+			c_path : C_STRING
+			l_b : BOOLEAN
+			l_om : INTEGER
+		do
+			l_om := owriter.bit_or (otrunc)
+			create c_path.make (a_path)
+			set_current_open_mode (l_om)
+			l_b := tctdbopen (tdb,c_path.item,l_om)
+			if not l_b then
+				has_error := True
+			else
+				is_open := True
+			end
+		ensure
+			valid_open_mode: is_valid_open_mode (current_open_mode)
+		end
+
+	open_writer_syncronize (a_path : STRING)
+			-- Every transaction synchronizes updated contents with the device
+		require
+			is_database_closed : not is_open
+			is_valid_path : a_path /= Void and not a_path.is_empty
+			exist_file : is_valid_path (a_path)
+		local
+			c_path : C_STRING
+			l_b : BOOLEAN
+			l_om : INTEGER
+		do
+			l_om := owriter.bit_or (otsync)
+			create c_path.make (a_path)
+			set_current_open_mode (l_om)
+			l_b := tctdbopen (tdb,c_path.item,l_om)
+			if not l_b then
+				has_error := True
+			else
+				is_open := True
+			end
+		ensure
+			valid_open_mode: is_valid_open_mode (current_open_mode)
+		end
+
+	open_writer_no_locking (a_path : STRING)
+			-- Open the database file without file locking
+		require
+			is_database_closed : not is_open
+			is_valid_path : a_path /= Void and not a_path.is_empty
+			exist_file : is_valid_path (a_path)
+		local
+			c_path : C_STRING
+			l_b : BOOLEAN
+			l_om : INTEGER
+		do
+			l_om := owriter.bit_or (onolck)
+			create c_path.make (a_path)
+			set_current_open_mode (l_om)
+			l_b := tctdbopen (tdb,c_path.item,l_om)
+			if not l_b then
+				has_error := True
+			else
+				is_open := True
+			end
+		ensure
+			valid_open_mode: is_valid_open_mode (current_open_mode)
+		end
+
+
+	open_writer_no_blocking (a_path : STRING)
+			-- locking is performed without blocking
+		require
+			is_database_closed : not is_open
+			is_valid_path : a_path /= Void and not a_path.is_empty
+			exist_file : is_valid_path (a_path)
+		local
+			c_path : C_STRING
+			l_b : BOOLEAN
+			l_om : INTEGER
+		do
+			l_om := owriter.bit_or (olcknb)
+			create c_path.make (a_path)
+			set_current_open_mode (l_om)
+			l_b := tctdbopen (tdb,c_path.item,l_om)
+			if not l_b then
+				has_error := True
+			else
+				is_open := True
+			end
+		ensure
+			valid_open_mode: is_valid_open_mode (current_open_mode)
+		end
+
+
+	open_reader (a_path : STRING)
+		require
+			is_database_closed : not is_open
+			is_valid_path : a_path /= Void and not a_path.is_empty
+			exist_file : is_valid_path (a_path)
+		local
+			c_path : C_STRING
+			l_b : BOOLEAN
+		do
+			create c_path.make (a_path)
+			set_current_open_mode (oreader)
+			l_b := tctdbopen (tdb,c_path.item,oreader)
+			if not l_b then
+				has_error := True
+			else
+				is_open := True
+			end
+		ensure
+			valid_open_mode: is_valid_open_mode (current_open_mode)
+		end
+
+
+	open_reader_no_locking (a_path : STRING)
+			--  opens the database file without file locking
+		require
+			is_database_closed : not is_open
+			is_valid_path : a_path /= Void and not a_path.is_empty
+			exist_file : is_valid_path (a_path)
+		local
+			c_path : C_STRING
+			l_b : BOOLEAN
+			l_om : INTEGER
+		do
+			l_om := oreader.bit_or (onolck)
+			create c_path.make (a_path)
+			set_current_open_mode (l_om)
+			l_b := tctdbopen (tdb,c_path.item, l_om)
+			if not l_b then
+				has_error := True
+			else
+				is_open := True
+			end
+		ensure
+			valid_open_mode: is_valid_open_mode (current_open_mode)
+		end
+
+	open_reader_no_blocking (a_path : STRING)
+			-- locking is performed without blocking
+		require
+			is_database_closed : not is_open
+			is_valid_path : a_path /= Void and not a_path.is_empty
+			exist_file : is_valid_path (a_path)
+		local
+			c_path : C_STRING
+			l_b : BOOLEAN
+			l_om : INTEGER
+		do
+			l_om := oreader.bit_or (olcknb)
+			create c_path.make (a_path)
+			set_current_open_mode (l_om)
+			l_b := tctdbopen (tdb,c_path.item,l_om)
+			if not l_b then
+				has_error := True
+			else
+				is_open := True
+			end
+		ensure
+			valid_open_mode: is_valid_open_mode (current_open_mode)
 		end
 
 feature -- Close and Delete
@@ -223,6 +421,12 @@ feature -- Error Messages
 		end
 
 feature -- Access
+	valid_open_modes : ARRAY[INTEGER]
+			-- valid open database modes
+		once
+			Result := <<owriter,owriter.bit_or (ocreat),owriter.bit_or(otrunc),owriter.bit_or (otsync),owriter.bit_or (olcknb),owriter.bit_or (onolck),oreader,oreader.bit_or (olcknb),oreader.bit_or (onolck)>>
+		end
+
 	get_map ( a_key : STRING ) : POINTER
 			-- Retrieve a record in a table database object.
 			-- The return value is a pointer to a map object of the columns of the corresponding record `a_key'.
@@ -301,7 +505,37 @@ feature -- Remove
 		 		has_error := True
 		 	end
 		end
+
+feature -- Status Report
+
+	is_valid_path (a_path : STRING) : BOOLEAN
+			-- Is `a_path' a valid path ?
+			-- The file exist and is readeble?
+		do
+			if a_path /= void and then not a_path.is_empty then
+				Result := file_system.file_exists (a_path) and file_system.is_file_readable (a_path)
+			else
+				Result := False
+			end
+		end
+
+	is_valid_open_mode ( a_mode : INTEGER) :BOOLEAN
+			-- Does `a_mode' represent a valid open mode?
+		 do
+		 	Result := valid_open_modes.has (a_mode)
+		 end
+
+	current_open_mode : INTEGER
+   			-- Represent a valid open mode
+
 feature {NONE} -- Implementation
+	 set_current_open_mode (a_mode : INTEGER)
+	 		-- Set the `current_open_mode' as `a_mode'
+	 		do
+	 			current_open_mode := a_mode
+	 		ensure
+	 			set_current_mode : current_open_mode = a_mode
+	 		end
 
 	full_message_implementation : STRING
 		do
