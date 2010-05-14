@@ -28,11 +28,36 @@ feature {NONE} -- Events
 	on_clean
 			-- <Precursor>
 		do
-			tdb.delete
 			tdb.close
+			tdb.delete
 		end
 
 feature -- Test routines
+	test_file_does_not_exist
+		do
+			assert("False",tdb.is_valid_path ("casket.tct") = False)
+		end
+
+	test_file_does_exist
+		do
+			tdb.open_writer_create ("casket.tct")
+			assert("True",tdb.is_valid_path ("casket.tct") = True)
+		end
+
+	test_put_invalid_operation_in_open_mode_reader
+		do
+			tdb.open_writer_create ("casket.tct")
+			tdb.put_string ("key", "value")
+			assert ("One element", tdb.records_number = 1)
+			tdb.close
+			assert ("Database is closed", not tdb.is_open)
+			tdb.open_reader ("casket.tct")
+			tdb.put_string ("key1", "value2")
+			assert ("Has error", tdb.has_error)
+			assert ("Invalid Operation", tdb.error_code = 2)
+			assert ("Expected Message",tdb.error_message (tdb.error_code).is_equal ("invalid operation"))
+			tdb.clean_error
+		end
 
 	test_put_map
 			-- New test routine

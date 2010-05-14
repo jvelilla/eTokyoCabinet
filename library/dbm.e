@@ -142,6 +142,16 @@ feature -- Status Report
 	has_error: BOOLEAN
 			-- Did an error occur?
 
+feature -- Status Settings
+
+	clean_error is
+			-- Reset the last error.
+		do
+			has_error := False
+		ensure
+			no_error: not has_error
+		end
+
 
 feature {DBM} -- Implementation
 
@@ -207,7 +217,7 @@ feature {DBM} -- Implementation
 		end
 
 invariant
-	non_empty_description: has_error implies (error_description /= Void and not error_description.is_empty)
+	non_empty_description: has_error implies (error_description /= Void and (not error_description.is_empty))
 
 end -- class DBM
 

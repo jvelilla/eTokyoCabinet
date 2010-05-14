@@ -48,6 +48,27 @@ feature {NONE} -- Events
 		end
 feature -- Test Open Database
 
+	test_tune_operation
+		local
+			b : BOOLEAN
+		do
+			b := tctdbtune (tdb, -1, -1, -1, tlarge.bit_or (tbzip).as_natural_8)
+			assert ("Tune true",b)
+		end
+
+
+	test_tune_operation_database_is_open
+		local
+			b : BOOLEAN
+			name: C_STRING
+		do
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+
+			b := tctdbtune (tdb, -1, -1, -1, tlarge.bit_or (tbzip).as_natural_8)
+			assert ("Tune FALSE",not b)
+		end
 	test_open_write_create
 		local
 			b : BOOLEAN
