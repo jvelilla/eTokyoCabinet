@@ -26,6 +26,7 @@ feature {NONE} -- Initialization
 			is_open := False
 			has_error := False
 		end
+
 feature -- Open Database
 
 	open_writer (a_path : STRING)
@@ -47,6 +48,7 @@ feature -- Open Database
 			end
 		ensure
 			valid_open_mode: is_valid_open_mode (current_open_mode)
+			is_open_mode_writer : is_open_mode_writer
 		end
 
 	open_writer_create (a_path : STRING)
@@ -70,6 +72,7 @@ feature -- Open Database
 			end
 		ensure
 			valid_open_mode: is_valid_open_mode (current_open_mode)
+			is_open_mode_writer : is_open_mode_writer
 		end
 
 
@@ -95,6 +98,7 @@ feature -- Open Database
 			end
 		ensure
 			valid_open_mode: is_valid_open_mode (current_open_mode)
+			is_open_mode_writer : is_open_mode_writer
 		end
 
 	open_writer_syncronize (a_path : STRING)
@@ -119,6 +123,7 @@ feature -- Open Database
 			end
 		ensure
 			valid_open_mode: is_valid_open_mode (current_open_mode)
+			is_open_mode_writer : is_open_mode_writer
 		end
 
 	open_writer_no_locking (a_path : STRING)
@@ -143,6 +148,7 @@ feature -- Open Database
 			end
 		ensure
 			valid_open_mode: is_valid_open_mode (current_open_mode)
+			is_open_mode_writer : is_open_mode_writer
 		end
 
 
@@ -168,6 +174,7 @@ feature -- Open Database
 			end
 		ensure
 			valid_open_mode: is_valid_open_mode (current_open_mode)
+			is_open_mode_reader : is_open_mode_reader
 		end
 
 
@@ -190,6 +197,7 @@ feature -- Open Database
 			end
 		ensure
 			valid_open_mode: is_valid_open_mode (current_open_mode)
+			is_open_mode_reader : is_open_mode_reader
 		end
 
 
@@ -215,6 +223,7 @@ feature -- Open Database
 			end
 		ensure
 			valid_open_mode: is_valid_open_mode (current_open_mode)
+			is_open_mode_reader : is_open_mode_reader
 		end
 
 	open_reader_no_blocking (a_path : STRING)
@@ -272,6 +281,28 @@ feature -- Close and Delete
 
 feature -- Database Control
 
+	copy_db (a_path : STRING)
+			--	Copy the database file of a table database object.
+			--  `path' specifies the path of the destination file.  If it begins with `@', the trailing
+			--  substring is executed as a command line.
+			--  The database file is assured to be kept synchronized and not modified while the copying or
+			--  executing operation is in progress.  So, this function is useful to create a backup file of
+			--  the database file.
+		require
+			is_database_open : is_open
+		local
+			c_path : C_STRING
+			b : BOOLEAN
+		do
+			create c_path.make (a_path)
+			b := tctdbcopy (tdb, c_path.item)
+			if not b then
+				has_error := True
+			end
+		ensure
+			is_valid_file : is_valid_path (a_path)
+		end
+
 	synchronize
 			--Synchronize updated contents of a table database object with the file and the device.
 		local
@@ -298,6 +329,8 @@ feature -- Database Control
 			--   is `UINT8_MAX', the current setting is not changed.
 			--   This function is useful to reduce the size of the database file with data fragmentation by
 			--   successive updating
+		require
+			is_database_open_writer : is_open_mode_writer
 		local
 			b : BOOLEAN
 		do
@@ -310,14 +343,17 @@ feature -- Database Control
 	default_optimize
 			-- Optimize the database file.
 			-- Call optimize(-1, -1, -1, 0xff)
+		require
+			is_database_open_writer : is_open_mode_writer
 		do
 			optimize(-1, -1, -1, 0xff)
 		end
 
 	path  : STRING
 			--Get the file path of a table database object.
-			--  The return value is the path of the database file or `NULL' if the object does not connect to
-			--  any database file.
+			--  The return value is the path of the database file.
+		require
+			is_open_database : is_open
 		local
 			r : POINTER
 		do
@@ -361,7 +397,7 @@ feature -- Database Control
 			--  `a_ncnum' specifies the maximum number of non-leaf nodes to be cached.  If it is not more than 0,
 			--   the default value is specified.  The default value is 512.
 		require
-			is_dabastabase_close : not is_open
+			is_database_close : not is_open
 		local
 			b : BOOLEAN
 		do
@@ -399,6 +435,7 @@ feature -- Database Control
 				has_error := true
 			end
 		end
+
 feature -- Error Messages
 
 	error_message (a_code: INTEGER_32): STRING
@@ -421,6 +458,19 @@ feature -- Error Messages
 		end
 
 feature -- Access
+	record_size ( a_key : ANY) :INTEGER_32
+			-- Get the size of the value of a record in a table database object
+		local
+			s8 : STRING
+		do
+			if a_key.conforms_to (a_string_8) then
+                s8 ?= a_key
+                Result := internal_record_size_string (s8)
+            else
+            	Result := internal_record_size (a_key)
+            end
+		end
+
 	valid_open_modes : ARRAY[INTEGER]
 			-- valid open database modes
 		once
@@ -441,10 +491,10 @@ feature -- Access
 		end
 
 	generate_unique_id : INTEGER_64
-		--Generate a unique ID number of a table database object.
-		--   The return value is the new unique ID number or -1 on failure. */
+		--	Generate a unique ID number of a table database object.
+		--  The return value is the new unique ID number or -1 on failure.
 		require
-			is_database_open : is_open
+			is_database_open_writer_mode : is_open_mode_writer
 		do
 			Result := tctdbgenuid (tdb)
 			if Result = -1 then
@@ -458,7 +508,7 @@ feature -- Element Change
 			-- Store a record into a table database object.
 			-- `a_map' specifies a map object containing columns
 		require
-			is_open : is_open
+			is_open_mode_writer : is_open_mode_writer
 		local
 			s8 : STRING
 		do
@@ -477,7 +527,7 @@ feature -- Element Change
 		--  `a_value' specifies the string of the the tab separated column string where the name and the
 		--   value of each column are situated one after the other.
 		require
-			is_open_database: is_open
+			is_open_mode_writer : is_open_mode_writer
 			is_valid_key: a_key /= Void and (not a_key.is_empty)
 			is_valid_value: a_value /= Void and (not a_value.is_empty)
 		local
@@ -496,7 +546,7 @@ feature -- Remove
 	vanish
 		--Remove all records of a table database object.
 		require
-			is_database_open : is_open
+			is_database_open_writer : is_open_mode_writer
 		local
 			b : BOOLEAN
 		do
@@ -528,7 +578,22 @@ feature -- Status Report
 	current_open_mode : INTEGER
    			-- Represent a valid open mode
 
+
+
+
 feature {NONE} -- Implementation
+
+	is_open_mode_reader_implementation : BOOLEAN
+   			-- is the database open in a reader mode?
+		do
+   			if current_open_mode = oreader or else current_open_mode = oreader.bit_or (onolck) or else  current_open_mode = oreader.bit_or (olcknb) then
+   				Result := True
+   			else
+   				Result := False
+   			end
+   		end
+
+
 	 set_current_open_mode (a_mode : INTEGER)
 	 		-- Set the `current_open_mode' as `a_mode'
 	 		do
@@ -630,16 +695,38 @@ feature {NONE} -- Implementation
 			end
 		end
 
+
+	internal_record_size_string ( a_key : STRING ) : INTEGER
+		local
+			c_key : C_STRING
+
+		do
+			create c_key.make (a_key)
+			Result := tctdbvsiz2 (tdb, c_key.item)
+		end
+
+
+	internal_record_size( a_key : ANY ) : INTEGER
+		local
+			c_key : C_STRING
+			str : STRING
+
+		do
+			str := serialize (a_key)
+			create c_key.make (str)
+			Result := tctdbvsiz (tdb, c_key.item, str.count)
+		end
+
+
 	a_string_8: STRING_8 is
         once
             Result := ""
         end
 
+
 feature -- Representation
 	tdb: POINTER
 		-- Table database object
-
-
 invariant
 	table_database_created: tdb /= default_pointer
 

@@ -67,8 +67,350 @@ feature -- Test Open Database
 			assert ("Expected true", b = true)
 
 			b := tctdbtune (tdb, -1, -1, -1, tlarge.bit_or (tbzip).as_natural_8)
+
 			assert ("Tune FALSE",not b)
+			assert ("Expected error code 2", tctdbecode (tdb) = 2)
 		end
+
+	test_set_cache
+		local
+			b : BOOLEAN
+		do
+			b := tctdbsetcache (tdb, -1,-1,-1)
+			assert ("Cache set true",b)
+		end
+
+	test_set_cache_database_is_open
+		local
+			b : BOOLEAN
+			name: C_STRING
+		do
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+
+			b := tctdbsetcache (tdb, -1,-1,-1)
+
+			assert ("Set cache FALSE",not b)
+			assert ("Expected error code 2", tctdbecode (tdb) = 2)
+		end
+
+	test_genuid
+		local
+		do
+			assert ("Id expected -1",tctdbgenuid (tdb) = -1)
+		end
+
+	test_genuid_writer_mode
+		local
+			name : C_STRING
+			b : BOOLEAN
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+			assert ("Id expected >= 1",tctdbgenuid (tdb) >= 1)
+
+		end
+
+	test_genuid_reader_mode
+		local
+			name : C_STRING
+			b : BOOLEAN
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+			b:=tctdbclose (tdb)
+
+			-- Open again as READER
+			b:= tctdbopen (tdb,name.item,oreader)
+			assert ("Id expected = -1",tctdbgenuid (tdb) = -1)
+
+		end
+
+	test_file_size
+		local
+		do
+			assert ("File does not exist, expected size 0",tctdbfsiz (tdb) = 0)
+		end
+
+	test_file_size_exist
+		local
+			b : BOOLEAN
+			name: C_STRING
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+			assert ("File exist, expected size > 0",tctdbfsiz (tdb) > 0)
+		end
+
+	test_file_size_database_closed
+		local
+			b : BOOLEAN
+			name: C_STRING
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+			b:=tctdbclose (tdb)
+			assert ("File exist, expected size  0",tctdbfsiz (tdb) = 0)
+		end
+
+	test_db_optimize
+		local
+			b : BOOLEAN
+		do
+			b := tctdboptimize (tdb, -1, -1, -1, tlarge.as_natural_8)
+			assert ("Optimize False",not b)
+			assert ("Expected error code 2", tctdbecode (tdb) = 2)
+		end
+
+
+	test_db_optimize_read_mode
+		local
+			b : BOOLEAN
+			name: C_STRING
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+			b:=tctdbclose (tdb)
+
+			-- Open again as READER
+			b:= tctdbopen (tdb,name.item,oreader)
+
+			assert("open",b)
+			b := tctdboptimize (tdb, -1, -1, -1, tlarge.as_natural_8)
+			assert ("Optimize False",not b)
+			assert ("Expected error code 2", tctdbecode (tdb) = 2)
+		end
+
+	test_db_optimize_writer_mode
+		local
+			b : BOOLEAN
+			name: C_STRING
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+
+			b := tctdboptimize (tdb, -1, -1, -1, tlarge.as_natural_8)
+			assert ("Optimize True", b)
+		end
+
+
+
+	test_vanish
+		local
+			b : BOOLEAN
+		do
+			b := tctdbvanish (tdb)
+			assert ("Vanish False",not b)
+			assert ("Expected error code 2", tctdbecode (tdb) = 2)
+		end
+
+
+	test_vanish_read_mode
+		local
+			b : BOOLEAN
+			name: C_STRING
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+			b:=tctdbclose (tdb)
+
+			-- Open again as READER
+			b:= tctdbopen (tdb,name.item,oreader)
+
+			assert("open",b)
+			b := tctdbvanish (tdb)
+			assert ("Vanish False",not b)
+			assert ("Expected error code 2", tctdbecode (tdb) = 2)
+		end
+
+	test_vanish_writer_mode
+		local
+			b : BOOLEAN
+			name: C_STRING
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+
+			b := tctdbvanish (tdb)
+			assert ("Vanish True", b)
+		end
+
+	test_copy
+		local
+			b : BOOLEAN
+			name: C_STRING
+		do
+			create name.make ("copydb.tct")
+			b := tctdbcopy (tdb, name.item)
+			assert ("Copy False",not b)
+			assert ("Expected error code 2", tctdbecode (tdb) = 2)
+		end
+
+
+	test_copy_read_mode
+		local
+			b : BOOLEAN
+			name: C_STRING
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+			b:=tctdbclose (tdb)
+
+			-- Open again as READER
+			b:= tctdbopen (tdb,name.item,oreader)
+
+			assert("open",b)
+			create name.make ("copydb.tct")
+			b := tctdbcopy (tdb, name.item)
+			assert("Copy True",b)
+		end
+
+
+	test_copy_to_same_file
+		local
+			b : BOOLEAN
+			name: C_STRING
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+			b:=tctdbclose (tdb)
+
+			-- Open again as READER
+			b:= tctdbopen (tdb,name.item,oreader)
+
+			b := tctdbcopy (tdb, name.item)
+			assert("Copy True", b)
+		end
+
+
+	test_copy_writer_mode
+		local
+			b : BOOLEAN
+			name: C_STRING
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+
+			create name.make ("copydb.tct")
+			b := tctdbcopy (tdb, name.item)
+			assert("Copy True",b)
+		end
+
+
+	test_path
+		local
+			r : POINTER
+		do
+			r := tctdbpath (tdb)
+			assert ("File does not exist", r = default_pointer)
+			assert ("Expected error code 2", tctdbecode (tdb) = 2)
+		end
+
+
+	test_path_read_mode
+		local
+			b : BOOLEAN
+			name: C_STRING
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+			b:=tctdbclose (tdb)
+
+			-- Open again as READER
+			b:= tctdbopen (tdb,name.item,oreader)
+			assert("open",b)
+			assert ("Expected file name casket.tct",(create {STRING}.make_from_c( tctdbpath (tdb))).is_equal("casket.tct"))
+		end
+
+
+	test_path_write_mode
+		local
+			b : BOOLEAN
+			name: C_STRING
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+			assert ("Expected file name casket.tct",(create {STRING}.make_from_c( tctdbpath (tdb))).is_equal("casket.tct"))
+		end
+
+
+	test_set_xmsiz
+		local
+			b : BOOLEAN
+		do
+
+			b := tctdbsetxmsiz (tdb, -1)
+			assert ("Set extra mapped memory true",b)
+		end
+
+	test_set_xmsiz_database_is_open
+		local
+			b : BOOLEAN
+			name: C_STRING
+		do
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+
+			b := tctdbsetxmsiz (tdb, -1)
+
+			assert ("Set extra mapped memory false",not b)
+			assert ("Expected error code 2", tctdbecode (tdb) = 2)
+		end
+
+
+	test_set_dfunit
+		local
+			b : BOOLEAN
+		do
+
+			b := tctdbsetdfunit (tdb, -1)
+			assert ("Set auto defragmentation true",b)
+		end
+
+	test_set_dfunit_database_is_open
+		local
+			b : BOOLEAN
+			name: C_STRING
+		do
+			create name.make ("casket.tct")
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+
+			b := tctdbsetxmsiz (tdb, -1)
+
+			assert ("Set auto defragmentation false",not b)
+			assert ("Expected error code 2", tctdbecode (tdb) = 2)
+		end
+
+
 	test_open_write_create
 		local
 			b : BOOLEAN
@@ -285,6 +627,157 @@ feature -- Test Open Database
 		end
 
 
+	test_out2_database_is_closed
+		local
+			name : C_STRING
+			key : C_STRING
+			val : C_STRING
+			b : BOOLEAN
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+
+            create key.make ("key")
+            create val.make ("value")
+
+            b := tctdbput3 (tdb, key.item, val.item)
+            assert ("Expected true", b = true)
+			b:=tctdbclose (tdb)
+
+			b:=tctdbout2 (tdb, key.item)
+			assert("Remove Element False", not b)
+			assert ("Expected error code 2",tctdbecode (tdb)=2) -- Invalid Operation
+		end
+
+
+	test_out2_read_mode
+		local
+			name : C_STRING
+			key : C_STRING
+			val : C_STRING
+			b : BOOLEAN
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+
+            create key.make ("key")
+            create val.make ("value")
+
+            b := tctdbput3 (tdb, key.item, val.item)
+            assert ("Expected true", b = true)
+			b:=tctdbclose (tdb)
+
+			--Open as READER		
+			b:= tctdbopen (tdb,name.item, oreader )
+			b:=tctdbout2 (tdb, key.item)
+			assert("Remove Element False", not b)
+			assert ("Expected error code 2",tctdbecode (tdb)=2) -- Invalid Operation
+		end
+
+	test_sync_read_mode
+		local
+			name : C_STRING
+			key : C_STRING
+			val : C_STRING
+			b : BOOLEAN
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+
+            create key.make ("key")
+            create val.make ("value")
+
+            b := tctdbput3 (tdb, key.item, val.item)
+            assert ("Expected true", b = true)
+			b:=tctdbclose (tdb)
+
+			--Open as READER		
+			b:= tctdbopen (tdb,name.item, oreader )
+			b:=tctdbsync (tdb)
+			assert("could no sync False", not b)
+			assert ("Expected error code 2",tctdbecode (tdb)=2) -- Invalid Operation
+		end
+
+	test_sync_database_closed
+		local
+			name : C_STRING
+			key : C_STRING
+			val : C_STRING
+			b : BOOLEAN
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+
+            create key.make ("key")
+            create val.make ("value")
+
+            b := tctdbput3 (tdb, key.item, val.item)
+            assert ("Expected true", b = true)
+			b:=tctdbclose (tdb)
+
+			b:=tctdbsync (tdb)
+			assert("could no sync False", not b)
+			assert ("Expected error code 2",tctdbecode (tdb)=2) -- Invalid Operation
+		end
+
+
+	test_vsize2_database_closed
+		local
+			name : C_STRING
+			key : C_STRING
+			val : C_STRING
+			b : BOOLEAN
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+
+            create key.make ("key")
+            create val.make ("value")
+
+            b := tctdbput3 (tdb, key.item, val.item)
+            assert ("Expected true", b = true)
+			b:=tctdbclose (tdb)
+
+			assert("Expected -1",tctdbvsiz2 (tdb, key.item)=-1)
+			assert ("Expected error code 2",tctdbecode (tdb)=2) -- Invalid Operation
+		end
+
+
+
+	test_vsize2_value_not_exist
+		local
+			name : C_STRING
+			key : C_STRING
+			b : BOOLEAN
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+
+            create key.make ("key")
+
+			assert("Expected -1",tctdbvsiz2 (tdb, key.item)=-1)
+			assert ("Expected error code 22",tctdbecode (tdb)=22) -- No record found
+		end
+
+
 	test_open_reader_put3
 		local
 			name : C_STRING
@@ -318,6 +811,7 @@ feature -- Test Open Database
 				-- so, put is applicable when the db is open in (writer modes)
 			end
 		end
+
 	test_insert
 		local
 			k : C_STRING
@@ -343,7 +837,6 @@ feature -- Test Open Database
 			b:=tctdbput (tdb, k.item, k.count, map)
 			assert ("Expected true", b = true)
 			assert ("One Element", tctdbrnum (tdb) = 1)
-
 		end
 
 	test_search

@@ -58,7 +58,7 @@ feature -- Test Open Database
 			name: C_STRING
 		do
 			create name.make ("casket.tcb")
-			b :=  tcbdbopen (bdb, name.item, bdbowriter.bit_or (bdbocreat))
+			b :=  tcbdbopen (bdb, name.item, owriter.bit_or (ocreat))
 			assert ("Expected true", b = true)
 		end
 
@@ -72,7 +72,7 @@ feature -- Test store records
 		v : C_STRING
 		do
 			create name.make ("casket.tcb")
-			b :=  tcbdbopen (bdb, name.item, bdbowriter.bit_or (bdbocreat))
+			b :=  tcbdbopen (bdb, name.item, owriter.bit_or (ocreat))
 			assert ("Expected true", b = true)
 
 			create k.make ("foo")
@@ -90,7 +90,7 @@ feature -- Test store records
 		v : C_STRING
 		do
 			create name.make ("casket.tcb")
-			b :=  tcbdbopen (bdb, name.item, bdbowriter.bit_or (bdbocreat))
+			b :=  tcbdbopen (bdb, name.item, owriter.bit_or (ocreat))
 			assert ("Expected true", b = true)
 
 			create k.make ("foo")
@@ -112,7 +112,7 @@ feature -- Test store records
 		do
 			create name.make ("casket.tcb")
 
-		 	b :=  tcbdbopen (bdb, name.item, bdbowriter.bit_or(bdbocreat))
+		 	b :=  tcbdbopen (bdb, name.item, owriter.bit_or(ocreat))
 			assert ("Expected true", b = true)
 
 			create k.make ("foo")
@@ -139,7 +139,7 @@ feature -- Test store records
 		v : C_STRING
 		do
 			create name.make ("casket.tcb")
-			b :=  tcbdbopen (bdb, name.item, bdbowriter.bit_or (bdbocreat))
+			b :=  tcbdbopen (bdb, name.item, owriter.bit_or (ocreat))
 			assert ("Expected true", b = true)
 
 			create k.make ("foo")
@@ -157,7 +157,7 @@ feature -- Test store records
 		r : POINTER
 		do
 			create name.make ("casket.tcb")
-			b :=  tcbdbopen (bdb, name.item, bdbowriter.bit_or (bdbocreat))
+			b :=  tcbdbopen (bdb, name.item, owriter.bit_or (ocreat))
 			assert ("Expected true", b = true)
 
 			create k.make ("foo")
@@ -186,7 +186,7 @@ feature -- Test iterator
 		val : POINTER
 		do
 			create name.make ("casket.tcb")
-			b :=  tcbdbopen (bdb, name.item, bdbowriter.bit_or(bdbocreat))
+			b :=  tcbdbopen (bdb, name.item, owriter.bit_or(ocreat))
 			assert ("Expected true", b = true)
 
 			create k.make ("foo")
@@ -223,7 +223,7 @@ feature -- Test retrieve records
 		r : POINTER
 		do
 			create name.make ("casket.tcb")
-			b :=  tcbdbopen (bdb, name.item, bdbowriter.bit_or (bdbocreat))
+			b :=  tcbdbopen (bdb, name.item, owriter.bit_or (ocreat))
 			assert ("Expected true", b = true)
 
 			create k.make ("foo")
@@ -257,7 +257,7 @@ feature -- Test Error Messages
 		i : INTEGER
 		do
 			create name.make ("casket.tcb")
-			b :=  tcbdbopen (bdb, name.item, bdbowriter.bit_or (bdbocreat))
+			b :=  tcbdbopen (bdb, name.item, owriter.bit_or (ocreat))
 			assert ("Expected true", b = true)
 
 			create k.make ("foo")

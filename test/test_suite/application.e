@@ -36,6 +36,8 @@ feature {NONE} -- Initialization
 			app2 : APPLICATION2
 			app3 : APPLICATION3
 		do
+			print ("Equal")
+			test_equal
 			print ("%N============================== TEST ADB API ======================================%N")
 			test_adb_api
 			print ("%N============================== TEST BDB API ======================================%N")
@@ -47,6 +49,20 @@ feature {NONE} -- Initialization
 			create app3.make
 			app3.test_Hdb_api
 
+		end
+feature -- Equal
+	test_equal
+		local
+			p, p1 : PERSON
+		do
+			create p.make ("javier", "velilla")
+			create p1.make ("javier","velilla")
+
+			if p ~ p1 then
+				print ("True")
+			else
+				print ("False")
+			end
 		end
 
 feature -- Test ADB_API
@@ -101,8 +117,6 @@ feature -- Test ADB_API
 		local
 		b:BOOLEAN
 		name,path: C_STRING
-		k : C_STRING
-		v : C_STRING
 		do
 			create path.make ("tokiodb.txt")
 			b := tcadbcopy (adb, path.item)
@@ -118,13 +132,13 @@ feature -- Test ADB_API
 		    print ("%NConstant BDBTTCBS: " + BDBTTCBS.out + "%N")
 		    print ("%NConstant BDBTEXCODEC: " + BDBTEXCODEC.out + "%N")
 		    print ("%N ============ Enumeration for open Modes =======================%N")
-		    print ("%NConstant BDBOREADER: " + BDBOREADER.out + "%N")
-		    print ("%NConstant BDBOWRITER: " + BDBOWRITER.out + "%N")
-		    print ("%NConstant BDBOCREAT: " + BDBOCREAT.out + "%N")
-		    print ("%NConstant BDBOTRUNC: " + BDBOTRUNC.out + "%N")
-		    print ("%NConstant BDBONOLCK: " + BDBONOLCK.out + "%N")
-		    print ("%NConstant BDBOLCKNB: " + BDBOLCKNB.out + "%N")
-		    print ("%NConstant BDBOTSYNC: " + BDBOTSYNC.out + "%N")
+		    print ("%NConstant BDBOREADER: " + OREADER.out + "%N")
+		    print ("%NConstant BDBOWRITER: " + OWRITER.out + "%N")
+		    print ("%NConstant BDBOCREAT: " + OCREAT.out + "%N")
+		    print ("%NConstant BDBOTRUNC: " + OTRUNC.out + "%N")
+		    print ("%NConstant BDBONOLCK: " + ONOLCK.out + "%N")
+		    print ("%NConstant BDBOLCKNB: " + OLCKNB.out + "%N")
+		    print ("%NConstant BDBOTSYNC: " + OTSYNC.out + "%N")
 		end
 
 	prepare_adb
@@ -163,7 +177,7 @@ feature -- Test BDB_API
 		val : POINTER
 		do
 			create name.make ("casket.tcb")
-			b :=  tcbdbopen (bdb, name.item, bdbowriter.bit_or(bdbocreat))
+			b :=  tcbdbopen (bdb, name.item, owriter.bit_or(ocreat))
 
 			create k.make ("foo")
 			create v.make ("hop")
@@ -207,6 +221,6 @@ feature {NONE} -- BDB implementation
 	bdb_cursor : POINTER
 		-- cursor b tree
 
-
+	bdbapi: BDB_API
 
 end

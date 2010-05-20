@@ -99,6 +99,10 @@ feature -- Constants
 	OLCKNB : INTEGER is 32
 		--open mode: lock without blocking
 
+	OTSYNC : INTEGER is 64
+		--open mode: synchronize every transaction
+
+
 feature -- Create Fixed Database
 
 	tcfdbnew : POINTER

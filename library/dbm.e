@@ -12,6 +12,23 @@ feature -- Access
 	is_open: BOOLEAN
 			-- is the database open?
 
+
+	is_open_mode_reader : BOOLEAN
+   			-- is the database open in a reader mode?
+		require
+   			is_database_open : is_open
+   		do
+   			Result := is_open_mode_reader_implementation
+   		end
+
+	is_open_mode_writer : BOOLEAN
+   			-- is the database open in a writer mode?
+		require
+   			is_database_open : is_open
+   		do
+   			Result := not is_open_mode_reader
+   		end
+
 	error_description: STRING
 			-- Textual description of error
 		require
@@ -55,12 +72,13 @@ feature -- Access
 			Result := file_size_implementation
 		end
 
+
 feature -- Change Element
 
 	put_string (a_key: STRING; a_value: STRING)
 			-- Is used in order to store a string record into a database object.
 		require
-			is_open_database: is_open
+			is_open_database_writer: is_open_mode_writer
 			is_valid_key: a_key /= Void and (not a_key.is_empty)
 			is_valid_value: a_value /= Void and (not a_value.is_empty)
 		local
@@ -80,7 +98,7 @@ feature -- Change Element
 			-- Is used in order to store a new string record into a database object.
 			-- If a record with the same key exists in the database, this function has no effect.
 		require
-			is_open_database: is_open
+			is_open_database_writer: is_open_mode_writer
 			is_valid_key: a_key /= Void and (not a_key.is_empty)
 			is_valid_value: a_value /= Void and (not a_value.is_empty)
 		local
@@ -99,7 +117,7 @@ feature -- Change Element
 	out_string (a_key: STRING)
 			-- remove a record by a key `a_key'
 		require
-			is_open_database: is_open
+			is_open_database_writer: is_open_mode_writer
 			is_valid_key: a_key /= Void and (not a_key.is_empty)
 		local
 			c_key: C_STRING
@@ -154,6 +172,10 @@ feature -- Status Settings
 
 
 feature {DBM} -- Implementation
+	is_open_mode_reader_implementation : BOOLEAN
+			-- Deferred implementation of get_string	
+		deferred
+		end
 
 	get_string_implementation (a_key: POINTER): POINTER
 			-- Deferred implementation of get_string	
@@ -218,6 +240,9 @@ feature {DBM} -- Implementation
 
 invariant
 	non_empty_description: has_error implies (error_description /= Void and (not error_description.is_empty))
+	not_open_as_reader_and_writer : is_open implies (not (is_open_mode_reader and is_open_mode_writer))
+	open_as_reader                : (is_open and then is_open_mode_reader) implies (not is_open_mode_writer)
+	open_as_writer				  : (is_open and then is_open_mode_writer) implies (not is_open_mode_reader)
 
 end -- class DBM
 

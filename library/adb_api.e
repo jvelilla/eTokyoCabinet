@@ -109,6 +109,12 @@ feature -- Error Messages
 
 
 feature {NONE} -- Implementation
+	is_open_mode_reader_implementation : BOOLEAN
+   			-- is the database open in a reader mode?
+		do
+   			-- Check this!!!
+   		end
+
 	internal_message : STRING
 
 	full_message_implementation : STRING

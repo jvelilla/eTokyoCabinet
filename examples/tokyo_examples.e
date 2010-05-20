@@ -117,7 +117,7 @@ feature -- Initialization
 			create bdb.make
 
 			print ("%N================ open database ======================%N")
-			bdb.open ("casket.tcb",bdb.bdbowriter.bit_or (bdb.bdbocreat))
+			bdb.open ("casket.tcb",bdb.owriter.bit_or (bdb.ocreat))
 			check not bdb.has_error	end
 
 			print ("%N================ store records ======================%N")

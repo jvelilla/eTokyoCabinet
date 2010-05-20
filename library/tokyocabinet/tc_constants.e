@@ -117,7 +117,7 @@ feature -- Enumeration for tuning options
 
 feature -- Enumeration for open modes
 
-	BDBOREADER :	INTEGER
+	OREADER :	INTEGER
 		--BDBOREADER = 1 << 0,
 		--open as a reader
 		external
@@ -129,7 +129,7 @@ feature -- Enumeration for open modes
 		end
 
 
-	BDBOWRITER :	INTEGER
+	OWRITER :	INTEGER
 		--BDBOWRITER = 1 << 1,
 		--open as a writer
 		external
@@ -140,7 +140,7 @@ feature -- Enumeration for open modes
 			}"
 		end
 
-	BDBOCREAT :	INTEGER
+	OCREAT :	INTEGER
 		--BDBOCREAT = 1 << 2,
 		--writer creating
 		external
@@ -152,7 +152,7 @@ feature -- Enumeration for open modes
 		end
 
 
-	BDBOTRUNC :	INTEGER
+	OTRUNC :	INTEGER
 		--BDBOTRUNC = 1 << 3,
 		--writer truncating
 		external
@@ -164,7 +164,7 @@ feature -- Enumeration for open modes
 		end
 
 
-	BDBONOLCK :	INTEGER
+	ONOLCK :	INTEGER
 		--BDBONOLCK = 1 << 4,
 		--open without locking
 		external
@@ -176,7 +176,7 @@ feature -- Enumeration for open modes
 		end
 
 
-	BDBOLCKNB :	INTEGER
+	OLCKNB :	INTEGER
 		--BDBOLCKNB = 1 << 5,
 		--lock without blocking
 		external
@@ -188,7 +188,7 @@ feature -- Enumeration for open modes
 		end
 
 
-	BDBOTSYNC :	INTEGER
+	OTSYNC :	INTEGER
 		--BDBOTSYNC = 1 << 6
 		--synchronize every transaction
 		external

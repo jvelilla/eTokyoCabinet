@@ -33,6 +33,43 @@ feature {NONE} -- Events
 		end
 
 feature -- Test routines
+
+	test_open_modes
+		do
+				-- Open as WRITER AND CREATE
+				tdb.open_writer_create ("casket.tct")
+
+				assert("open mode as writer", tdb.is_open_mode_writer)
+
+				-- Check the invariant
+				assert("not_open_as_reader_and_writder", tdb.is_open implies (not (tdb.is_open_mode_reader and tdb.is_open_mode_writer)))
+				assert("open_as_reader               " , (tdb.is_open and then tdb.is_open_mode_reader) implies (not tdb.is_open_mode_writer))
+				assert("open_as_writer				  ", (tdb.is_open and then tdb.is_open_mode_writer) implies (not tdb.is_open_mode_reader))
+
+				-- Close DB
+				tdb.close
+				assert ("database is closed", not tdb.is_open)
+
+
+				-- Check the invariant
+				assert("not_open_as_reader_and_writder", tdb.is_open implies (not (tdb.is_open_mode_reader and tdb.is_open_mode_writer)))
+				assert("open_as_reader               " , (tdb.is_open and then tdb.is_open_mode_reader) implies (not tdb.is_open_mode_writer))
+				assert("open_as_writer				  ", (tdb.is_open and then tdb.is_open_mode_writer) implies (not tdb.is_open_mode_reader))
+
+
+				-- Open as READER
+				tdb.open_reader ("casket.tct")
+
+				assert("open mode as reader", tdb.is_open_mode_reader)
+
+				-- Check the invariant
+				assert("not_open_as_reader_and_writder", tdb.is_open implies (not (tdb.is_open_mode_reader and tdb.is_open_mode_writer)))
+				assert("open_as_reader               " , (tdb.is_open and then tdb.is_open_mode_reader) implies (not tdb.is_open_mode_writer))
+				assert("open_as_writer				  ", (tdb.is_open and then tdb.is_open_mode_writer) implies (not tdb.is_open_mode_reader))
+
+
+		end
+
 	test_file_does_not_exist
 		do
 			assert("False",tdb.is_valid_path ("casket.tct") = False)
