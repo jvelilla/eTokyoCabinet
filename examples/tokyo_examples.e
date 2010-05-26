@@ -75,7 +75,7 @@ feature -- Initialization
 			create fdb.make
 
 			print ("%N================ open database ======================%N")
-			fdb.open ("casket.tcf", fdb.owriter.bit_or (fdb.ocreat))
+			fdb.open_writer("casket.tcf")
 			check not fdb.has_error	end
 
 			print ("%N================ store records ======================%N")
@@ -117,7 +117,7 @@ feature -- Initialization
 			create bdb.make
 
 			print ("%N================ open database ======================%N")
-			bdb.open ("casket.tcb",bdb.owriter.bit_or (bdb.ocreat))
+			bdb.open_writer ("casket.tcb")
 			check not bdb.has_error	end
 
 			print ("%N================ store records ======================%N")
@@ -160,7 +160,7 @@ feature -- Initialization
 			create hdb.make
 
 			print ("%N================ open database ======================%N")
-			hdb.open ("casket2.tch",hdb.owriter.bit_or (hdb.ocreat))
+			hdb.open_writer ("casket2.tch")
 			check not hdb.has_error	end
 
 			print ("%N================ store records ======================%N")

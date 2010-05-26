@@ -661,6 +661,23 @@ feature -- Retrieve Records and Keys
 		end
 
 
+
+--/* Retrieve a record in a hash database object and write the value into a buffer.
+--   `hdb' specifies the hash database object.
+--   `kbuf' specifies the pointer to the region of the key.
+--   `ksiz' specifies the size of the region of the key.
+--   `vbuf' specifies the pointer to the buffer into which the value of the corresponding record is
+--   written.
+--   `max' specifies the size of the buffer.
+--   If successful, the return value is the size of the written data, else, it is -1.  -1 is
+--   returned if no record corresponds to the specified key.
+--   Note that an additional zero code is not appended at the end of the region of the writing
+--   buffer. */
+--int tchdbget3(TCHDB *hdb, const void *kbuf, int ksiz, void *vbuf, int max);
+
+
+
+
 	tchdbvsiz (a_hdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32) : INTEGER_32
 		--	/* Get the size of the value of a record in a hash database object.
 		--   `hdb' specifies the hash database object.
@@ -829,6 +846,22 @@ feature -- Iterator
 				tchdbiternext2((TCHDB *)$an_hdb)
 			}"
 		end
+
+--/* Retrieve the key and the value of the next record of a record in a hash database object.
+--   `hdb' specifies the hash database object.
+--   `kbuf' specifies the pointer to the region of the key.
+--   `ksiz' specifies the size of the region of the key.
+--   `sp' specifies the pointer to the variable into which the size of the region of the return
+--   value is assigned.
+--   `vbp' specifies the pointer to the variable into which the pointer to the value is assigned.
+--   `vsp' specifies the pointer to the variable into which the size of the value is assigned.
+--   If successful, the return value is the pointer to the region of the key of the next
+--   record.
+--   Because the region of the return value is allocated with the `malloc' call, it should be
+--   released with the `free' call when it is no longer in use.  The retion pointed to by `vbp'
+--   should not be released. */
+--char *tchdbgetnext3(TCHDB *hdb, const char *kbuf, int ksiz, int *sp, const char **vbp, int *vsp);
+
 
 feature -- Transaction
 

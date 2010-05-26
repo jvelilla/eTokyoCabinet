@@ -13,7 +13,7 @@ inherit
 	TC_HDB_API
 
 	KL_SHARED_FILE_SYSTEM
-	
+
 create
 	make
 
@@ -29,31 +29,7 @@ feature {NONE} -- Initialization
 
 feature -- Open Database
 
-	open (a_path : STRING; o_mode : INTEGER_32)
-		-- Open a  database file and connect a hash database object.
-		--   `a_path' specifies the path of the database file.
-		--   `o_mode' specifies the connection mode: `HDBOWRITER' as a writer, `HDBOREADER' as a reader.
-		--   If the mode is `HDBOWRITER', the following may be added by bitwise-or: `HDBOCREAT', which
-		--   means it creates a new database if not exist, `HDBOTRUNC', which means it creates a new
-		--   database regardless if one exists, `HDBOTSYNC', which means every transaction synchronizes
-		--   updated contents with the device.  Both of `HDBOREADER' and `HDBOWRITER' can be added to by
-		--   bitwise-or: `HDBONOLCK', which means it opens the database file without file locking, or
-		--   `HDBOLCKNB', which means locking is performed without blocking.
-		require
-			is_database_closed : not is_open
-			is_valid_path : a_path /= Void and not a_path.is_empty
-		local
-			c_path : C_STRING
-			l_b : BOOLEAN
-		do
-			create c_path.make (a_path)
-			l_b := tchdbopen (hdb,c_path.item,o_mode)
-			if not l_b then
-				has_error := True
-			else
-				is_open := True
-			end
-		end
+	
 
 	open_writer (a_path : STRING)
 		require
@@ -276,6 +252,178 @@ feature -- Open Database
 			valid_open_mode: is_valid_open_mode (current_open_mode)
 		end
 
+feature -- Database Control
+
+	tune (a_bnum: INTEGER_64; an_apow, an_fpow: INTEGER_8; an_opts: NATURAL_8)
+			--	Set the tuning parameters of a hash database object.
+			--   `a_bnum' specifies the number of elements of the bucket array.  If it is not more than 0, the
+			--   default value is specified.  The default value is 131071.  Suggested size of the bucket array
+			--   is about from 0.5 to 4 times of the number of all records to be stored.
+			--   `an_apow' specifies the size of record alignment by power of 2.  If it is negative, the default
+			--   value is specified.  The default value is 4 standing for 2^4=16.
+			--   `an_fpow' specifies the maximum number of elements of the free block pool by power of 2.  If it
+			--   is negative, the default value is specified.  The default value is 10 standing for 2^10=1024.
+			--   `an_opts' specifies options by bitwise-or: `HDBTLARGE' specifies that the size of the database
+			--   can be larger than 2GB by using 64-bit bucket array, `HDBTDEFLATE' specifies that each record
+			--   is compressed with Deflate encoding, `HDBTBZIP' specifies that each record is compressed with
+			--   BZIP2 encoding, `HDBTTCBS' specifies that each record is compressed with TCBS encoding.
+			--   Note that the tuning parameters should be set before the database is opened.
+		require
+			is_database_closed : not is_open
+		local
+			b : BOOLEAN
+		do
+			b := tchdbtune (hdb, a_bnum, an_apow, an_fpow, an_opts)
+			if not b then
+				has_error := True
+			end
+		end
+
+	set_cache (a_rcnum: INTEGER_32)
+			--	Set the caching parameters of a hash database object.
+			--  `a_rcnum' specifies the maximum number of records to be cached.  If it is not more than 0, the
+			--   record cache is disabled.  It is disabled by default.
+			--   Note that the caching parameters should be set before the database is opened.
+		require
+			is_database_close : not is_open
+		local
+			b : BOOLEAN
+		do
+			b := tchdbsetcache (hdb, a_rcnum)
+			if not b then
+				has_error := True
+			end
+		end
+
+	set_extra_mapped_memory (a_xmsiz: INTEGER_64)
+			--	Set the size of the extra mapped memory of a hash database object.
+			--  `a_xmsiz' specifies the size of the extra mapped memory.  If it is not more than 0, the extra
+			--   mapped memory is disabled.  The default size is 67108864.
+			--   Note that the mapping parameters should be set before the database is opened.
+		require
+			is_database_close : not is_open
+		local
+			b : BOOLEAN
+		do
+			b := tchdbsetxmsiz (hdb, a_xmsiz)
+			if not b then
+				has_error := True
+			end
+		end
+
+
+	set_defragmentation_unit (a_dfunit: INTEGER_32)
+			-- Set the unit step number of auto defragmentation of a hash database object.
+			-- `a_dfunit' specifie the unit step number.  If it is not more than 0, the auto defragmentation
+			--  is disabled.  It is disabled by default.
+			--  Note that the defragmentation parameters should be set before the database is opened.
+		require
+			is_database_close : not is_open
+		local
+			b : BOOLEAN
+		do
+			b := tchdbsetdfunit (hdb, a_dfunit)
+			if not b then
+				has_error := True
+			end
+		end
+
+	optimize (a_bnum : INTEGER_64; an_apow: INTEGER_8; a_fpow : INTEGER_8; an_opts : NATURAL_8)
+			-- Optimize the file of a hash database object.
+			-- `a_bnum' specifies the number of elements of the bucket array.  If it is not more than 0, the
+			--  default value is specified.  The default value is two times of the number of records.
+			-- `an_apow' specifies the size of record alignment by power of 2.  If it is negative, the current
+			--  setting is not changed.
+			--  `a_fpow' specifies the maximum number of elements of the free block pool by power of 2.  If it
+			--  is negative, the current setting is not changed.
+			--  `an_opts' specifies options by bitwise-or: `HDBTLARGE' specifies that the size of the database
+			--   can be larger than 2GB by using 64-bit bucket array, `HDBTDEFLATE' specifies that each record
+			--   is compressed with Deflate encoding, `HDBTBZIP' specifies that each record is compressed with
+			--   BZIP2 encoding, `HDBTTCBS' specifies that each record is compressed with TCBS encoding.  If it
+			--   is `UINT8_MAX', the current setting is not changed.
+			--   This function is useful to reduce the size of the database file with data fragmentation by
+			--   successive updating.
+		require
+			is_database_open_writer : is_open_mode_writer
+		local
+			b : BOOLEAN
+		do
+			b := tchdboptimize (hdb, a_bnum, an_apow, a_fpow, an_opts)
+			if not b then
+				has_error := true
+			end
+		end
+
+	default_optimize
+			-- Optimize the database file.
+			-- Call optimize(-1, -1, -1, 0xff)
+		require
+			is_database_open_writer : is_open_mode_writer
+		do
+			optimize(-1, -1, -1, 0xff)
+		end
+
+	copy_db (a_path : STRING)
+			-- Copy the database file of a hash database object.
+			--	`a_path' specifies the path of the destination file.  If it begins with `@', the trailing
+			--	substring is executed as a command line.
+			--  The database file is assured to be kept synchronized and not modified while the copying or
+			--	executing operation is in progress.  So, this function is useful to create a backup file of
+			--	the database file.
+		require
+			is_database_open : is_open
+		local
+			c_path : C_STRING
+			b : BOOLEAN
+		do
+			create c_path.make (a_path)
+			b := tchdbcopy (hdb, c_path.item)
+			if not b then
+				has_error := True
+			end
+		ensure
+			is_valid_file : is_valid_path (a_path)
+		end
+
+
+	path : STRING
+			-- Get the file path of a table database object.
+			-- The return value is the path of the database file.
+		require
+			is_open_database : is_open
+		local
+			r : POINTER
+		do
+			r := tchdbpath (hdb)
+			if r /= default_pointer then
+				create Result.make_from_c (r)
+			end
+		end
+
+
+	synchronize
+			--Synchronize updated contents of a table database object with the file and the device.
+		require
+			is_database_open_writer: is_open_mode_writer
+		local
+			b : BOOLEAN
+		do
+			b := tchdbsync (hdb)
+			if not b then
+				has_error := True
+			end
+		end
+
+feature -- Remove
+	vanish
+			-- Remove all records of a hash database object.
+		require
+			is_database_open_writer : is_open_mode_writer
+		local
+			b : BOOLEAN
+		do
+			b := tchdbvanish (hdb)
+		end
 feature -- Close and Delete
 
 	close

@@ -310,6 +310,27 @@ feature -- Database Control
 feature -- Open
 
 
+	tctdbsetindex (tdb : POINTER; a_name : POINTER; a_type : INTEGER) : BOOLEAN
+		--/* Set a column index to a table database object.
+		--   `tdb' specifies the table database object connected as a writer.
+		--   `name' specifies the name of a column.  If the name of an existing index is specified, the
+		--   index is rebuilt.  An empty string means the primary key.
+		--   `type' specifies the index type: `TDBITLEXICAL' for lexical string, `TDBITDECIMAL' for decimal
+		--   string, `TDBITTOKEN' for token inverted index, `TDBITQGRAM' for q-gram inverted index.  If it
+		--   is `TDBITOPT', the index is optimized.  If it is `TDBITVOID', the index is removed.  If
+		--   `TDBITKEEP' is added by bitwise-or and the index exists, this function merely returns failure.
+		--   If successful, the return value is true, else, it is false.
+		--   Note that the setting indices should be set after the database is opened. */
+		--bool tctdbsetindex(TCTDB *tdb, const char *name, int type);
+		external
+			"C inline use <tctdb.h>"
+		alias
+			"{
+				tctdbsetindex((TCTDB *)$tdb, (const char *)$a_name, (int)$a_type)
+			}"
+		end
+
+
 	tctdbopen (an_tdb : POINTER; a_path: POINTER; an_omode : INTEGER_32) : BOOLEAN
 		--/* Open a database file and connect a table database object.
 		--   `tdb' specifies the table database object which is not opened.
@@ -713,6 +734,7 @@ feature -- Retrieve Records
 
 
 
+	tctdbget2 (tdb : POINTER; a_pkbuf: POINTER; a_pksiz : INTEGER;  a_sp : TYPED_POINTER [INTEGER]) : POINTER
 		--/* Retrieve a record in a table database object as a zero separated column string.
 		--   `tdb' specifies the table database object.
 		--   `pkbuf' specifies the pointer to the region of the primary key.
@@ -726,7 +748,16 @@ feature -- Retrieve Records
 		--   value is allocated with the `malloc' call, it should be released with the `free' call when
 		--   it is no longer in use. */
 		--char *tctdbget2(TCTDB *tdb, const void *pkbuf, int pksiz, int *sp);
-
+		external
+			"C inline use <tcutil.h>"
+		alias
+			"[
+				int sp;
+				void *result = tctdbget2((TCTDB *)$tdb, (const void *)$a_pkbuf, (int)$a_pksiz, &sp);
+				*(EIF_INTEGER *) $a_sp = (EIF_INTEGER) sp;
+				return result;
+			]"
+		end
 
 
 	tctdbget3 (an_tdb : POINTER; a_pkstr : POINTER) : POINTER
@@ -871,22 +902,32 @@ feature -- Iterator
 		end
 
 
---/* Get the next primary key of the iterator of a table database object.
---   `tdb' specifies the table database object.
---   `sp' specifies the pointer to the variable into which the size of the region of the return
---   value is assigned.
---   If successful, the return value is the pointer to the region of the next primary key, else, it
---   is `NULL'.  `NULL' is returned when no record is to be get out of the iterator.
---   Because an additional zero code is appended at the end of the region of the return value, the
---   return value can be treated as a character string.  Because the region of the return value is
---   allocated with the `malloc' call, it should be released with the `free' call when it is no
---   longer in use.  It is possible to access every record by iteration of calling this function.
---   It is allowed to update or remove records whose keys are fetched while the iteration.
---   However, it is not assured if updating the database is occurred while the iteration.  Besides,
---   the order of this traversal access method is arbitrary, so it is not assured that the order of
---   storing matches the one of the traversal access. */
---void *tctdbiternext(TCTDB *tdb, int *sp);
-
+	tctdbiternext (tdb : POINTER; a_sp : TYPED_POINTER [INTEGER] ) : POINTER
+		--/* Get the next primary key of the iterator of a table database object.
+		--   `tdb' specifies the table database object.
+		--   `sp' specifies the pointer to the variable into which the size of the region of the return
+		--   value is assigned.
+		--   If successful, the return value is the pointer to the region of the next primary key, else, it
+		--   is `NULL'.  `NULL' is returned when no record is to be get out of the iterator.
+		--   Because an additional zero code is appended at the end of the region of the return value, the
+		--   return value can be treated as a character string.  Because the region of the return value is
+		--   allocated with the `malloc' call, it should be released with the `free' call when it is no
+		--   longer in use.  It is possible to access every record by iteration of calling this function.
+		--   It is allowed to update or remove records whose keys are fetched while the iteration.
+		--   However, it is not assured if updating the database is occurred while the iteration.  Besides,
+		--   the order of this traversal access method is arbitrary, so it is not assured that the order of
+		--   storing matches the one of the traversal access. */
+		--void *tctdbiternext(TCTDB *tdb, int *sp);
+		external
+			"C inline use <tcutil.h>"
+		alias
+			"[
+				int sp;
+				void *result = tctdbiternext((TCTDB *)$tdb, &sp);
+				*(EIF_INTEGER *) $a_sp = (EIF_INTEGER) sp;
+				return result;
+			]"
+		end
 
 	tctdbiternext2 (an_tdb : POINTER) : POINTER
 		--	/* Get the next primary key string of the iterator of a table database object.
@@ -908,19 +949,27 @@ feature -- Iterator
 			}"
 		end
 
---/* Get the columns of the next record of the iterator of a table database object.
---   `tdb' specifies the table database object.
---   If successful, the return value is a map object of the columns of the next record, else, it is
---   `NULL'.  `NULL' is returned when no record is to be get out of the iterator.  The primary key
---   is added into the map as a column of an empty string key.
---   Because the object of the return value is created with the function `tcmapnew', it should be
---   deleted with the function `tcmapdel' when it is no longer in use.  It is possible to access
---   every record by iteration of calling this function.  However, it is not assured if updating
---   the database is occurred while the iteration.  Besides, the order of this traversal access
---   method is arbitrary, so it is not assured that the order of storing matches the one of the
---   traversal access. */
---TCMAP *tctdbiternext3(TCTDB *tdb);
 
+	tctdbiternext3 (tdb : POINTER) : POINTER
+		--/* Get the columns of the next record of the iterator of a table database object.
+		--   `tdb' specifies the table database object.
+		--   If successful, the return value is a map object of the columns of the next record, else, it is
+		--   `NULL'.  `NULL' is returned when no record is to be get out of the iterator.  The primary key
+		--   is added into the map as a column of an empty string key.
+		--   Because the object of the return value is created with the function `tcmapnew', it should be
+		--   deleted with the function `tcmapdel' when it is no longer in use.  It is possible to access
+		--   every record by iteration of calling this function.  However, it is not assured if updating
+		--   the database is occurred while the iteration.  Besides, the order of this traversal access
+		--   method is arbitrary, so it is not assured that the order of storing matches the one of the
+		--   traversal access. */
+		--TCMAP *tctdbiternext3(TCTDB *tdb);
+		external
+			"C inline use <tctdb.h>"
+		alias
+			"{
+				tctdbiternext3((TCTDB *)$tdb)
+			}"
+		end
 
 feature -- Transaction
 

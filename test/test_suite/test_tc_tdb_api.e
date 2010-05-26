@@ -733,6 +733,29 @@ feature -- Test Open Database
 		end
 
 
+	test_sync_database
+		local
+			name : C_STRING
+			key : C_STRING
+			val : C_STRING
+			b : BOOLEAN
+		do
+			-- Open as WRITER and CREATE
+			create name.make ("casket.tct")
+
+			b:= tctdbopen (tdb,name.item,owriter.bit_or (ocreat) )
+			assert ("Expected true", b = true)
+
+            create key.make ("key")
+            create val.make ("value")
+
+            b := tctdbput3 (tdb, key.item, val.item)
+            assert ("Expected true", b = true)
+
+			b:=tctdbsync (tdb)
+			assert("could  sync False",b)
+		end
+
 	test_vsize2_database_closed
 		local
 			name : C_STRING

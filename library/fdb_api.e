@@ -28,33 +28,6 @@ feature {NONE} -- Initialization
 		end
 feature -- Open Database
 
-	open (a_path : STRING; o_mode : INTEGER_32)
-		-- Open a database file and connect a fixed-length database object.
-		--   `a_path' specifies the path of the database file.
-		--   `o_mode' specifies the connection mode: `FDBOWRITER' as a writer, `FDBOREADER' as a reader.
-		--   If the mode is `FDBOWRITER', the following may be added by bitwise-or: `FDBOCREAT', which
-		--   means it creates a new database if not exist, `FDBOTRUNC', which means it creates a new
-		--   database regardless if one exists, `FDBOTSYNC', which means every transaction synchronizes
-		--   updated contents with the device.  Both of `FDBOREADER' and `FDBOWRITER' can be added to by
-		--   bitwise-or: `FDBONOLCK', which means it opens the database file without file locking, or
-		--   `FDBOLCKNB', which means locking is performed without blocking.
-		require
-			is_database_closed : not is_open
-			is_valid_path : a_path /= Void and not a_path.is_empty
-		local
-			c_path : C_STRING
-			l_b : BOOLEAN
-		do
-			create c_path.make (a_path)
-			l_b := tcfdbopen (fdb,c_path.item,o_mode)
-			if not l_b then
-				has_error := True
-			else
-				is_open := True
-			end
-		end
-
-
 	open_writer (a_path : STRING)
 		require
 			is_database_closed : not is_open
@@ -274,6 +247,93 @@ feature -- Open Database
 			end
 		ensure
 			valid_open_mode: is_valid_open_mode (current_open_mode)
+		end
+
+feature -- Database Control
+
+	copy_db (a_path : STRING)
+		-- Copy the database file of a fixed-length database object.
+		--  `a_path' specifies the path of the destination file.  If it begins with `@', the trailing
+		--   substring is executed as a command line.
+		--   The database file is assured to be kept synchronized and not modified while the copying or
+		--   executing operation is in progress.  So, this function is useful to create a backup file of
+		--   the database file.
+		require
+			is_database_open : is_open
+		local
+			c_path : C_STRING
+			b : BOOLEAN
+		do
+			create c_path.make (a_path)
+			b := tcfdbcopy (fdb, c_path.item)
+			if not b then
+				has_error := True
+			end
+		ensure
+			is_valid_file : is_valid_path (a_path)
+		end
+
+	synchronize
+			--Synchronize updated contents of a table database object with the file and the device.
+		require
+			is_database_open_writer: is_open_mode_writer
+		local
+			b : BOOLEAN
+		do
+			b := tcfdbsync (fdb)
+			if not b then
+				has_error := True
+			end
+		end
+
+	optimize (a_width: INTEGER_32; a_limsiz: INTEGER_64)
+		--	Optimize the file of a fixed-length database object.
+		--  `a_width' specifies the width of the value of each record.  If it is not more than 0, the current
+		--   setting is not changed.
+		--  `a_limsiz' specifies the limit size of the database file.  If it is not more than 0, the current
+		--   setting is not changed.
+		require
+			is_database_open_writer : is_open_mode_writer
+		local
+			b : BOOLEAN
+		do
+			b := tcfdboptimize (fdb, a_width, a_limsiz)
+			if not b then
+				has_error := true
+			end
+		end
+
+
+	path  : STRING
+			--Get the file path of a table database object.
+			--  The return value is the path of the database file.
+		require
+			is_open_database : is_open
+		local
+			r : POINTER
+		do
+			r := tcfdbpath (fdb)
+			if r /= default_pointer then
+				create Result.make_from_c (r)
+			end
+		end
+
+	tune (a_width: INTEGER_32; a_limsiz: INTEGER_64)
+			-- Set the tuning parameters of a fixed-length database object.
+			-- `a_width' specifies the width of the value of each record.  If it is not more than 0, the
+			--  default value is specified.  The default value is 255.
+			-- `a_limsiz' specifies the limit size of the database file.  If it is not more than 0, the default
+			--  value is specified.  The default value is 268435456.
+			--  Note that the tuning parameters should be set before the database is opened.
+		require
+			is_database_close : not is_open
+		local
+			b:  BOOLEAN
+		do
+			b := tcfdbtune (fdb, a_width, a_limsiz)
+			if not b then
+				has_error := true
+			end
 		end
 
 feature -- Close and Delete

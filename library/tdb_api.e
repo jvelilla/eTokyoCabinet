@@ -305,6 +305,8 @@ feature -- Database Control
 
 	synchronize
 			--Synchronize updated contents of a table database object with the file and the device.
+		require
+			is_database_open_writer: is_open_mode_writer
 		local
 			b : BOOLEAN
 		do

@@ -29,31 +29,7 @@ feature {NONE} -- Initialization
 		end
 feature -- Open Database
 
-	open (a_path : STRING; o_mode : INTEGER_32)
-		--Open a database file and connect a B+ tree database object.
-		-- `a_path' specifies the path of the database file.
-		-- `o_mode' specifies the connection mode: `BDBOWRITER' as a writer, `BDBOREADER' as a reader.
-		--   If the mode is `BDBOWRITER', the following may be added by bitwise-or: `BDBOCREAT', which
-		--   means it creates a new database if not exist, `BDBOTRUNC', which means it creates a new
-		--   database regardless if one exists, `BDBOTSYNC', which means every transaction synchronizes
-		--   updated contents with the device.  Both of `BDBOREADER' and `BDBOWRITER' can be added to by
-		--   bitwise-or: `BDBONOLCK', which means it opens the database file without file locking, or
-		--   `BDBOLCKNB', which means locking is performed without blocking.
-		require
-			is_database_closed : not is_open
-			is_valid_path : a_path /= Void and not a_path.is_empty
-		local
-			c_path : C_STRING
-			l_b : BOOLEAN
-		do
-			create c_path.make (a_path)
-			l_b := tcbdbopen (bdb,c_path.item,o_mode)
-			if not l_b then
-				has_error := True
-			else
-				is_open := True
-			end
-		end
+
 
 	open_writer (a_path : STRING)
 		require
@@ -305,6 +281,142 @@ feature -- Close and Delete
 
 		end
 
+
+feature -- Database Control
+
+	tune (a_lmemb : INTEGER_32; a_nmemb : INTEGER_32; a_bnum : INTEGER_64; an_apow : INTEGER_8; a_fpow : INTEGER_8; a_opts :NATURAL_8 )
+			-- Set the tuning parameters of a B+ tree database object.
+			-- `a_lmemb' specifies the number of members in each leaf page.  If it is not more than 0, the
+			--  default value is specified.  The default value is 128.
+			-- `a_nmemb' specifies the number of members in each non-leaf page.  If it is not more than 0, the
+			--  default value is specified.  The default value is 256.
+			-- `a_bnum' specifies the number of elements of the bucket array.  If it is not more than 0, the
+			--  default value is specified.  The default value is 32749.  Suggested size of the bucket array
+			--  is about from 1 to 4 times of the number of all pages to be stored.
+			-- `an_apow' specifies the size of record alignment by power of 2.  If it is negative, the default
+			--  value is specified.  The default value is 8 standing for 2^8=256.
+			-- `an_fpow' specifies the maximum number of elements of the free block pool by power of 2.  If it
+			--  is negative, the default value is specified.  The default value is 10 standing for 2^10=1024.
+			-- `a_opts' specifies options by bitwise-or: `TLARGE' specifies that the size of the database
+			--  can be larger than 2GB by using 64-bit bucket array, `TDEFLATE' specifies that each page
+			--  is compressed with Deflate encoding, `TBZIP' specifies that each page is compressed with
+			--  BZIP2 encoding, `TTCBS' specifies that each page is compressed with TCBS encoding.
+			--  Note that the tuning parameters should be set before the database is opened.
+		require
+			is_database_close : not is_open
+		local
+			b : BOOLEAN
+		do
+			b := tcbdbtune (bdb, a_lmemb, a_nmemb, a_bnum, an_apow, a_fpow, a_opts)
+			if not b then
+				has_error := True
+			end
+		end
+
+
+	set_cache ( a_lcnum:INTEGER_32; a_ncnum: INTEGER_32)
+			--Set the caching parameters of a B+ tree database object.
+			--`a_lcnum' specifies the maximum number of leaf nodes to be cached.  If it is not more than 0,
+			-- the default value is specified.  The default value is 1024.
+			--`a_ncnum' specifies the maximum number of non-leaf nodes to be cached.  If it is not more than 0,
+			--the default value is specified.  The default value is 512.
+			--Note that the caching parameters should be set before the database is opened.
+		require
+			is_database_close: not is_open
+		local
+			b : BOOLEAN
+		do
+			b := tcbdbsetcache (bdb, a_lcnum, a_ncnum)
+			if not b then
+				has_error := True
+			end
+		end
+
+
+	set_extra_mapped_memory (a_xmsiz:INTEGER_64)
+			--Set the size of the extra mapped memory of a B+ tree database object.
+			--`a_xmsiz' specifies the size of the extra mapped memory.  If it is not more than 0, the extra
+			-- mapped memory is disabled.  It is disabled by default.
+			-- Note that the mapping parameters should be set before the database is opened.
+		require
+			is_database_close : not is_open
+		local
+			b : BOOLEAN
+		do
+			b := tcbdbsetxmsiz (bdb, a_xmsiz)
+			if not b then
+				has_error := True
+			end
+		end
+
+
+	set_defragmentation_unit ( a_dfunit : INTEGER_32)
+			--Set the unit step number of auto defragmentation of a B+ tree database object.
+			-- `a_dfunit' specifie the unit step number.  If it is not more than 0, the auto defragmentation
+			--  is disabled.  It is disabled by default.
+			--  Note that the defragmentation parameter should be set before the database is opened. */
+			--bool tcbdbsetdfunit(TCBDB *bdb, int32_t dfunit);
+		require
+			is_database_close : not is_open
+		local
+			b : BOOLEAN
+		do
+			b := tcbdbsetdfunit (bdb, a_dfunit)
+			if not b then
+				has_error := True
+			end
+		end
+
+
+	synchronize
+			--Synchronize updated contents of a B+ tree database object with the file and the device.
+			--This function is useful when another process connects to the same database file.
+		require
+			is_open_mode_writer : is_open_mode_writer
+		local
+			b : BOOLEAN
+		do
+			b := tcbdbsync (bdb)
+			if not b then
+				has_error := True
+			end
+		end
+
+
+	db_copy (a_path : STRING)
+			--   `a_path' specifies the path of the destination file.  If it begins with `@', the trailing
+			--   substring is executed as a command line.
+			--   The database file is assured to be kept synchronized and not modified while the copying or
+			--   executing operation is in progress.  So, this function is useful to create a backup file of
+			--   the database file.
+		require
+			is_database_open : is_open
+		local
+			c_path : C_STRING
+			b : BOOLEAN
+		do
+			create c_path.make (a_path)
+			b := tcbdbcopy (bdb, c_path.item)
+			if not b then
+				has_error := True
+			end
+		ensure
+			is_valid_file : is_valid_path (a_path)
+		end
+
+	path  : STRING
+			--Get the file path of a B+ tree database object.
+			--The return value is the path of the database file.
+		require
+			is_open_database : is_open
+		local
+			r : POINTER
+		do
+			r := tcbdbpath (bdb)
+			if r /= default_pointer then
+				create Result.make_from_c (r)
+			end
+		end
 
 feature -- Error Messages
 

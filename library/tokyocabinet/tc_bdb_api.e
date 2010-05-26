@@ -701,7 +701,6 @@ feature -- Database Control
 			}"
 		end
 
-feature -- Sincronize
 
 	tcbdbsync(an_bdb : POINTER) : BOOLEAN
 		--/* Synchronize updated contents of a B+ tree database object with the file and the device.
