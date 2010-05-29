@@ -366,6 +366,24 @@ feature -- Remove Records
 			}"
 		end
 
+
+	tcfdbout2 (fdb:POINTER; a_kbuf : POINTER; a_ksiz : INTEGER) : BOOLEAN
+		--/* Remove a record with a decimal key of a fixed-length database object.
+		--   `fdb' specifies the fixed-length database object connected as a writer.
+		--   `kbuf' specifies the pointer to the region of the decimal key.  It should be more than 0.  If
+		--   it is "min", the minimum ID number of existing records is specified.  If it is "max", the
+		--   maximum ID number of existing records is specified.
+		--   `ksiz' specifies the size of the region of the key.
+		--   If successful, the return value is true, else, it is false. */
+		--bool tcfdbout2(TCFDB *fdb, const void *kbuf, int ksiz);
+		external
+			"C inline use <tcfdb.h>"
+		alias
+			"{
+				tcfdbout2((TCFDB *)$fdb, (const void *)$a_kbuf, (int)$a_ksiz)
+			}"
+		end
+
 	tcfdbout3 (an_fdb : POINTER; a_kstr : POINTER) : BOOLEAN
 		--/* Remove a string record with a decimal key of a fixed-length database object.
 		--   `fdb' specifies the fixed-length database object connected as a writer.
@@ -398,6 +416,60 @@ feature -- Remove Records
 
 feature -- Retrieve Records
 
+	tcfdbget (fdb : POINTER; an_id : INTEGER_64; a_sp : TYPED_POINTER[INTEGER]) : POINTER
+		--/* Retrieve a record in a fixed-length database object.
+		--   `fdb' specifies the fixed-length database object.
+		--   `id' specifies the ID number.  It should be more than 0.  If it is `FDBIDMIN', the minimum ID
+		--   number of existing records is specified.  If it is `FDBIDMAX', the maximum ID number of
+		--   existing records is specified.
+		--   `sp' specifies the pointer to the variable into which the size of the region of the return
+		--   value is assigned.
+		--   If successful, the return value is the pointer to the region of the value of the corresponding
+		--   record.  `NULL' is returned if no record corresponds.
+		--   Because an additional zero code is appended at the end of the region of the return value,
+		--   the return value can be treated as a character string.  Because the region of the return
+		--   value is allocated with the `malloc' call, it should be released with the `free' call when
+		--   it is no longer in use. */
+		--void *tcfdbget(TCFDB *fdb, int64_t id, int *sp);
+		external
+			"C inline use <tcfdb.h>"
+		alias
+			"[
+				int sp;
+				void *result = tcfdbget((TCFDB *)$fdb, (int64_t) $an_id, &sp);
+				*(EIF_INTEGER *) $a_sp = (EIF_INTEGER) sp;
+				return result;
+			]"
+		end
+
+
+	tcfdbget2 (fdb: POINTER; a_kbuf : POINTER; a_ksiz : INTEGER; a_sp : TYPED_POINTER [INTEGER]) : POINTER
+		--/* Retrieve a record with a decimal key in a fixed-length database object.
+		--   `fdb' specifies the fixed-length database object.
+		--   `kbuf' specifies the pointer to the region of the decimal key.  It should be more than 0.  If
+		--   it is "min", the minimum ID number of existing records is specified.  If it is "max", the
+		--   maximum ID number of existing records is specified.
+		--   `ksiz' specifies the size of the region of the key.
+		--   `sp' specifies the pointer to the variable into which the size of the region of the return
+		--   value is assigned.
+		--   If successful, the return value is the pointer to the region of the value of the corresponding
+		--   record.  `NULL' is returned if no record corresponds.
+		--   Because an additional zero code is appended at the end of the region of the return value,
+		--   the return value can be treated as a character string.  Because the region of the return
+		--   value is allocated with the `malloc' call, it should be released with the `free' call when
+		--   it is no longer in use. */
+		--void *tcfdbget2(TCFDB *fdb, const void *kbuf, int ksiz, int *sp);
+		external
+			"C inline use <tcfdb.h>"
+		alias
+			"[
+				int sp;
+				void *result =tcfdbget2((TCFDB *)$fdb, (const void *)$a_kbuf, (int) $a_ksiz, &sp) ;
+				*(EIF_INTEGER *) $a_sp = (EIF_INTEGER) sp;
+				return result;
+			]"
+		end
+
 
 	tcfdbget3 (an_fdb : POINTER; a_kstr : POINTER) : POINTER
 		--/* Retrieve a string record with a decimal key in a fixed-length database object.
@@ -421,6 +493,29 @@ feature -- Retrieve Records
 		end
 
 
+
+	tcfdbget4 (fdb : POINTER; an_id : INTEGER_64; a_vbuf : POINTER; a_max : INTEGER) : INTEGER
+		--/* Retrieve a record in a fixed-length database object and write the value into a buffer.
+		--   `fdb' specifies the fixed-length database object.
+		--   `id' specifies the ID number.  It should be more than 0.  If it is `FDBIDMIN', the minimum ID
+		--   number of existing records is specified.  If it is `FDBIDMAX', the maximum ID number of
+		--   existing records is specified.
+		--   `vbuf' specifies the pointer to the buffer into which the value of the corresponding record is
+		--   written.
+		--   `max' specifies the size of the buffer.
+		--   If successful, the return value is the size of the written data, else, it is -1.  -1 is
+		--   returned if no record corresponds to the specified key.
+		--   Note that an additional zero code is not appended at the end of the region of the writing
+		--   buffer. */
+		--int tcfdbget4(TCFDB *fdb, int64_t id, void *vbuf, int max);
+		external
+			"C inline use <tcfdb.h>"
+		alias
+			"{
+				tcfdbget4((TCFDB *)$fdb, (int64_t) $an_id, (void *)$a_vbuf, (int) $a_max)
+			}"
+		end
+
 	tcfdbvsiz (an_fdb : POINTER; an_id : INTEGER_64) : INTEGER_32
 		--/* Get the size of the value of a record in a fixed-length database object.
 		--   `fdb' specifies the fixed-length database object.
@@ -438,6 +533,23 @@ feature -- Retrieve Records
 			}"
 		end
 
+	tcfdbvsiz2 (fdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER) : INTEGER
+		--/* Get the size of the value with a decimal key in a fixed-length database object.
+		--   `fdb' specifies the fixed-length database object.
+		--   `kbuf' specifies the pointer to the region of the decimal key.  It should be more than 0.  If
+		--   it is "min", the minimum ID number of existing records is specified.  If it is "max", the
+		--   maximum ID number of existing records is specified.
+		--   `ksiz' specifies the size of the region of the key.
+		--   If successful, the return value is the size of the value of the corresponding record, else,
+		--   it is -1. */
+		--int tcfdbvsiz2(TCFDB *fdb, const void *kbuf, int ksiz);
+		external
+			"C inline use <tcfdb.h>"
+		alias
+			"{
+				tcfdbvsiz2((TCFDB *)$fdb, (const void *)$a_kbuf, (int) $a_ksiz)
+			}"
+		end
 
 
 	tcfdbvsiz3 (an_fdb : POINTER; a_kstr : POINTER) : INTEGER_32
@@ -455,6 +567,127 @@ feature -- Retrieve Records
 			"{
 				tcfdbvsiz3((TCFDB *)$an_fdb, (const char *)$a_kstr)
 			}"
+		end
+
+	tcfdbrange(fdb : POINTER; a_lower : INTEGER_64; an_upper : INTEGER_64; a_max : INTEGER; a_np : TYPED_POINTER[INTEGER]) : NATURAL_64
+		--	/* Get range matching ID numbers in a fixed-length database object.
+		--   `fdb' specifies the fixed-length database object.
+		--   `lower' specifies the lower limit of the range.  If it is `FDBIDMIN', the minimum ID is
+		--   specified.
+		--   `upper' specifies the upper limit of the range.  If it is `FDBIDMAX', the maximum ID is
+		--   specified.
+		--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is
+		--   specified.
+		--   `np' specifies the pointer to the variable into which the number of elements of the return
+		--   value is assigned.
+		--   If successful, the return value is the pointer to an array of ID numbers of the corresponding
+		--   records.  `NULL' is returned on failure.  This function does never fail.  It returns an empty
+		--   array even if no key corresponds.
+		--   Because the region of the return value is allocated with the `malloc' call, it should be
+		--   released with the `free' call when it is no longer in use. */
+		--uint64_t *tcfdbrange(TCFDB *fdb, int64_t lower, int64_t upper, int max, int *np);
+		external
+			"C inline use <tcfdb.h>"
+		alias
+			"[
+				int np;
+				void *result =tcfdbrange((TCFDB *)$fdb, (int64_t) $a_lower, (int64_t) $an_upper, (int) $a_max, &np);
+				*(EIF_INTEGER *) $a_np = (EIF_INTEGER) np;
+				return result;
+			]"
+		end
+
+
+	tcfdbrange2 (fdb : POINTER; a_lbuf : POINTER; a_lsiz : INTEGER; an_ubuf : POINTER; an_usiz : INTEGER; a_max : INTEGER) : POINTER
+		--/* Get range matching decimal keys in a fixed-length database object.
+		--   `fdb' specifies the fixed-length database object.
+		--   `lbuf' specifies the pointer to the region of the lower key.  If it is "min", the minimum ID
+		--   number of existing records is specified.
+		--   `lsiz' specifies the size of the region of the lower key.
+		--   `ubuf' specifies the pointer to the region of the upper key.  If it is "max", the maximum ID
+		--   number of existing records is specified.
+		--   `usiz' specifies the size of the region of the upper key.
+		--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is
+		--   specified.
+		--   The return value is a list object of the corresponding decimal keys.  This function does never
+		--   fail.  It returns an empty list even if no key corresponds.
+		--   Because the object of the return value is created with the function `tclistnew', it should be
+		--   deleted with the function `tclistdel' when it is no longer in use.  Note that this function
+		--   may be very slow because every key in the database is scanned. */
+		--TCLIST *tcfdbrange2(TCFDB *fdb, const void *lbuf, int lsiz, const void *ubuf, int usiz, int max);
+		external
+			"C inline use <tcfdb.h>"
+		alias
+			"[
+				tcfdbrange2((TCFDB *)$fdb, (const void *)$a_lbuf, (int) $a_lsiz, (const void *)$an_ubuf, (int) $an_usiz, (int) $a_max)
+				]"
+		end
+
+
+	tcfdbrange3 (fdb : POINTER; a_lstr : POINTER; an_ustr : POINTER; a_max : INTEGER) : POINTER
+		--/* Get range matching decimal keys with strings in a fixed-length database object.
+		--   `fdb' specifies the fixed-length database object.
+		--   `lstr' specifies the string of the lower key.  If it is "min", the minimum ID number of
+		--   existing records is specified.
+		--   `ustr' specifies the string of the upper key.  If it is "max", the maximum ID number of
+		--   existing records is specified.
+		--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is
+		--   specified.
+		--   The return value is a list object of the corresponding decimal keys.  This function does never
+		--   fail.  It returns an empty list even if no key corresponds.
+		--   Because the object of the return value is created with the function `tclistnew', it should be
+		--   deleted with the function `tclistdel' when it is no longer in use.  Note that this function
+		--   may be very slow because every key in the database is scanned. */
+		--TCLIST *tcfdbrange3(TCFDB *fdb, const char *lstr, const char *ustr, int max);
+		external
+			"C inline use <tcfdb.h>"
+		alias
+			"[
+				tcfdbrange3((TCFDB *)$fdb, (const char *)$a_lstr, (const char *)$an_ustr, (int) $a_max)
+				]"
+		end
+
+
+	tcfdbrange4 (fdb : POINTER; an_ibuf : POINTER; an_isiz: INTEGER; a_max : INTEGER) : POINTER
+		--/* Get keys with an interval notation in a fixed-length database object.
+		--   `fdb' specifies the fixed-length database object.
+		--   `ibuf' specifies the pointer to the region of the interval notation.
+		--   `isiz' specifies the size of the region of the interval notation.
+		--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is
+		--   specified.
+		--   The return value is a list object of the corresponding decimal keys.  This function does never
+		--   fail.  It returns an empty list even if no key corresponds.
+		--   Because the object of the return value is created with the function `tclistnew', it should be
+		--   deleted with the function `tclistdel' when it is no longer in use.  Note that this function
+		--   may be very slow because every key in the database is scanned. */
+		--TCLIST *tcfdbrange4(TCFDB *fdb, const void *ibuf, int isiz, int max);
+		external
+			"C inline use <tcfdb.h>"
+		alias
+			"[
+				tcfdbrange4((TCFDB *)$fdb, (const void *)$an_ibuf, (int) $an_isiz, (int) $a_max)
+				]"
+		end
+
+
+	tcfdbrange5 (fdb : POINTER; an_istr: POINTER; a_max : INTEGER) : POINTER
+		--/* Get keys with an interval notation string in a fixed-length database object.
+		--   `fdb' specifies the fixed-length database object.
+		--   `istr' specifies the pointer to the region of the interval notation string.
+		--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is
+		--   specified.
+		--   The return value is a list object of the corresponding decimal keys.  This function does never
+		--   fail.  It returns an empty list even if no key corresponds.
+		--   Because the object of the return value is created with the function `tclistnew', it should be
+		--   deleted with the function `tclistdel' when it is no longer in use.  Note that this function
+		--   may be very slow because every key in the database is scanned. */
+		--TCLIST *tcfdbrange5(TCFDB *fdb, const void *istr, int max);
+		external
+			"C inline use <tcfdb.h>"
+		alias
+			"[
+				tcfdbrange5((TCFDB *)$fdb, (const void *)$an_istr, (int) $a_max)
+				]"
 		end
 
 
@@ -492,6 +725,31 @@ feature -- Iterator
 			}"
 		end
 
+
+	tcfdbiternext2 (fdb : POINTER; a_sp : TYPED_POINTER[INTEGER]) : POINTER
+		--/* Get the next decimay key of the iterator of a fixed-length database object.
+		--   `fdb' specifies the fixed-length database object.
+		--   `sp' specifies the pointer to the variable into which the size of the region of the return
+		--   value is assigned.
+		--   If successful, the return value is the pointer to the region of the next decimal key, else, it
+		--   is `NULL'.  `NULL' is returned when no record is to be get out of the iterator.
+		--   Because an additional zero code is appended at the end of the region of the return value, the
+		--   return value can be treated as a character string.  Because the region of the return value is
+		--   allocated with the `malloc' call, it should be released with the `free' call when it is no
+		--   longer in use.  It is possible to access every record by iteration of calling this function.
+		--   It is allowed to update or remove records whose keys are fetched while the iteration.  The
+		--   order of this traversal access method is ascending of the ID number. */
+		--void *tcfdbiternext2(TCFDB *fdb, int *sp);
+		external
+			"C inline use <tcfdb.h>"
+		alias
+			"[
+				int sp;
+				void *result = tcfdbiternext2((TCFDB *)$fdb, &sp);
+				*(EIF_INTEGER *) $a_sp = (EIF_INTEGER) sp;
+				return result;
+			]"
+		end
 
 
 	tcfdbiternext3(an_fdb : POINTER) : POINTER
@@ -539,6 +797,7 @@ feature -- Store Records
 			}"
 		end
 
+	tcfdbput2 (fdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER; a_vbuf : POINTER; a_vsiz: INTEGER) : BOOLEAN
 		--/* Store a record with a decimal key into a fixed-length database object.
 		--   `fdb' specifies the fixed-length database object connected as a writer.
 		--   `kbuf' specifies the pointer to the region of the decimal key.  It should be more than 0.  If
@@ -553,6 +812,14 @@ feature -- Store Records
 		--   If successful, the return value is true, else, it is false.
 		--   If a record with the same key exists in the database, it is overwritten. */
 		--bool tcfdbput2(TCFDB *fdb, const void *kbuf, int ksiz, const void *vbuf, int vsiz);
+		external
+			"C inline use <tcfdb.h>"
+		alias
+			"{
+				tcfdbput2((TCFDB *)$fdb, (const void *)$a_kbuf, (int)$a_ksiz, (const void *)$a_vbuf, (int)$a_vsiz)
+			}"
+		end
+
 
 	tcfdbput3 (an_fdb : POINTER; a_kstr : POINTER;  a_vstr : POINTER) : BOOLEAN
 		--/* Store a string record with a decimal key into a fixed-length database object.
@@ -575,6 +842,52 @@ feature -- Store Records
 		end
 
 
+	tcfdbputkeep (fdb : POINTER; an_id : INTEGER_64; a_vbuf, a_vsiz : INTEGER) : BOOLEAN
+		--/* Store a new record into a fixed-length database object.
+		--   `fdb' specifies the fixed-length database object connected as a writer.
+		--   `id' specifies the ID number.  It should be more than 0.  If it is `FDBIDMIN', the minimum ID
+		--   number of existing records is specified.  If it is `FDBIDPREV', the number less by one than
+		--   the minimum ID number of existing records is specified.  If it is `FDBIDMAX', the maximum ID
+		--   number of existing records is specified.  If it is `FDBIDNEXT', the number greater by one than
+		--   the maximum ID number of existing records is specified.
+		--   `vbuf' specifies the pointer to the region of the value.
+		--   `vsiz' specifies the size of the region of the value.  If the size of the value is greater
+		--   than the width tuning parameter of the database, the size is cut down to the width.
+		--   If successful, the return value is true, else, it is false.
+		--   If a record with the same key exists in the database, this function has no effect. */
+		--bool tcfdbputkeep(TCFDB *fdb, int64_t id, const void *vbuf, int vsiz);
+		external
+			"C inline use <tcfdb.h>"
+		alias
+			"{
+				tcfdbputkeep((TCFDB *)$fdb, (int64_t) $an_id, (const void *)$a_vbuf, (int)$a_vsiz)
+			}"
+		end
+
+	tcfdbputkeep2 (fdb : POINTER; a_kbuf : POINTER; a_ksiz: INTEGER; a_vbuf : POINTER; a_vsiz : INTEGER) : BOOLEAN
+		--/* Store a new record with a decimal key into a fixed-length database object.
+		--   `fdb' specifies the fixed-length database object connected as a writer.
+		--   `kbuf' specifies the pointer to the region of the decimal key.  It should be more than 0.  If
+		--   it is "min", the minimum ID number of existing records is specified.  If it is "prev", the
+		--   number less by one than the minimum ID number of existing records is specified.  If it is
+		--   "max", the maximum ID number of existing records is specified.  If it is "next", the number
+		--   greater by one than the maximum ID number of existing records is specified.
+		--   `ksiz' specifies the size of the region of the key.
+		--   `vbuf' specifies the pointer to the region of the value.
+		--   `vsiz' specifies the size of the region of the value.  If the size of the value is greater
+		--   than the width tuning parameter of the database, the size is cut down to the width.
+		--   If successful, the return value is true, else, it is false.
+		--   If a record with the same key exists in the database, this function has no effect. */
+		--bool tcfdbputkeep2(TCFDB *fdb, const void *kbuf, int ksiz, const void *vbuf, int vsiz);
+		external
+			"C inline use <tcfdb.h>"
+		alias
+			"{
+				tcfdbputkeep2((TCFDB *)$fdb, (const void *)$a_kbuf, (int) $a_ksiz, (const void *)$a_vbuf, (int) $a_vsiz)
+			}"
+		end
+
+
 	tcfdbputkeep3 (an_fdb : POINTER;  a_kstr: POINTER;  a_vstr : POINTER) : BOOLEAN
 		--	/* Store a new string record with a decimal key into a fixed-length database object.
 		--   `fdb' specifies the fixed-length database object connected as a writer.
@@ -592,6 +905,53 @@ feature -- Store Records
 		alias
 			"{
 				tcfdbputkeep3((TCFDB *)$an_fdb, (const char *)$a_kstr, (const void *)$a_vstr)
+			}"
+		end
+
+
+	tcfdbputcat (fdb: POINTER; an_id : INTEGER_64; a_vbuf : POINTER; a_vsiz: INTEGER) : BOOLEAN
+		--/* Concatenate a value at the end of the existing record in a fixed-length database object.
+		--   `fdb' specifies the fixed-length database object connected as a writer.
+		--   `id' specifies the ID number.  It should be more than 0.  If it is `FDBIDMIN', the minimum ID
+		--   number of existing records is specified.  If it is `FDBIDPREV', the number less by one than
+		--   the minimum ID number of existing records is specified.  If it is `FDBIDMAX', the maximum ID
+		--   number of existing records is specified.  If it is `FDBIDNEXT', the number greater by one than
+		--   the maximum ID number of existing records is specified.
+		--   `vbuf' specifies the pointer to the region of the value.
+		--   `vsiz' specifies the size of the region of the value.  If the size of the value is greater
+		--   than the width tuning parameter of the database, the size is cut down to the width.
+		--   If successful, the return value is true, else, it is false.
+		--   If there is no corresponding record, a new record is created. */
+		--bool tcfdbputcat(TCFDB *fdb, int64_t id, const void *vbuf, int vsiz);
+		external
+			"C inline use <tcfdb.h>"
+		alias
+			"{
+				tcfdbputcat((TCFDB *)$fdb, (int64_t) $an_id, (const void *)$a_vbuf, (int) $a_vsiz)
+			}"
+		end
+
+
+	tcfdbputcat2 (fdb: POINTER; a_kbuf : POINTER; a_ksiz : INTEGER; a_vbuf : POINTER; a_vsiz : POINTER) : BOOLEAN
+		--/* Concatenate a value with a decimal key in a fixed-length database object.
+		--   `fdb' specifies the fixed-length database object connected as a writer.
+		--   `kbuf' specifies the pointer to the region of the decimal key.  It should be more than 0.  If
+		--   it is "min", the minimum ID number of existing records is specified.  If it is "prev", the
+		--   number less by one than the minimum ID number of existing records is specified.  If it is
+		--   "max", the maximum ID number of existing records is specified.  If it is "next", the number
+		--   greater by one than the maximum ID number of existing records is specified.
+		--   `ksiz' specifies the size of the region of the key.
+		--   `vbuf' specifies the pointer to the region of the value.
+		--   `vsiz' specifies the size of the region of the value.  If the size of the value is greater
+		--   than the width tuning parameter of the database, the size is cut down to the width.
+		--   If successful, the return value is true, else, it is false.
+		--   If there is no corresponding record, a new record is created. */
+		--bool tcfdbputcat2(TCFDB *fdb, const void *kbuf, int ksiz, const void *vbuf, int vsiz);
+		external
+			"C inline use <tcfdb.h>"
+		alias
+			"{
+				tcfdbputcat2((TCFDB *)$fdb, (const void *)$a_kbuf, (int) $a_ksiz, (const void *)$a_vbuf, (int) $a_vsiz)
 			}"
 		end
 

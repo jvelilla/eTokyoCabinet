@@ -7,8 +7,6 @@ note
 class
 	ADB_API
 inherit
-	DBM
-
 	TC_ADB_API
 
 create
@@ -23,6 +21,170 @@ feature {NONE} -- Initialization
 			is_open := False
 			has_error := False
 		end
+
+feature -- Access
+
+	is_open: BOOLEAN
+			-- is the database open?
+
+
+	is_open_mode_reader : BOOLEAN
+   			-- is the database open in a reader mode?
+		require
+   			is_database_open : is_open
+   		do
+   			Result := is_open_mode_reader_implementation
+   		end
+
+	is_open_mode_writer : BOOLEAN
+   			-- is the database open in a writer mode?
+		require
+   			is_database_open : is_open
+   		do
+   			Result := not is_open_mode_reader
+   		end
+
+	error_description: STRING
+			-- Textual description of error
+		require
+			has_error: has_error
+		do
+			Result := full_message_implementation
+		ensure
+			result_exists: Result /= Void
+			result_not_empty: not Result.is_empty
+		end
+
+	get_string (a_key: STRING): STRING
+			--  Retrieve a string record by `a_key'
+		require
+			is_open_database: is_open
+			is_valid_key: a_key /= Void and (not a_key.is_empty)
+		local
+			c_key: C_STRING
+			r: POINTER
+		do
+			create c_key.make (a_key)
+			r := get_string_implementation (c_key.item)
+			if r /= default_pointer then
+				create Result.make_from_c (r)
+			end
+		end
+
+	records_number: NATURAL_64
+			--Get the number of records.
+		require
+			is_open_database: is_open
+		do
+			Result := records_number_implementation
+		end
+
+	file_size: NATURAL_64
+			-- Get the size of the database file. 	
+		require
+			is_open_database: is_open
+		do
+			Result := file_size_implementation
+		end
+
+
+feature -- Change Element
+
+	put_string (a_key: STRING; a_value: STRING)
+			-- Is used in order to store a string record into a database object.
+		require
+			is_open_database_writer: is_open_mode_writer
+			is_valid_key: a_key /= Void and (not a_key.is_empty)
+			is_valid_value: a_value /= Void and (not a_value.is_empty)
+		local
+			c_key: C_STRING
+			c_value: C_STRING
+			l_b: BOOLEAN
+		do
+			create c_key.make (a_key)
+			create c_value.make (a_value)
+			l_b := put_string_implementation (c_key.item, c_value.item)
+			if not l_b then
+				has_error := True
+			end
+		end
+
+	put_keep_string (a_key: STRING; a_value: STRING)
+			-- Is used in order to store a new string record into a database object.
+			-- If a record with the same key exists in the database, this function has no effect.
+		require
+			is_open_database_writer: is_open_mode_writer
+			is_valid_key: a_key /= Void and (not a_key.is_empty)
+			is_valid_value: a_value /= Void and (not a_value.is_empty)
+		local
+			c_key: C_STRING
+			c_value: C_STRING
+			l_b: BOOLEAN
+		do
+			create c_key.make (a_key)
+			create c_value.make (a_value)
+			l_b := put_keep_string_implementation (c_key.item, c_value.item)
+			if not l_b then
+				has_error := True
+			end
+		end
+
+	out_string (a_key: STRING)
+			-- remove a record by a key `a_key'
+		require
+			is_open_database_writer: is_open_mode_writer
+			is_valid_key: a_key /= Void and (not a_key.is_empty)
+		local
+			c_key: C_STRING
+			l_b: BOOLEAN
+		do
+			create c_key.make (a_key)
+			l_b := out_string_implementation (c_key.item)
+		end
+
+feature -- Iterator
+
+	iterator_init
+			-- Initialize the iterator
+		require
+			is_open_database: is_open
+		local
+			l_b: BOOLEAN
+		do
+			l_b := iterator_init_implementation
+			if not l_b then
+				has_error := True
+			end
+		end
+
+	iterator_next_string: STRING
+			-- get the next key of the iterator
+		require
+			is_open_database: is_open
+		local
+			r: POINTER
+		do
+			r := iterator_next_string_implementation
+			if r /= default_pointer then
+				create Result.make_from_c (r)
+			end
+		end
+
+feature -- Status Report
+
+	has_error: BOOLEAN
+			-- Did an error occur?
+
+feature -- Status Settings
+
+	clean_error is
+			-- Reset the last error.
+		do
+			has_error := False
+		ensure
+			no_error: not has_error
+		end
+
 feature -- Open Database
 
 	open (a_name : STRING)
@@ -187,4 +349,9 @@ feature {NONE} -- Implementation
 
 invariant
 	abstract_database_created: adb /= default_pointer
+	non_empty_description: has_error implies (error_description /= Void and (not error_description.is_empty))
+	not_open_as_reader_and_writer : is_open implies (not (is_open_mode_reader and is_open_mode_writer))
+	open_as_reader                : (is_open and then is_open_mode_reader) implies (not is_open_mode_writer)
+	open_as_writer				  : (is_open and then is_open_mode_writer) implies (not is_open_mode_reader)
+
 end

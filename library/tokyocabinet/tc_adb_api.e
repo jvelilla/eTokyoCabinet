@@ -6,7 +6,6 @@ note
 
 deferred class
 	 TC_ADB_API
-	inherit ANY undefine is_equal, copy end
 
 feature {} -- Create an Abstract Database Object
 

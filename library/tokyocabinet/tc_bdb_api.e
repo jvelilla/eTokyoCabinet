@@ -559,6 +559,101 @@ feature -- Retrieve Records
 		end
 
 
+
+	tcbdbrange (bdb : POINTER; a_bkbuf : POINTER; a_bksiz : INTEGER; a_binc : BOOLEAN; an_ekbuf : POINTER; an_eksiz : INTEGER; an_einc : INTEGER; a_max : INTEGER) : POINTER
+		--/* Get keys of ranged records in a B+ tree database object.
+		--   `bdb' specifies the B+ tree database object.
+		--   `bkbuf' specifies the pointer to the region of the key of the beginning border.  If it is
+		--   `NULL', the first record is specified.
+		--   `bksiz' specifies the size of the region of the beginning key.
+		--   `binc' specifies whether the beginning border is inclusive or not.
+		--   `ekbuf' specifies the pointer to the region of the key of the ending border.  If it is `NULL',
+		--   the last record is specified.
+		--   `eksiz' specifies the size of the region of the ending key.
+		--   `einc' specifies whether the ending border is inclusive or not.
+		--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is
+		--   specified.
+		--   The return value is a list object of the keys of the corresponding records.  This function
+		--   does never fail.  It returns an empty list even if no record corresponds.
+		--   Because the object of the return value is created with the function `tclistnew', it should
+		--   be deleted with the function `tclistdel' when it is no longer in use. */
+		--TCLIST *tcbdbrange(TCBDB *bdb, const void *bkbuf, int bksiz, bool binc,
+		--                   const void *ekbuf, int eksiz, bool einc, int max);
+		external
+			"C inline use <tcbdb.h>"
+		alias
+			"{
+				tcbdbrange((TCBDB *)$bdb, (const void *)$a_bkbuf, (int) $a_bksiz, (bool) $a_binc, 
+							(const void *)$an_ekbuf, (int) $an_eksiz, (bool) $an_einc, (int) $a_max)
+			}"
+		end
+		
+		
+	tcbdbrange2 (bdb : POINTER; a_bkstr : POINTER; a_binc : BOOLEAN; an_ekstr : POINTER; an_einc : INTEGER; a_max : INTEGER) : POINTER
+		--/* Get string keys of ranged records in a B+ tree database object.
+		--   `bdb' specifies the B+ tree database object.
+		--   `bkstr' specifies the string of the key of the beginning border.  If it is `NULL', the first
+		--   record is specified.
+		--   `binc' specifies whether the beginning border is inclusive or not.
+		--   `ekstr' specifies the string of the key of the ending border.  If it is `NULL', the last
+		--   record is specified.
+		--   `einc' specifies whether the ending border is inclusive or not.
+		--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is
+		--   specified.
+		--   The return value is a list object of the keys of the corresponding records.  This function
+		--   does never fail.  It returns an empty list even if no record corresponds.
+		--   Because the object of the return value is created with the function `tclistnew', it should
+		--   be deleted with the function `tclistdel' when it is no longer in use. */
+		--TCLIST *tcbdbrange2(TCBDB *bdb, const char *bkstr, bool binc,
+		--                    const char *ekstr, bool einc, int max);
+		external
+			"C inline use <tcbdb.h>"
+		alias
+			"{
+				tcbdbrange2((TCBDB *)$bdb, (const char *)$a_bkstr, (bool) $a_binc,
+		                    (const char *)$an_ekstr, (bool) $an_einc, (int) $a_max)
+			}"
+		end
+
+
+	tcbdbfwmkeys (bdb : POINTER; a_pbuf : POINTER; a_psiz : INTEGER; a_max : INTEGER) : POINTER
+		--/* Get forward matching keys in a B+ tree database object.
+		--   `bdb' specifies the B+ tree database object.
+		--   `pbuf' specifies the pointer to the region of the prefix.
+		--   `psiz' specifies the size of the region of the prefix.
+		--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is
+		--   specified.
+		--   The return value is a list object of the corresponding keys.  This function does never fail.
+		--   It returns an empty list even if no key corresponds.
+		--   Because the object of the return value is created with the function `tclistnew', it should be
+		--   deleted with the function `tclistdel' when it is no longer in use. */
+		--TCLIST *tcbdbfwmkeys(TCBDB *bdb, const void *pbuf, int psiz, int max);
+		external
+			"C inline use <tcbdb.h>"
+		alias
+			"{
+				tcbdbfwmkeys((TCBDB *)$bdb, (const void *)$a_pbuf, (int) $a_psiz, (int) $a_max)
+			}"
+		end
+
+	tcbdbfwmkeys2 (bdb : POINTER; a_pstr : POINTER; a_max : INTEGER)
+		--/* Get forward matching string keys in a B+ tree database object.
+		--   `bdb' specifies the B+ tree database object.
+		--   `pstr' specifies the string of the prefix.
+		--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is
+		--   specified.
+		--   The return value is a list object of the corresponding keys.  This function does never fail.
+		--   It returns an empty list even if no key corresponds.
+		--   Because the object of the return value is created with the function `tclistnew', it should be
+		--   deleted with the function `tclistdel' when it is no longer in use. */
+		--TCLIST *tcbdbfwmkeys2(TCBDB *bdb, const char *pstr, int max);
+		external
+			"C inline use <tcbdb.h>"
+		alias
+			"{
+				tcbdbfwmkeys2((TCBDB *)$bdb, (const char *)$a_pstr, (int) $a_max)
+			}"
+		end
 feature -- Error Messages
 
 	tcbdberrmsg (an_ecode : INTEGER) : POINTER

@@ -281,7 +281,7 @@ feature -- Close and Delete
 
 feature -- Database Control
 
-	copy_db (a_path : STRING)
+	db_copy (a_path : STRING)
 			--	Copy the database file of a table database object.
 			--  `path' specifies the path of the destination file.  If it begins with `@', the trailing
 			--  substring is executed as a command line.
