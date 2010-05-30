@@ -53,6 +53,7 @@ feature -- Access
 			r := get_string_implementation (c_key.item)
 			if r /= default_pointer then
 				create Result.make_from_c (r)
+				free (r)
 			end
 		end
 
@@ -236,6 +237,14 @@ feature {DBM} -- Implementation
 
 	full_message_implementation : STRING
 		deferred
+		end
+
+	free (a_object: POINTER) is
+			-- Delete c object
+		external
+			"C inline use %"eif_lmalloc.h%""
+		alias
+			"eif_free((void *)$a_object)"
 		end
 
 invariant
