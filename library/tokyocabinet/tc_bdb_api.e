@@ -654,6 +654,8 @@ feature -- Retrieve Records
 				tcbdbfwmkeys2((TCBDB *)$bdb, (const char *)$a_pstr, (int) $a_max)
 			}"
 		end
+		
+		
 feature -- Error Messages
 
 	tcbdberrmsg (an_ecode : INTEGER) : POINTER

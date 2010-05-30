@@ -136,6 +136,14 @@ feature -- Test store records
 			create v.make ("hop")
 			b := tcfdbput3 (fdb, k.item, v.item)
 			assert ("Expected False", b = false)
+
+
+
+			create k.make ("key1")
+			create v.make ("val1")
+			b := tcfdbput3 (fdb, k.item, v.item)
+			assert ("Expected False", b = false)
+
 		end
 
 

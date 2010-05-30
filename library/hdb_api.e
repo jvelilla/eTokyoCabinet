@@ -29,7 +29,7 @@ feature {NONE} -- Initialization
 
 feature -- Open Database
 
-	
+
 
 	open_writer (a_path : STRING)
 		require
@@ -363,7 +363,7 @@ feature -- Database Control
 			optimize(-1, -1, -1, 0xff)
 		end
 
-	copy_db (a_path : STRING)
+	db_copy (a_path : STRING)
 			-- Copy the database file of a hash database object.
 			--	`a_path' specifies the path of the destination file.  If it begins with `@', the trailing
 			--	substring is executed as a command line.
@@ -410,6 +410,25 @@ feature -- Database Control
 		do
 			b := tchdbsync (hdb)
 			if not b then
+				has_error := True
+			end
+		end
+feature -- Change Element
+
+	put_asyncrhonic_string ( a_key : STRING; a_value : STRING)
+		require
+			is_open_database_writer: is_open_mode_writer
+			is_valid_key: a_key /= Void and (not a_key.is_empty)
+			is_valid_value: a_value /= Void and (not a_value.is_empty)
+		local
+			c_key: C_STRING
+			c_value: C_STRING
+			l_b: BOOLEAN
+		do
+			create c_key.make (a_key)
+			create c_value.make (a_value)
+			l_b := tchdbputasync2 (hdb, c_key.item,c_value.item)
+			if not l_b then
 				has_error := True
 			end
 		end
