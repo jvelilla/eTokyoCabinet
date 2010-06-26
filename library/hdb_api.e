@@ -443,6 +443,7 @@ feature -- Remove
 		do
 			b := tchdbvanish (hdb)
 		end
+		
 feature -- Close and Delete
 
 	close

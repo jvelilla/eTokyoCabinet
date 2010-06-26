@@ -726,6 +726,8 @@ feature {NONE} -- Implementation
         end
 
 
+	
+
 feature -- Representation
 	tdb: POINTER
 		-- Table database object

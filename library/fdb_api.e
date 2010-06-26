@@ -365,6 +365,17 @@ feature -- Close and Delete
 
 		end
 
+feature -- Remove
+	vanish
+			-- Remove all records of a fixed database object.
+		require
+			is_database_open_writer : is_open_mode_writer
+		local
+			b : BOOLEAN
+		do
+			b := tcfdbvanish (fdb)
+		end
+
 feature -- Error Messages
 
 	error_message (a_code: INTEGER_32): STRING
