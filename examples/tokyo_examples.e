@@ -9,6 +9,7 @@ feature -- Initialization
 		local
 			l_tdb_example : TABLE_DATABASE_EXAMPLE
 			tc_database_performace : TC_DATABASE_PERFORMANCE
+			l_btree_example : BTREE_DATABASE_EXAMPLE
 		do
 --			create l_tdb_example
 --			l_tdb_example.example
@@ -17,6 +18,9 @@ feature -- Initialization
 			tc_database_performace.btree_table_performance
 			tc_database_performace.table_table_performance
 			tc_database_performace.fixed_db_performance
+
+			create  l_btree_example
+			l_btree_example.example
 --			print ("%N================ Abstract Database Example ======================%N")
 --			adb_example
 --			print ("%N================ Fixed Database Example ======================%N")

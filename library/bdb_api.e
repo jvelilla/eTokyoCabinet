@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {BDB_API}."
+	description: "B-Tree database; keys may have multiple values"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -26,6 +26,45 @@ feature {NONE} -- Initialization
 			bdb := tcbdbnew
 			is_open := False
 			has_error := False
+		end
+
+feature -- Access
+
+	range_string ( a_start_key : STRING; key_start_inclusive:BOOLEAN; an_end_key : STRING; key_end_inclusive:BOOLEAN) : POINTER
+			--	 Get string keys of ranged records in a B+ tree database object.
+			--   `a_start_key' specifies the string of the key of the beginning border.  If it is `NULL', the first
+			--   record is specified.
+			--   `key_start_inclusive' specifies whether the beginning border is inclusive or not.
+			--   `an_end_key' specifies the string of the key of the ending border.  If it is `NULL', the last
+			--   record is specified.
+			--   `key_end_inclusive' specifies whether the ending border is inclusive or not.
+			--   The return value is a list object of the keys of the corresponding records.
+			--   It returns an empty list even if no record corresponds.
+			--   Because the object of the return value is created with the function `tclistnew', it should
+			--   be deleted with the function `tclistdel' when it is no longer in use.
+		require
+			is_database_open : is_open
+		local
+			c_skey: C_STRING
+			c_ekey: C_STRING
+		do
+				create c_skey.make (a_start_key)
+				create c_ekey.make (an_end_key)
+				Result :=tcbdbrange2 (bdb, c_skey.item,key_start_inclusive, c_ekey.item, key_end_inclusive,-1)
+				--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is specified.
+		end
+
+
+	list_string ( a_key : STRING ) : POINTER
+			-- retrieve records in a B+ tree database object.
+			-- If successful, the return value is a list object of the values of the corresponding records. `NULL' is returned if no record corresponds.
+		require
+			is_database_open : is_open
+		local
+			c_key :C_STRING
+		do
+			create c_key.make (a_key)
+			Result := tcbdbget4 (bdb, c_key.item,a_key.count)
 		end
 feature -- Open Database
 
@@ -281,6 +320,30 @@ feature -- Close and Delete
 
 		end
 
+feature -- Change Element
+	put_dup_string ( a_key : STRING; a_value : STRING)
+			--	Store a string record into a B+ tree database object with allowing duplication of keys.
+			--  `a_key' specifies the string of the key.
+			--  `a_value' specifies the string of the value.
+			--  If a record with the same key exists in the database, the new record is placed after the
+			--  existing one.
+		require
+			is_open_database_writer: is_open_mode_writer
+			is_valid_key: a_key /= Void and (not a_key.is_empty)
+			is_valid_value: a_value /= Void and (not a_value.is_empty)
+		local
+			c_key: C_STRING
+			c_value: C_STRING
+			l_b: BOOLEAN
+
+		do
+			create c_key.make (a_key)
+			create c_value.make (a_value)
+			l_b := tcbdbputdup2 (bdb, c_key.item,c_value.item)
+			if not l_b then
+				has_error := True
+			end
+		end
 
 feature -- Database Control
 
@@ -427,7 +490,7 @@ feature -- Remove
 		do
 			b := tcbdbvanish (bdb)
 		end
-		
+
 feature -- Error Messages
 
 	error_message (a_code: INTEGER_32): STRING

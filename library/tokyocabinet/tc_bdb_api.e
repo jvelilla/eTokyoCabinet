@@ -428,7 +428,7 @@ feature -- Retrieve Records
 
 
 
-	tcbdbget4 (a_bdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32) : BOOLEAN
+	tcbdbget4 (a_bdb : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER_32) : POINTER
 		--/* Retrieve records in a B+ tree database object.
 		--   `bdb' specifies the B+ tree database object.
 		--   `kbuf' specifies the pointer to the region of the key.
@@ -587,9 +587,9 @@ feature -- Retrieve Records
 							(const void *)$an_ekbuf, (int) $an_eksiz, (bool) $an_einc, (int) $a_max)
 			}"
 		end
-		
-		
-	tcbdbrange2 (bdb : POINTER; a_bkstr : POINTER; a_binc : BOOLEAN; an_ekstr : POINTER; an_einc : INTEGER; a_max : INTEGER) : POINTER
+
+
+	tcbdbrange2 (bdb : POINTER; a_bkstr : POINTER; a_binc : BOOLEAN; an_ekstr : POINTER; an_einc : BOOLEAN; a_max : INTEGER) : POINTER
 		--/* Get string keys of ranged records in a B+ tree database object.
 		--   `bdb' specifies the B+ tree database object.
 		--   `bkstr' specifies the string of the key of the beginning border.  If it is `NULL', the first
@@ -654,8 +654,8 @@ feature -- Retrieve Records
 				tcbdbfwmkeys2((TCBDB *)$bdb, (const char *)$a_pstr, (int) $a_max)
 			}"
 		end
-		
-		
+
+
 feature -- Error Messages
 
 	tcbdberrmsg (an_ecode : INTEGER) : POINTER
