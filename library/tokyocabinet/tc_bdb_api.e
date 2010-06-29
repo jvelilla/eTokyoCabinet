@@ -636,7 +636,7 @@ feature -- Retrieve Records
 			}"
 		end
 
-	tcbdbfwmkeys2 (bdb : POINTER; a_pstr : POINTER; a_max : INTEGER)
+	tcbdbfwmkeys2 (bdb : POINTER; a_pstr : POINTER; a_max : INTEGER) : POINTER
 		--/* Get forward matching string keys in a B+ tree database object.
 		--   `bdb' specifies the B+ tree database object.
 		--   `pstr' specifies the string of the prefix.

@@ -66,6 +66,25 @@ feature -- Access
 			create c_key.make (a_key)
 			Result := tcbdbget4 (bdb, c_key.item,a_key.count)
 		end
+
+
+	forward_matching_string_keys ( a_prefix : STRING) : POINTER
+			--  Get forward matching string keys in a B+ tree database object.
+			--   `a_prefix' specifies the string of the prefix.
+			--   The return value is a list object of the corresponding keys.  This function does never fail.
+			--   It returns an empty list even if no key corresponds.
+		require
+			is_open_database : is_open
+		local
+			c_prefix : C_STRING
+		do
+			create c_prefix.make (a_prefix)
+			Result := tcbdbfwmkeys2 (bdb, c_prefix.item,-1)
+			--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is
+			--   specified.
+
+		end
+
 feature -- Open Database
 
 

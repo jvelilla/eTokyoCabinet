@@ -30,6 +30,9 @@ feature -- Example
 			bdb.put_dup_string("key1", "value2")
 			bdb.put_string("key2", "value3")
 			bdb.put_string("key3", "value4")
+			bdb.put_string("apples", "red")
+			bdb.put_string("ant", "build")
+
 
 			-- retrive all records
 			print ("%N Retrieve all records by key %N")
@@ -55,6 +58,41 @@ feature -- Example
 				i := i + 1
 			end
 
+
+			-- forward matching keys,
+			print ("%N Forward matching 'a'%N")
+			create l_list.make_by_pointer (bdb.forward_matching_string_keys ("a"))
+			from
+				i := 1
+			until
+				i > l_list.elements
+			loop
+				print ("%N Index:" + i.out + ":Key:" +l_list.value (i))
+				i := i + 1
+			end
+
+
+			print ("%N Forward matching 'an'%N")
+			create l_list.make_by_pointer (bdb.forward_matching_string_keys ("an"))
+			from
+				i := 1
+			until
+				i > l_list.elements
+			loop
+				print ("%N Index:" + i.out + ":Key:" +l_list.value (i))
+				i := i + 1
+			end
+
+			print ("%N Forward matching 'e'%N")
+			create l_list.make_by_pointer (bdb.forward_matching_string_keys ("e"))
+			from
+				i := 1
+			until
+				i > l_list.elements
+			loop
+				print ("%N Index:" + i.out + ":Key:" +l_list.value (i))
+				i := i + 1
+			end
 		end
 
 feature {NONE} -- Implementation
