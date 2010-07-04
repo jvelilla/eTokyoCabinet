@@ -22,6 +22,7 @@ feature -- Create
 		end
 
 
+
 feature -- Delete
 
 
@@ -51,7 +52,7 @@ feature -- Delete
 				tctreeclear((TCTREE *)$a_tree)
 			}"
 		end
-		
+
 	tctreecutfringe(a_tree : POINTER; a_num : INTEGER_32)
 		--/* Remove fringe records of a tree object.
 		--   `tree' specifies the tree object.
@@ -344,7 +345,7 @@ feature -- Access
 				tctreevals((const TCTREE *)$a_tree)
 			}"
 		end
-		
+
 feature -- Iterator
 
 	tctreeiterinit (a_tree : POINTER)
@@ -382,8 +383,8 @@ feature -- Iterator
 				return result;
 			]"
 		end
-		
-		
+
+
 	tctreeiternext2 (a_tree : POINTER) : POINTER
 		--/* Get the next key string of the iterator of a tree object.
 		--   `tree' specifies the tree object.

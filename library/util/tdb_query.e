@@ -10,9 +10,9 @@ class
 inherit
 	TC_TDB_QUERY
 
-create
+create {TDB_API}
 	make_by_pointer
-feature -- Iinitialization
+feature {TDB_API} -- Iinitialization
 
 	make_by_pointer ( a_tdb : POINTER)
 			-- Create an object Query based on a table database pointer `a_tdb'
@@ -25,14 +25,17 @@ feature -- Iinitialization
 		end
 
 feature -- Access
-	search : POINTER
+
+	search : LIST[STRING]
 		-- Execute the search of a query object.
 		-- The return value is a list object of the primary keys of the corresponding records.  This
 		-- function does never fail.  It returns an empty list even if no record corresponds.
+		local
+			l_list : LIST_API
 		do
-			Result := tctdbqrysearch (qry)
-		ensure
-			valid_response : Result /= default_pointer
+			create l_list.make_by_pointer(tctdbqrysearch (qry))
+			Result := l_list.as_list
+			l_list.delete
 		end
 
 	hint : STRING

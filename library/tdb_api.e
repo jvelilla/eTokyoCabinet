@@ -13,7 +13,6 @@ inherit
 
 	KL_SHARED_FILE_SYSTEM
 
-	TC_SERIALIZATION
 create
 	make
 
@@ -460,18 +459,17 @@ feature -- Error Messages
 		end
 
 feature -- Access
-	record_size ( a_key : ANY) :INTEGER_32
-			-- Get the size of the value of a record in a table database object
-		local
-			s8 : STRING
+
+	query : TDB_QUERY
 		do
-			if a_key.conforms_to (a_string_8) then
-                s8 ?= a_key
-                Result := internal_record_size_string (s8)
-            else
-            	Result := internal_record_size (a_key)
-            end
+			create Result.make_by_pointer (tdb)
 		end
+
+	record_size ( a_key : STRING) :INTEGER_32
+			-- Get the size of the value of a record in a table database object
+		do
+	        	Result := internal_record_size_string(a_key)
+    	end
 
 	valid_open_modes : ARRAY[INTEGER]
 			-- valid open database modes
@@ -479,17 +477,22 @@ feature -- Access
 			Result := <<owriter,owriter.bit_or (ocreat),owriter.bit_or(otrunc),owriter.bit_or (otsync),owriter.bit_or (olcknb),owriter.bit_or (onolck),oreader,oreader.bit_or (olcknb),oreader.bit_or (onolck)>>
 		end
 
-	get_map ( a_key : STRING ) : POINTER
+	get_map ( a_key : STRING ) : HASH_TABLE [STRING,STRING]
 			-- Retrieve a record in a table database object.
-			-- The return value is a pointer to a map object of the columns of the corresponding record `a_key'.
+			-- The return value is a map object of the columns of the corresponding record `a_key'.
 		require
 			is_open : is_open
 		local
 			r : POINTER
 			c_key : C_STRING
+			l_map : MAP_API
+			l_pointer : POINTER
 		do
 			create c_key.make (a_key)
-			Result := tctdbget (tdb, c_key.item, a_key.count)
+			l_pointer := tctdbget (tdb, c_key.item, a_key.count)
+			create l_map.make_by_pointer(l_pointer)
+			Result := l_map.as_map
+			l_map.delete
 		end
 
 	generate_unique_id : INTEGER_64
@@ -506,21 +509,14 @@ feature -- Access
 
 
 feature -- Element Change
-	put_map ( a_key : ANY; a_map : MAP_API[ANY,ANY])
+	put_map ( a_key : STRING; a_map : HASH_TABLE[STRING,STRING])
 			-- Store a record into a table database object.
 			-- `a_map' specifies a map object containing columns
 		require
 			is_open_mode_writer : is_open_mode_writer
-		local
-			s8 : STRING
 		do
-			if a_key.conforms_to (a_string_8) then
-				s8 ?= a_key
-                internal_put_map_string (s8,a_map)
-            else
-            	internal_put_map (a_key, a_map)
-            end
-		end
+	            internal_put_map_string (a_key,a_map)
+    	end
 
 
 	put_cat_string (a_key: STRING; a_value: STRING)
@@ -671,31 +667,21 @@ feature {NONE} -- Implementation
 
 
 
-	internal_put_map_string ( a_key : STRING; a_map : MAP_API [ANY,ANY])
+	internal_put_map_string ( a_key : STRING; a_map : HASH_TABLE[STRING,STRING])
 		local
 			c_key : C_STRING
 			b : BOOLEAN
+			l_map : MAP_API
 		do
 			create c_key.make (a_key)
-			b := tctdbput (tdb, c_key.item, a_key.count, a_map.map)
+			create l_map.make_by_map (a_map)
+			b := tctdbput (tdb, c_key.item, a_key.count, l_map.map)
 			if not b then
 				has_error := true
 			end
 		end
 
-	internal_put_map ( a_key : ANY; a_map : MAP_API [ANY,ANY])
-		local
-			str : STRING
-			c_key : C_STRING
-			b : BOOLEAN
-		do
-			str := serialize (a_key)
-			create c_key.make (str)
-			b := tctdbput (tdb, c_key.item, str.count, a_map.map)
-			if not b then
-				has_error := true
-			end
-		end
+
 
 
 	internal_record_size_string ( a_key : STRING ) : INTEGER
@@ -708,25 +694,13 @@ feature {NONE} -- Implementation
 		end
 
 
-	internal_record_size( a_key : ANY ) : INTEGER
-		local
-			c_key : C_STRING
-			str : STRING
-
-		do
-			str := serialize (a_key)
-			create c_key.make (str)
-			Result := tctdbvsiz (tdb, c_key.item, str.count)
-		end
-
-
 	a_string_8: STRING_8 is
         once
             Result := ""
         end
 
 
-	
+
 
 feature -- Representation
 	tdb: POINTER

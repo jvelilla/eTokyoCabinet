@@ -21,6 +21,19 @@ feature -- Create List
 			}"
 		end
 
+	tclistnew2 (a_num : INTEGER) : POINTER
+		--	Create a list object with expecting the number of elements.
+		--  `anum' specifies the number of elements expected to be stored in the list.
+		--   The return value is the new list object. */
+		--TCLIST *tclistnew2(int anum);
+		external
+			"C inline use <tcutil.h>"
+		alias
+			"{
+				tclistnew2((int)$a_num)
+			}"
+		end
+
 feature -- Delete
 
 	tclistdel (a_list : POINTER)

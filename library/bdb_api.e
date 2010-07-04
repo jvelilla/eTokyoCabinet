@@ -30,7 +30,7 @@ feature {NONE} -- Initialization
 
 feature -- Access
 
-	range_string ( a_start_key : STRING; key_start_inclusive:BOOLEAN; an_end_key : STRING; key_end_inclusive:BOOLEAN) : POINTER
+	range_string ( a_start_key : STRING; key_start_inclusive:BOOLEAN; an_end_key : STRING; key_end_inclusive:BOOLEAN) : LIST[STRING]
 			--	 Get string keys of ranged records in a B+ tree database object.
 			--   `a_start_key' specifies the string of the key of the beginning border.  If it is `NULL', the first
 			--   record is specified.
@@ -47,28 +47,34 @@ feature -- Access
 		local
 			c_skey: C_STRING
 			c_ekey: C_STRING
+			l_list : LIST_API
 		do
 				create c_skey.make (a_start_key)
 				create c_ekey.make (an_end_key)
-				Result :=tcbdbrange2 (bdb, c_skey.item,key_start_inclusive, c_ekey.item, key_end_inclusive,-1)
+				create l_list.make_by_pointer(tcbdbrange2 (bdb, c_skey.item,key_start_inclusive, c_ekey.item, key_end_inclusive,-1))
 				--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is specified.
+				Result := l_list.as_list
+				l_list.delete
 		end
 
 
-	list_string ( a_key : STRING ) : POINTER
+	list_string ( a_key : STRING ) : LIST[STRING]
 			-- retrieve records in a B+ tree database object.
 			-- If successful, the return value is a list object of the values of the corresponding records. `NULL' is returned if no record corresponds.
 		require
 			is_database_open : is_open
 		local
 			c_key :C_STRING
+			l_list : LIST_API
 		do
 			create c_key.make (a_key)
-			Result := tcbdbget4 (bdb, c_key.item,a_key.count)
+			create l_list.make_by_pointer (tcbdbget4 (bdb, c_key.item,a_key.count))
+			Result := l_list.as_list
+			l_list.delete
 		end
 
 
-	forward_matching_string_keys ( a_prefix : STRING) : POINTER
+	forward_matching_string_keys ( a_prefix : STRING) : LIST[STRING]
 			--  Get forward matching string keys in a B+ tree database object.
 			--   `a_prefix' specifies the string of the prefix.
 			--   The return value is a list object of the corresponding keys.  This function does never fail.
@@ -77,12 +83,14 @@ feature -- Access
 			is_open_database : is_open
 		local
 			c_prefix : C_STRING
+			l_list : LIST_API
 		do
 			create c_prefix.make (a_prefix)
-			Result := tcbdbfwmkeys2 (bdb, c_prefix.item,-1)
+			create l_list.make_by_pointer (tcbdbfwmkeys2 (bdb, c_prefix.item,-1))
 			--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is
 			--   specified.
-
+			Result := l_list.as_list
+			l_list.delete
 		end
 
 feature -- Open Database

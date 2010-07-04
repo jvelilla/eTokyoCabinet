@@ -99,83 +99,86 @@ feature -- Test routines
 	test_put_map
 			-- New test routine
 		local
-			cols : MAP_API[STRING,STRING]
-			r_cols : MAP_API[STRING,STRING]
+			l_cols : HASH_TABLE[STRING,STRING]
+			r_cols : HASH_TABLE[STRING,STRING]
 			str : STRING
 		do
 
 			tdb.open_writer_create ("casket.tct")
 			assert ("Empty Database", tdb.records_number = 0)
-			create cols.make
-			cols.put ("name", "javier")
-			cols.put ("age", "30")
-			cols.put ("lang", "es,en")
-			tdb.put_map ("key", cols)
+			create l_cols.make (3)
+			l_cols.put ("javier","name")
+			l_cols.put ("30","age")
+			l_cols.put ("es,en","lang")
+
+			tdb.put_map ("key", l_cols)
 			assert ("One Element", tdb.records_number = 1)
 
-			create cols.make
-			cols.put ("name", "diego")
-			cols.put ("age", "50")
-			cols.put ("lang", "it,en")
-			cols.put ("skills", "db,scripting")
-			tdb.put_map ("key2", cols)
+			create l_cols.make(4)
+			l_cols.put ("diego","name")
+			l_cols.put ("50","age")
+			l_cols.put ("it,en","lang")
+			l_cols.put ("db,scripting","skills")
+			tdb.put_map ("key2", l_cols)
 			assert ("Two Elements", tdb.records_number = 2)
 
-			create r_cols.make_by_pointer (tdb.get_map ("key"))
-			assert ("Expected Name", r_cols.get ("name").is_equal ("javier"))
-			assert ("Expected age", r_cols.get ("age").is_equal ("30"))
+			r_cols  := tdb.get_map ("key")
+			assert ("Expected Name", r_cols.at ("name").is_equal ("javier"))
+			assert ("Expected age", r_cols.at ("age").is_equal ("30"))
 
 			str := tdb.get_string ("key")
-			assert ("Tab string record", str.is_equal ("name%Tjavier%Tage%T30%Tlang%Tes,en"))
+			assert ("Tab string record", str.is_equal ("age%T30%Tname%Tjavier%Tlang%Tes,en"))
 		end
 
 
 	test_search
 			-- New test routine
 		local
-			cols : MAP_API[STRING,STRING]
-			r_cols : MAP_API[STRING,STRING]
+			l_cols: HASH_TABLE [STRING,STRING]
 			str : STRING
 			qry : TDB_QUERY
-			l_list : LIST_API[STRING]
+			l_list : LIST[STRING]
+			r_cols : HASH_TABLE [STRING,STRING]
+
 		do
 
 			tdb.open_writer_create ("casket.tct")
 			assert ("Empty Database", tdb.records_number = 0)
-			create cols.make
-			cols.put ("name", "javier")
-			cols.put ("age", "30")
-			cols.put ("lang", "es,en")
-			tdb.put_map ("key", cols)
+			create l_cols.make(4)
+			l_cols.put ("javier","name")
+			l_cols.put ("30","age")
+			l_cols.put ("es,en","lang")
+
+			tdb.put_map ("key", l_cols)
 			assert ("One Element", tdb.records_number = 1)
 
-			create cols.make
-			cols.put ("name", "diego")
-			cols.put ("age", "50")
-			cols.put ("lang", "it,en")
-			cols.put ("skills", "db,scripting")
-			tdb.put_map ("key2", cols)
+			create l_cols.make(4)
+			l_cols.put ("diego","name")
+			l_cols.put ("50","age")
+			l_cols.put ("it,en","lang")
+			l_cols.put ("db,scripting","skills")
+			tdb.put_map ("key2", l_cols)
 			assert ("Two Elements", tdb.records_number = 2)
 
-			create r_cols.make_by_pointer (tdb.get_map ("key"))
-			assert ("Expected Name", r_cols.get ("name").is_equal ("javier"))
-			assert ("Expected age", r_cols.get ("age").is_equal ("30"))
+			r_cols := tdb.get_map ("key")
+			assert ("Expected Name", r_cols.at ("name").is_equal ("javier"))
+			assert ("Expected age", r_cols.at ("age").is_equal ("30"))
 
-			create qry.make_by_pointer (tdb.tdb)
+			qry := tdb.query
 
 			qry.add_condition ("age", qry.qcnumge, "20")
 			qry.add_condition ("lang", qry.qcstror, "es,en")
 			qry.set_order ("name", qry.qostrasc)
 			qry.set_limit (10,0)
 
-			create l_list.make_by_pointer (qry.search)
-			assert ("two elements", l_list.elements = 2)
-			assert ("Expected key2",l_list.value (1).is_equal ("key2"))
-			create r_cols.make_by_pointer ( tdb.get_map (l_list.value (1)))
-			assert ("Expected Name diego",r_cols.get ("name").is_equal ("diego"))
-			assert ("Expected Age 50",r_cols.get ("age").is_equal ("50"))
+			l_list := qry.search
+			assert ("two elements", l_list.count = 2)
+			assert ("Expected key2",l_list.at (1).is_equal ("key2"))
+			r_cols := tdb.get_map (l_list.at (1))
+			assert ("Expected Name diego",r_cols.at ("name").is_equal ("diego"))
+			assert ("Expected Age 50",r_cols.at ("age").is_equal ("50"))
 			str := tdb.get_string ("key")
-			assert ("Tab string record", str.is_equal ("name%Tjavier%Tage%T30%Tlang%Tes,en"))
+			assert ("Tab string record", str.is_equal ("age%T30%Tname%Tjavier%Tlang%Tes,en"))
 		end
 
 feature -- Implementation

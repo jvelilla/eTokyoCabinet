@@ -11,7 +11,7 @@ feature -- Example
 
 	example
 		local
-			l_list : LIST_API[STRING]
+			l_list : LIST[STRING]
 			i : INTEGER
 		do
 			print ("%N ===================== BTREE DATABASE EXAMPLE  =========================%N")
@@ -36,61 +36,61 @@ feature -- Example
 
 			-- retrive all records
 			print ("%N Retrieve all records by key %N")
-			create l_list.make_by_pointer (bdb.list_string ("key1"))
+			l_list := bdb.list_string ("key1")
 			from
 				i := 1
 			until
-				i > l_list.elements
+				i > l_list.count
 			loop
-				print ("%N Index:" + i.out + ":Value:" +l_list.value (i))
+				print ("%N Index:" + i.out + ":Value:" +l_list.at (i))
 				i := i + 1
 			end
 
 			-- range query, find all matching keys
 			print ("%N Range query %N")
-			create l_list.make_by_pointer (bdb.range_string("key1", true, "key3", true))
+			l_list:= bdb.range_string("key1", true, "key3", true)
 			from
 				i := 1
 			until
-				i > l_list.elements
+				i > l_list.count
 			loop
-				print ("%N Index:" + i.out + ":Key:" +l_list.value (i))
+				print ("%N Index:" + i.out + ":Key:" +l_list.at (i))
 				i := i + 1
 			end
 
 
 			-- forward matching keys,
 			print ("%N Forward matching 'a'%N")
-			create l_list.make_by_pointer (bdb.forward_matching_string_keys ("a"))
+			l_list := bdb.forward_matching_string_keys ("a")
 			from
 				i := 1
 			until
-				i > l_list.elements
+				i > l_list.count
 			loop
-				print ("%N Index:" + i.out + ":Key:" +l_list.value (i))
+				print ("%N Index:" + i.out + ":Key:" +l_list.at (i))
 				i := i + 1
 			end
 
 
 			print ("%N Forward matching 'an'%N")
-			create l_list.make_by_pointer (bdb.forward_matching_string_keys ("an"))
+			l_list := bdb.forward_matching_string_keys ("an")
 			from
 				i := 1
 			until
-				i > l_list.elements
+				i > l_list.count
 			loop
-				print ("%N Index:" + i.out + ":Key:" +l_list.value (i))
+				print ("%N Index:" + i.out + ":Key:" +l_list.at (i))
 				i := i + 1
 			end
 
 			print ("%N Forward matching 'e'%N")
-			create l_list.make_by_pointer (bdb.forward_matching_string_keys ("e"))
+			l_list := bdb.forward_matching_string_keys ("e")
 			from
 				i := 1
 			until
-				i > l_list.elements
+				i > l_list.count
 			loop
-				print ("%N Index:" + i.out + ":Key:" +l_list.value (i))
+				print ("%N Index:" + i.out + ":Key:" +l_list.at (i))
 				i := i + 1
 			end
 		end

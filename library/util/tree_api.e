@@ -5,11 +5,9 @@ note
 	revision: "$Revision$"
 
 class
-	TREE_API [V,K]
+	TREE_API
 inherit
 	TC_TREE_API
-
-	TC_SERIALIZATION
 
 create
 	make,
@@ -31,14 +29,17 @@ feature -- Initialization
 		ensure
 			assigned_tree : tree = p
 		end
+
+
+
 feature -- Access
-	found_element : V
+	found_element : STRING
 		-- if any, yielded by last has_key operation
 
-	has_key (a_key : K) : BOOLEAN
+	has_key (a_key : STRING) : BOOLEAN
 			-- Is there an element in the tree with key `a_key'? Set `found_element' to the found element.
 			local
-				l_value : V
+				l_value : STRING
 			do
 				l_value := get (a_key)
 				if l_value /= Void then
@@ -49,26 +50,14 @@ feature -- Access
 				found : Result implies (found_element /= Void)
 			end
 
-	get ( a_key : K ) : V
+	get ( a_key : STRING ) : STRING
 			-- Item associated with `a_key', if present
 			-- otherwise default value of type `STRING'
 		require
 			is_valid_key : a_key /= Void
-		local
-			l_internal : INTERNAL
-			class_name : STRING
-			s8 : STRING
 		do
-		    create l_internal
-		    class_name := l_internal.type_name (Current)
-
-			if class_name.is_equal("TREE_API [STRING_8, STRING_8]") then
-                s8 ?= a_key
-                Result ?= internal_get_string (s8)
-            else
-            	Result ?= internal_get (a_key)
-            end
-		end
+		        Result := internal_get_string (a_key)
+        end
 
 	elements : NATURAL_64
 		-- number of records stored in a tree object.
@@ -88,101 +77,65 @@ feature -- Access
 			Result := tctreemsiz (tree)
 		end
 
-	tree_keys : LIST_API[K]
+	tree_keys : LIST[STRING]
 			--  Create a list object containing all keys in a tree object.
 		local
 			r : POINTER
-
+			l_list : LIST_API
 		do
 			r:= tctreekeys (tree)
 			if r /= default_pointer then
-				create Result.make_by_pointer (r)
+				create l_list.make_by_pointer (r)
+				Result := l_list.as_list
 			end
 		end
 
-	tree_values : LIST_API[V]
+	tree_values : LIST[STRING]
 			-- Create a list object containing all values in a tree object
 		local
 			r: POINTER
+			l_list : LIST_API
 		do
 			r:= tctreevals (tree)
 			if r /= default_pointer then
-				create Result.make_by_pointer (r)
+				create l_list.make_by_pointer (r)
+				Result := l_list.as_list
 			end
 		end
 
 feature -- Element Change
 
-	duplicate : TREE_API [V,K]
+	duplicate : TREE_API
 			-- Copy a tree object.
 			-- The return value is the new tree object equivalent to the Current object.
 		do
 			Result.make_by_pointer (tctreedup (tree))
 		end
 
-	put ( a_key : K; a_value : V)
+	put ( a_key : STRING; a_value : STRING)
 			-- Store a record into a tree object.
 			-- If a record with the same key exists in the tree, it is overwritten.
-		local
-			l_internal : INTERNAL
-			class_name : STRING
-			k8,v8 : STRING
 		do
-		    create l_internal
-		    class_name := l_internal.type_name (Current)
-
-			if class_name.is_equal("TREE_API [STRING_8, STRING_8]") then
-                k8 ?= a_key
-                v8 ?= a_value
-                internal_put_string (k8 , v8)
-            else
-            	internal_put (a_key, a_value)
-            end
+                internal_put_string (a_key, a_value)
         ensure
         	added :old is_empty implies (old elements + 1 = elements)
         	added_or_ovewriten : not (old is_empty) implies ( (old elements + 1 = elements) or (old elements = elements))
 		end
 
-	put_keep ( a_key : K; a_value : V)
+	put_keep ( a_key : STRING; a_value : STRING)
 			-- Store a new record into a tree object.
 			-- If a record with the same key exists in the tree, this function has no effect.
-		local
-			l_internal : INTERNAL
-			class_name : STRING
-			k8,v8 : STRING
 		do
-		    create l_internal
-		    class_name := l_internal.type_name (Current)
-
-			if class_name.is_equal("TREE_API [STRING_8, STRING_8]") then
-                k8 ?= a_key
-                v8 ?= a_value
-                internal_put_keep_string (k8 , v8)
-            else
-            	internal_put_keep (a_key, a_value)
-            end
-		end
+	            internal_put_keep_string (a_key , a_value)
+    	end
 
 
-	put_cat ( a_key : K; a_value : V)
+	put_cat ( a_key : STRING; a_value : STRING)
 			-- Concatenate a value at the end of the value of the existing record in a tree object
 			-- If there is no corresponding record, a new record is created
-		local
-			l_internal : INTERNAL
-			class_name : STRING
-			k8,v8 : STRING
 		do
-		    create l_internal
-		    class_name := l_internal.type_name (Current)
-
-			if class_name.is_equal("TREE_API [STRING_8, STRING_8]") then
-                k8 ?= a_key
-                v8 ?= a_value
-                internal_put_cat_string (k8 , v8)
-            else
-            	internal_put_cat (a_key, a_value)
-            end
-		end
+	        	internal_put_cat_string (a_key, a_value)
+    	end
 
 feature -- Remove
 	clear
@@ -195,25 +148,13 @@ feature -- Remove
 		end
 
 
-	remove ( a_key : K )
+	remove ( a_key : STRING )
 		-- Remove a record of a tree object.
 		require
 			has_key : has_key (a_key)
-		local
-			l_internal : INTERNAL
-			class_name : STRING
-			k8 : STRING
 		do
-			create l_internal
-		    class_name := l_internal.type_name (Current)
-
-			if class_name.is_equal("TREE_API [STRING_8, STRING_8]") then
-                k8 ?= a_key
-                internal_remove_string (k8 )
-            else
-            	internal_remove (a_key)
-            end
-		ensure
+	            internal_remove_string (a_key )
+    	ensure
 			remove_record : old elements - 1 = elements
 			not_has_key   : not has_key (a_key)
 		end
@@ -225,21 +166,14 @@ feature -- Iterator
 			tctreeiterinit (tree)
 		end
 
-	iterator_next : V
+	iterator_next : STRING
 			-- Get the next key of the iterator of a tree object.
 		local
 			l_internal : INTERNAL
 			class_name : STRING
 		do
-			create l_internal
-		    class_name := l_internal.type_name (Current)
-
-			if class_name.is_equal("TREE_API [STRING_8, STRING_8]") then
-                Result ?= internal_iterator_next_string
-            else
-            	Result ?= internal_iterator_next_string
-            end
-		end
+                Result := internal_iterator_next_string
+     	end
 
 feature {NONE} -- Implementation
 	internal_get_string ( a_key : STRING) : STRING
@@ -255,24 +189,6 @@ feature {NONE} -- Implementation
 		end
 
 
-	internal_get (a_key : K) : V
-		local
-			r : POINTER
-			c,str : STRING
-			sc,str_p : C_STRING
-			i : INTEGER
-		do
-			str :=serialize (a_key)
-			create str_p.make (str)
-			r := tctreeget (tree, str_p.item, str.count, $i)
-			if r /= default_pointer then
-				create sc.make_by_pointer_and_count (r, i)
-				c := sc.substring (1, i)
-		    	Result ?= deserialize (c)
-		    end
-		end
-
-
 	internal_put_string (a_key : STRING; a_value : STRING)
 		local
 			c_key : C_STRING
@@ -284,20 +200,6 @@ feature {NONE} -- Implementation
 		end
 
 
-	internal_put (a_key : K; a_value : V)
-		local
-			str_k : STRING
-			c_str_k : C_STRING
-			str_v : STRING
-			c_str_v : C_STRING
-		do
-			str_k := serialize (a_key)
-			create c_str_k.make (str_k)
-
-			str_v := serialize (a_value)
-			create c_str_v.make (str_v)
-			tctreeput (tree, c_str_k.item, str_k.count, c_str_v.item, str_v.count)
-		end
 
 	internal_put_keep_string ( a_key : STRING; a_value : STRING)
 		local
@@ -310,21 +212,6 @@ feature {NONE} -- Implementation
 			l_b:= tctreeputkeep2 (tree, c_key.item,c_value.item)
 		end
 
-	internal_put_keep (a_key : K; a_value : V)
-		local
-			str_k : STRING
-			c_str_k : C_STRING
-			str_v : STRING
-			c_str_v : C_STRING
-			l_b : BOOLEAN
-		do
-			str_k := serialize (a_key)
-			create c_str_k.make (str_k)
-
-			str_v := serialize (a_value)
-			create c_str_v.make (str_v)
-			l_b := tctreeputkeep (tree, c_str_k.item, str_k.count, c_str_v.item, str_v.count)
-		end
 
 	internal_put_cat_string ( a_key : STRING; a_value : STRING)
 		local
@@ -336,22 +223,6 @@ feature {NONE} -- Implementation
 			tctreeputcat2 (tree, c_key.item,c_value.item)
 		end
 
-	internal_put_cat (a_key : K; a_value : V)
-		local
-			str_k : STRING
-			c_str_k : C_STRING
-			str_v : STRING
-			c_str_v : C_STRING
-		do
-			str_k := serialize (a_key)
-			create c_str_k.make (str_k)
-
-			str_v := serialize (a_value)
-			create c_str_v.make (str_v)
-			tctreeputcat (tree, c_str_k.item, str_k.count, c_str_v.item, str_v.count)
-		end
-
-
 
 	internal_remove_string (a_key : STRING)
 		local
@@ -361,38 +232,6 @@ feature {NONE} -- Implementation
 			create c_key.make (a_key)
 			l_b := tctreeout2 (tree, c_key.item)
 			check l_b end
-		end
-
-
-	internal_remove (a_key : K)
-		local
-			str : STRING
-			str_p : C_STRING
-			l_b : BOOLEAN
-		do
-			str := serialize (a_key)
-			create str_p.make (str)
-			l_b := tctreeout (tree, str_p.item, str.count)
-			check l_b end
-		end
-
-
-
-
-	internal_iterator_next : V
-			-- Get the next key of the iterator of a tree object.
-		local
-			r: POINTER
-			i : INTEGER
-			c : STRING
-			sc : C_STRING
-		do
-			r := tctreeiternext (tree, $i)
-			if r /= default_pointer then
-				create sc.make_by_pointer_and_count (r, i)
-				c := sc.substring (1, i)
-		    	Result ?= deserialize (c)
-			end
 		end
 
 

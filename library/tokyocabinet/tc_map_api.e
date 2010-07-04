@@ -22,6 +22,19 @@ feature -- Create Map
 				}"
 		end
 
+
+	tcmapnew2 ( a_num : NATURAL_32) : POINTER
+		--/* Create a map object with specifying the number of the buckets.
+		--   `bnum' specifies the number of the buckets.
+		--   The return value is the new map object. */
+		--TCMAP *tcmapnew2(uint32_t bnum);
+		external
+			"C inline use <tcutil.h>"
+		alias
+			"{
+				tcmapnew2((uint32_t) $a_num)
+			}"
+		end
 feature -- Copy
 	tcmapdup ( a_map : POINTER ) : POINTER
 		--/* Copy a map object.
@@ -182,8 +195,8 @@ feature -- Element Change
 				tcmapputcat2((TCMAP *)$a_map, (const char *)$a_kstr, (const char *)$a_vstr)
 				}"
 		end
-		
-		
+
+
 	tcmapout (a_map : POINTER; a_kbuf : POINTER; a_ksiz : INTEGER) : BOOLEAN
 		--/* Remove a record of a map object.
 		--   `map' specifies the map object.
@@ -299,8 +312,8 @@ feature -- Query
 				tcmapmsiz((const TCMAP *)$a_map)
 			]"
 		end
-		
-		
+
+
 
 	tcmapkeys (a_map : POINTER) : POINTER
 		--/* Create a list object containing all keys in a map object.

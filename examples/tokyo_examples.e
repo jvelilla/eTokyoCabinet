@@ -11,8 +11,8 @@ feature -- Initialization
 			tc_database_performace : TC_DATABASE_PERFORMANCE
 			l_btree_example : BTREE_DATABASE_EXAMPLE
 		do
---			create l_tdb_example
---			l_tdb_example.example
+			create l_tdb_example
+			l_tdb_example.example
 			create tc_database_performace
 			tc_database_performace.hash_table_performance
 			tc_database_performace.btree_table_performance

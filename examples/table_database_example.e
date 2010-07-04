@@ -14,8 +14,8 @@ feature
 			tdb : TDB_API
 			qry : TDB_QUERY
 			key : STRING
-			map : MAP_API[STRING,STRING]
-			list_of_keys : LIST_API [STRING]
+			map : HASH_TABLE[STRING,STRING]
+			list_of_keys : LIST [STRING]
 		do
 			--	create the object
 		    create tdb.make
@@ -40,19 +40,19 @@ feature
 			key := tdb.generate_unique_id.out  -- generate a unique Id
 
 			-- Create a map
-			create map.make
-			map.put ("name", "juan")
-			map.put ("age", "50")
-			map.put ("sex", "male")
+			create map.make(3)
+			map.put ("juan","name")
+			map.put ("50","age")
+			map.put ("male","sex")
 
 			tdb.put_map (key, map)
 
 			-- Store other record
-			create map.make
-			map.put ("name", "elena")
-			map.put ("age", "12")
-			map.put ("sex", "female")
-			map.put ("lang", "en,es,it")
+			create map.make (4)
+			map.put ("elena","name")
+			map.put ("12","age")
+			map.put ("female","sex")
+			map.put ("en,es,it","lang")
 			tdb.put_map ("pk1", map)
 
 			-- Now we have two records
@@ -68,22 +68,22 @@ feature
 			-- Order_by name asc
 
 			-- Create a query object
-			create qry.make_by_pointer (tdb.tdb)
+			qry := tdb.query
 			qry.add_condition ("age", qry.qcnumge,"18")
 			qry.set_order ("name", qry.qostrasc)
 
 			-- excecute query
-			create list_of_keys.make_by_pointer (qry.search)
+			list_of_keys := qry.search
 
 			-- Find one element
 			check
-				list_of_keys.elements = 1
+				list_of_keys.count = 1
 			end
 
 			-- Show element
-			create map.make_by_pointer (tdb.get_map (list_of_keys.value (1)))
-			print ("%Nname:" + map.get ("name"))
-			print ("%Nage :" + map.get ("age"))
+			map := tdb.get_map (list_of_keys.at (1))
+			print ("%Nname:" + map.at ("name"))
+			print ("%Nage :" + map.at ("age"))
 
 
 			--close the database
