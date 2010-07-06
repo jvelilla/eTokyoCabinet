@@ -25,6 +25,69 @@ feature {NONE} -- Initialization
 			is_open := False
 			has_error := False
 		end
+feature -- Access
+
+	forward_matching_string_keys ( a_prefix : STRING) : LIST[STRING]
+		require
+			is_open_database : is_open
+		local
+			l_api : LIST_API
+			c_prefix : C_STRING
+		do
+			create c_prefix.make (a_prefix)
+			create l_api.make_by_pointer (tctdbfwmkeys2 (tdb, c_prefix.item, -1))
+			Result := l_api.as_list
+			l_api.delete
+		end
+
+	query : TDB_QUERY
+		do
+			create Result.make_by_pointer (tdb)
+		end
+
+	record_size ( a_key : STRING) :INTEGER_32
+			-- Get the size of the value of a record in a table database object
+		do
+	        	Result := internal_record_size_string(a_key)
+    	end
+
+	valid_open_modes : ARRAY[INTEGER]
+			-- valid open database modes
+		once
+			Result := <<owriter,owriter.bit_or (ocreat),owriter.bit_or(otrunc),owriter.bit_or (otsync),owriter.bit_or (olcknb),owriter.bit_or (onolck),oreader,oreader.bit_or (olcknb),oreader.bit_or (onolck)>>
+		end
+
+	get_map ( a_key : STRING ) : HASH_TABLE [STRING,STRING]
+			-- Retrieve a record in a table database object.
+			-- The return value is a map object of the columns of the corresponding record `a_key'.
+		require
+			is_open : is_open
+		local
+			r : POINTER
+			c_key : C_STRING
+			l_map : MAP_API
+			l_pointer : POINTER
+		do
+			create c_key.make (a_key)
+			l_pointer := tctdbget (tdb, c_key.item, a_key.count)
+			create l_map.make_by_pointer(l_pointer)
+			Result := l_map.as_map
+			l_map.delete
+		end
+
+	generate_unique_id : INTEGER_64
+		--	Generate a unique ID number of a table database object.
+		--  The return value is the new unique ID number or -1 on failure.
+		require
+			is_database_open_writer_mode : is_open_mode_writer
+		do
+			Result := tctdbgenuid (tdb)
+			if Result = -1 then
+				has_error := true
+			end
+		end
+
+
 
 feature -- Open Database
 
@@ -277,7 +340,38 @@ feature -- Close and Delete
 			is_database_closed : not is_open
 
 		end
+feature -- Change Element
+	put_map ( a_key : STRING; a_map : HASH_TABLE[STRING,STRING])
+			-- Store a record into a table database object.
+			-- `a_map' specifies a map object containing columns
+		require
+			is_open_mode_writer : is_open_mode_writer
+		do
+	            internal_put_map_string (a_key,a_map)
+    	end
 
+
+	put_cat_string (a_key: STRING; a_value: STRING)
+		--	Concatenate columns in a table database object with with a tab separated column string.
+		--  `a_key' specifies the string of the primary key.
+		--  `a_value' specifies the string of the the tab separated column string where the name and the
+		--   value of each column are situated one after the other.
+		require
+			is_open_mode_writer : is_open_mode_writer
+			is_valid_key: a_key /= Void and (not a_key.is_empty)
+			is_valid_value: a_value /= Void and (not a_value.is_empty)
+		local
+			c_key: C_STRING
+			c_value: C_STRING
+			l_b: BOOLEAN
+		do
+			create c_key.make (a_key)
+			create c_value.make (a_value)
+			l_b := tctdbputcat3 (tdb, c_key.item, c_value.item)
+			if not l_b then
+				has_error := True
+			end
+		end
 feature -- Database Control
 
 	db_copy (a_path : STRING)
@@ -437,7 +531,22 @@ feature -- Database Control
 			end
 		end
 
-feature -- Error Messages
+
+feature -- Remove
+	vanish
+		--Remove all records of a table database object.
+		require
+			is_database_open_writer : is_open_mode_writer
+		local
+			b : BOOLEAN
+		do
+		 	b := tctdbvanish (tdb)
+		 	if not b then
+		 		has_error := True
+		 	end
+		end
+
+feature -- Error Message
 
 	error_message (a_code: INTEGER_32): STRING
 			-- Get the message string corresponding to an error code.
@@ -458,114 +567,7 @@ feature -- Error Messages
 			Result := error_code_implementation
 		end
 
-feature -- Access
 
-	forward_matching_string_keys ( a_prefix : STRING) : LIST[STRING]
-		require
-			is_open_database : is_open
-		local
-			l_api : LIST_API
-			c_prefix : C_STRING
-		do
-			create c_prefix.make (a_prefix)
-			create l_api.make_by_pointer (tctdbfwmkeys2 (tdb, c_prefix.item, -1))
-			Result := l_api.as_list
-			l_api.delete
-		end
-
-	query : TDB_QUERY
-		do
-			create Result.make_by_pointer (tdb)
-		end
-
-	record_size ( a_key : STRING) :INTEGER_32
-			-- Get the size of the value of a record in a table database object
-		do
-	        	Result := internal_record_size_string(a_key)
-    	end
-
-	valid_open_modes : ARRAY[INTEGER]
-			-- valid open database modes
-		once
-			Result := <<owriter,owriter.bit_or (ocreat),owriter.bit_or(otrunc),owriter.bit_or (otsync),owriter.bit_or (olcknb),owriter.bit_or (onolck),oreader,oreader.bit_or (olcknb),oreader.bit_or (onolck)>>
-		end
-
-	get_map ( a_key : STRING ) : HASH_TABLE [STRING,STRING]
-			-- Retrieve a record in a table database object.
-			-- The return value is a map object of the columns of the corresponding record `a_key'.
-		require
-			is_open : is_open
-		local
-			r : POINTER
-			c_key : C_STRING
-			l_map : MAP_API
-			l_pointer : POINTER
-		do
-			create c_key.make (a_key)
-			l_pointer := tctdbget (tdb, c_key.item, a_key.count)
-			create l_map.make_by_pointer(l_pointer)
-			Result := l_map.as_map
-			l_map.delete
-		end
-
-	generate_unique_id : INTEGER_64
-		--	Generate a unique ID number of a table database object.
-		--  The return value is the new unique ID number or -1 on failure.
-		require
-			is_database_open_writer_mode : is_open_mode_writer
-		do
-			Result := tctdbgenuid (tdb)
-			if Result = -1 then
-				has_error := true
-			end
-		end
-
-
-feature -- Element Change
-	put_map ( a_key : STRING; a_map : HASH_TABLE[STRING,STRING])
-			-- Store a record into a table database object.
-			-- `a_map' specifies a map object containing columns
-		require
-			is_open_mode_writer : is_open_mode_writer
-		do
-	            internal_put_map_string (a_key,a_map)
-    	end
-
-
-	put_cat_string (a_key: STRING; a_value: STRING)
-		--	Concatenate columns in a table database object with with a tab separated column string.
-		--  `a_key' specifies the string of the primary key.
-		--  `a_value' specifies the string of the the tab separated column string where the name and the
-		--   value of each column are situated one after the other.
-		require
-			is_open_mode_writer : is_open_mode_writer
-			is_valid_key: a_key /= Void and (not a_key.is_empty)
-			is_valid_value: a_value /= Void and (not a_value.is_empty)
-		local
-			c_key: C_STRING
-			c_value: C_STRING
-			l_b: BOOLEAN
-		do
-			create c_key.make (a_key)
-			create c_value.make (a_value)
-			l_b := tctdbputcat3 (tdb, c_key.item, c_value.item)
-			if not l_b then
-				has_error := True
-			end
-		end
-feature -- Remove
-	vanish
-		--Remove all records of a table database object.
-		require
-			is_database_open_writer : is_open_mode_writer
-		local
-			b : BOOLEAN
-		do
-		 	b := tctdbvanish (tdb)
-		 	if not b then
-		 		has_error := True
-		 	end
-		end
 
 feature -- Status Report
 

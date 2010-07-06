@@ -26,6 +26,34 @@ feature {NONE} -- Initialization
 			is_open := False
 			has_error := False
 		end
+
+feature -- Access
+	range ( lower_key : STRING; upper_key : STRING) : LIST [STRING]
+			--	`lower_key' specifies the string of the lower key.
+			--  `upper_key' specifies the string of the upper key.
+			--	 The return value is a list object of the corresponding decimal keys.
+			--  It returns an empty list even if no key corresponds.
+		require
+			is_database_open : is_open
+		local
+			c_lower_key : C_STRING
+			c_upper_key : C_STRING
+			l_api : LIST_API
+		do
+			create c_lower_key.make (lower_key)
+			create c_upper_key.make (upper_key)
+			create l_api.make_by_pointer (tcfdbrange3 (fdb, c_lower_key.item, c_upper_key.item, -1))
+			Result := l_api.as_list
+			l_api.delete
+		end
+
+	valid_open_modes : ARRAY[INTEGER]
+			-- valid open database modes
+		once
+			Result := <<owriter,owriter.bit_or (ocreat),owriter.bit_or(otrunc),owriter.bit_or (otsync),owriter.bit_or (olcknb),owriter.bit_or (onolck),oreader,oreader.bit_or (olcknb),oreader.bit_or (onolck)>>
+		end
+
+
 feature -- Open Database
 
 	open_writer (a_path : STRING)
@@ -249,6 +277,37 @@ feature -- Open Database
 			valid_open_mode: is_valid_open_mode (current_open_mode)
 		end
 
+
+
+feature -- Close and Delete
+
+	close
+		-- Close a Fixed Database
+		require
+			is_database_open : is_open
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tcfdbclose (fdb)
+			if not l_b then
+				has_error := True
+			else
+				is_open := False
+			end
+		ensure
+			is_database_closed : not is_open
+		end
+
+	delete
+		-- Delete an Fixed Database
+		do
+			tcfdbdel (fdb)
+			is_open := False
+		ensure
+			is_database_closed : not is_open
+
+		end
+
 feature -- Database Control
 
 	db_copy (a_path : STRING)
@@ -336,35 +395,6 @@ feature -- Database Control
 			end
 		end
 
-feature -- Close and Delete
-
-	close
-		-- Close a Fixed Database
-		require
-			is_database_open : is_open
-		local
-			l_b : BOOLEAN
-		do
-			l_b := tcfdbclose (fdb)
-			if not l_b then
-				has_error := True
-			else
-				is_open := False
-			end
-		ensure
-			is_database_closed : not is_open
-		end
-
-	delete
-		-- Delete an Fixed Database
-		do
-			tcfdbdel (fdb)
-			is_open := False
-		ensure
-			is_database_closed : not is_open
-
-		end
-
 feature -- Remove
 	vanish
 			-- Remove all records of a fixed database object.
@@ -376,7 +406,7 @@ feature -- Remove
 			b := tcfdbvanish (fdb)
 		end
 
-feature -- Error Messages
+feature -- Error Message
 
 	error_message (a_code: INTEGER_32): STRING
 			-- Get the message string corresponding to an error code.
@@ -397,31 +427,6 @@ feature -- Error Messages
 			Result := error_code_implementation
 		end
 
-feature -- Access
-	range ( lower_key : STRING; upper_key : STRING) : LIST [STRING]
-			--	`lower_key' specifies the string of the lower key.
-			--  `upper_key' specifies the string of the upper key.
-			--	 The return value is a list object of the corresponding decimal keys.
-			--  It returns an empty list even if no key corresponds.
-		require
-			is_database_open : is_open
-		local
-			c_lower_key : C_STRING
-			c_upper_key : C_STRING
-			l_api : LIST_API
-		do
-			create c_lower_key.make (lower_key)
-			create c_upper_key.make (upper_key)
-			create l_api.make_by_pointer (tcfdbrange3 (fdb, c_lower_key.item, c_upper_key.item, -1))
-			Result := l_api.as_list
-			l_api.delete
-		end
-
-	valid_open_modes : ARRAY[INTEGER]
-			-- valid open database modes
-		once
-			Result := <<owriter,owriter.bit_or (ocreat),owriter.bit_or(otrunc),owriter.bit_or (otsync),owriter.bit_or (olcknb),owriter.bit_or (onolck),oreader,oreader.bit_or (olcknb),oreader.bit_or (onolck)>>
-		end
 
 feature -- Status Report
 

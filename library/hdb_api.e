@@ -27,6 +27,26 @@ feature {NONE} -- Initialization
 			has_error := False
 		end
 
+feature -- Access
+	forward_matching_string_keys (a_prefix : STRING) : LIST[STRING]
+		require
+			is_databse_open : is_open
+		local
+			c_prefix : C_STRING
+			l_api : LIST_API
+		do
+			create c_prefix.make (a_prefix)
+			create l_api.make_by_pointer (tchdbfwmkeys2 (hdb, c_prefix.item,-1))
+			Result := l_api.as_list
+			l_api.delete
+		end
+
+	valid_open_modes : ARRAY[INTEGER]
+			-- valid open database modes
+		once
+			Result := <<owriter,owriter.bit_or (ocreat),owriter.bit_or(otrunc),owriter.bit_or (otsync),owriter.bit_or (olcknb),owriter.bit_or (onolck),oreader,oreader.bit_or (olcknb),oreader.bit_or (onolck)>>
+		end
+
 feature -- Open Database
 
 
@@ -251,7 +271,54 @@ feature -- Open Database
 		ensure
 			valid_open_mode: is_valid_open_mode (current_open_mode)
 		end
+feature -- Close and Delete
 
+	close
+		-- Close a Hash Database
+		require
+			is_database_open : is_open
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tchdbclose (hdb)
+			if not l_b then
+				has_error := True
+			else
+				is_open := False
+			end
+		ensure
+			is_database_closed : not is_open
+		end
+
+	delete
+		-- Delete a Hash Database
+		do
+			tchdbdel (hdb)
+			is_open := False
+		ensure
+			is_database_closed : not is_open
+
+		end
+
+feature -- Change Element
+
+	put_asyncrhonic_string ( a_key : STRING; a_value : STRING)
+		require
+			is_open_database_writer: is_open_mode_writer
+			is_valid_key: a_key /= Void and (not a_key.is_empty)
+			is_valid_value: a_value /= Void and (not a_value.is_empty)
+		local
+			c_key: C_STRING
+			c_value: C_STRING
+			l_b: BOOLEAN
+		do
+			create c_key.make (a_key)
+			create c_value.make (a_value)
+			l_b := tchdbputasync2 (hdb, c_key.item,c_value.item)
+			if not l_b then
+				has_error := True
+			end
+		end
 feature -- Database Control
 
 	tune (a_bnum: INTEGER_64; an_apow, an_fpow: INTEGER_8; an_opts: NATURAL_8)
@@ -413,25 +480,7 @@ feature -- Database Control
 				has_error := True
 			end
 		end
-feature -- Change Element
 
-	put_asyncrhonic_string ( a_key : STRING; a_value : STRING)
-		require
-			is_open_database_writer: is_open_mode_writer
-			is_valid_key: a_key /= Void and (not a_key.is_empty)
-			is_valid_value: a_value /= Void and (not a_value.is_empty)
-		local
-			c_key: C_STRING
-			c_value: C_STRING
-			l_b: BOOLEAN
-		do
-			create c_key.make (a_key)
-			create c_value.make (a_value)
-			l_b := tchdbputasync2 (hdb, c_key.item,c_value.item)
-			if not l_b then
-				has_error := True
-			end
-		end
 
 feature -- Remove
 	vanish
@@ -444,37 +493,8 @@ feature -- Remove
 			b := tchdbvanish (hdb)
 		end
 
-feature -- Close and Delete
 
-	close
-		-- Close a Hash Database
-		require
-			is_database_open : is_open
-		local
-			l_b : BOOLEAN
-		do
-			l_b := tchdbclose (hdb)
-			if not l_b then
-				has_error := True
-			else
-				is_open := False
-			end
-		ensure
-			is_database_closed : not is_open
-		end
-
-	delete
-		-- Delete a Hash Database
-		do
-			tchdbdel (hdb)
-			is_open := False
-		ensure
-			is_database_closed : not is_open
-
-		end
-
-
-feature -- Error Messages
+feature -- Error Message
 
 	error_message (a_code: INTEGER_32): STRING
 			-- Get the message string corresponding to an error code.
@@ -495,25 +515,7 @@ feature -- Error Messages
 			Result := error_code_implementation
 		end
 
-feature -- Access
-	forward_matching_string_keys (a_prefix : STRING) : LIST[STRING]
-		require
-			is_databse_open : is_open
-		local
-			c_prefix : C_STRING
-			l_api : LIST_API
-		do
-			create c_prefix.make (a_prefix)
-			create l_api.make_by_pointer (tchdbfwmkeys2 (hdb, c_prefix.item,-1))
-			Result := l_api.as_list
-			l_api.delete
-		end
 
-	valid_open_modes : ARRAY[INTEGER]
-			-- valid open database modes
-		once
-			Result := <<owriter,owriter.bit_or (ocreat),owriter.bit_or(otrunc),owriter.bit_or (otsync),owriter.bit_or (olcknb),owriter.bit_or (onolck),oreader,oreader.bit_or (olcknb),oreader.bit_or (onolck)>>
-		end
 feature -- Status Report
 
 	is_valid_path (a_path : STRING) : BOOLEAN

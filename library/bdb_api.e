@@ -29,6 +29,11 @@ feature {NONE} -- Initialization
 		end
 
 feature -- Access
+	valid_open_modes : ARRAY[INTEGER]
+			-- valid open database modes
+		once
+			Result := <<owriter,owriter.bit_or (ocreat),owriter.bit_or(otrunc),owriter.bit_or (otsync),owriter.bit_or (olcknb),owriter.bit_or (onolck),oreader,oreader.bit_or (olcknb),oreader.bit_or (onolck)>>
+		end
 
 	range_string ( a_start_key : STRING; key_start_inclusive:BOOLEAN; an_end_key : STRING; key_end_inclusive:BOOLEAN) : LIST[STRING]
 			--	 Get string keys of ranged records in a B+ tree database object.
@@ -539,12 +544,7 @@ feature -- Error Messages
 			Result := error_code_implementation
 		end
 
-feature -- Access
-	valid_open_modes : ARRAY[INTEGER]
-			-- valid open database modes
-		once
-			Result := <<owriter,owriter.bit_or (ocreat),owriter.bit_or(otrunc),owriter.bit_or (otsync),owriter.bit_or (olcknb),owriter.bit_or (onolck),oreader,oreader.bit_or (olcknb),oreader.bit_or (onolck)>>
-		end
+
 feature -- Status Report
 	current_open_mode : INTEGER
    			-- Represent a valid open mode
