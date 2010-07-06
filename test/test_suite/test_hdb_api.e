@@ -117,6 +117,22 @@ feature -- Test routines
 			assert ("Expected val4",hdb.get_string ("key4").is_equal ("val4"))
 		end
 
+	test_fwd_keys
+		local
+			l_list : LIST[STRING]
+		do
+			hdb.open_writer_create ("casket.tch")
+			hdb.put_string("key1", "val1")
+			hdb.put_string("key2", "val2")
+			hdb.put_string("key3", "val3")
+			assert ("three elements", hdb.records_number = 3)
+			assert ("expected value val1",hdb.get_string ("key1").is_equal ("val1"))
+			assert ("expected value val3",hdb.get_string ("key3").is_equal ("val3"))
+			l_list := hdb.forward_matching_string_keys ("k")
+			assert("Expected three values", l_list.count = 3)
+			l_list := hdb.forward_matching_string_keys ("ap")
+			assert("Expected empty", l_list.is_empty)
+		end
 
 feature -- Implementation
 	hdb : HDB_API

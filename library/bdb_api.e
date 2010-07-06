@@ -567,6 +567,48 @@ feature -- Status Report
 		 	Result := valid_open_modes.has (a_mode)
 		 end
 
+
+feature -- Transaction
+	transaction_begin
+			-- Begin the transaction of a B-tree database object.
+		require
+			is_open_database_writer: is_open_mode_writer
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tcbdbtranbegin (bdb)
+			if not l_b  then
+				has_error := True
+			end
+		end
+
+
+	transaction_commit
+			-- Commit the transaction of a B-tree database object.
+		require
+			is_open_database_writer: is_open_mode_writer
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tcbdbtrancommit (bdb)
+			if not l_b  then
+				has_error := True
+			end
+		end
+
+
+	transaction_abort
+			-- Abort the transaction of a B-tree database object.
+		require
+			is_open_database_writer: is_open_mode_writer
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tcbdbtranabort (bdb)
+			if not l_b  then
+				has_error := True
+			end
+		end
 feature {NONE} -- Implementation
 
 	set_current_open_mode (a_mode : INTEGER)

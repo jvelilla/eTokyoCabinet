@@ -111,6 +111,27 @@ feature -- Test routines
 		end
 
 
+	test_range
+		local
+			l_list : LIST[STRING]
+		do
+			fdb.open_writer_create ("casket.tcf")
+			fdb.put_string("1", "val1")
+			fdb.put_string("2", "val2")
+			fdb.put_string("3", "val3")
+			assert ("three elements", fdb.records_number = 3)
+			assert ("expected value val1",fdb.get_string ("1").is_equal ("val1"))
+			assert ("expected value val3",fdb.get_string ("3").is_equal ("val3"))
+			fdb.put_string("4", "val4")
+			fdb.put_string("5", "val5")
+			fdb.put_string("6", "val6")
+			fdb.put_string("7", "val7")
+			fdb.put_string("8", "val8")
+
+			l_list := fdb.range ("2", "5")
+			assert("Extected 4 elements", l_list.count = 4)
+		end
+
 
 feature -- Implementation
 	fdb : FDB_API

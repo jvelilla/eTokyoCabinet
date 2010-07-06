@@ -398,6 +398,25 @@ feature -- Error Messages
 		end
 
 feature -- Access
+	range ( lower_key : STRING; upper_key : STRING) : LIST [STRING]
+			--	`lower_key' specifies the string of the lower key.
+			--  `upper_key' specifies the string of the upper key.
+			--	 The return value is a list object of the corresponding decimal keys.
+			--  It returns an empty list even if no key corresponds.
+		require
+			is_database_open : is_open
+		local
+			c_lower_key : C_STRING
+			c_upper_key : C_STRING
+			l_api : LIST_API
+		do
+			create c_lower_key.make (lower_key)
+			create c_upper_key.make (upper_key)
+			create l_api.make_by_pointer (tcfdbrange3 (fdb, c_lower_key.item, c_upper_key.item, -1))
+			Result := l_api.as_list
+			l_api.delete
+		end
+
 	valid_open_modes : ARRAY[INTEGER]
 			-- valid open database modes
 		once
@@ -425,6 +444,49 @@ feature -- Status Report
 
 	current_open_mode : INTEGER
    			-- Represent a valid open mode
+
+
+feature -- Transaction
+	transaction_begin
+			-- Begin the transaction of a fixed database object.
+		require
+			is_open_database_writer: is_open_mode_writer
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tcfdbtranbegin (fdb)
+			if not l_b  then
+				has_error := True
+			end
+		end
+
+
+	transaction_commit
+			-- Commit the transaction of a fixed database object.
+		require
+			is_open_database_writer: is_open_mode_writer
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tcfdbtrancommit (fdb)
+			if not l_b  then
+				has_error := True
+			end
+		end
+
+
+	transaction_abort
+			-- Abort the transaction of a fixed database object.
+		require
+			is_open_database_writer: is_open_mode_writer
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tcfdbtranabort (fdb)
+			if not l_b  then
+				has_error := True
+			end
+		end
 
 feature {NONE} -- Implementation
 	 set_current_open_mode (a_mode : INTEGER)

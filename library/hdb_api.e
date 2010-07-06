@@ -443,7 +443,7 @@ feature -- Remove
 		do
 			b := tchdbvanish (hdb)
 		end
-		
+
 feature -- Close and Delete
 
 	close
@@ -496,6 +496,19 @@ feature -- Error Messages
 		end
 
 feature -- Access
+	forward_matching_string_keys (a_prefix : STRING) : LIST[STRING]
+		require
+			is_databse_open : is_open
+		local
+			c_prefix : C_STRING
+			l_api : LIST_API
+		do
+			create c_prefix.make (a_prefix)
+			create l_api.make_by_pointer (tchdbfwmkeys2 (hdb, c_prefix.item,-1))
+			Result := l_api.as_list
+			l_api.delete
+		end
+
 	valid_open_modes : ARRAY[INTEGER]
 			-- valid open database modes
 		once
@@ -523,6 +536,48 @@ feature -- Status Report
 
 	current_open_mode : INTEGER
    			-- Represent a valid open mode
+
+feature -- Transaction
+	transaction_begin
+			-- Begin the transaction of a hash database object.
+		require
+			is_open_database_writer: is_open_mode_writer
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tchdbtranbegin (hdb)
+			if not l_b  then
+				has_error := True
+			end
+		end
+
+
+	transaction_commit
+			-- Commit the transaction of a hash database object.
+		require
+			is_open_database_writer: is_open_mode_writer
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tchdbtrancommit (hdb)
+			if not l_b  then
+				has_error := True
+			end
+		end
+
+
+	transaction_abort
+			-- Abort the transaction of a hash database object.
+		require
+			is_open_database_writer: is_open_mode_writer
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tchdbtranabort (hdb)
+			if not l_b  then
+				has_error := True
+			end
+		end
 
 feature {NONE} -- Implementation
 	set_current_open_mode (a_mode : INTEGER)

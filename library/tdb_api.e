@@ -460,6 +460,19 @@ feature -- Error Messages
 
 feature -- Access
 
+	forward_matching_string_keys ( a_prefix : STRING) : LIST[STRING]
+		require
+			is_open_database : is_open
+		local
+			l_api : LIST_API
+			c_prefix : C_STRING
+		do
+			create c_prefix.make (a_prefix)
+			create l_api.make_by_pointer (tctdbfwmkeys2 (tdb, c_prefix.item, -1))
+			Result := l_api.as_list
+			l_api.delete
+		end
+
 	query : TDB_QUERY
 		do
 			create Result.make_by_pointer (tdb)
@@ -577,8 +590,47 @@ feature -- Status Report
    			-- Represent a valid open mode
 
 
+feature -- Transaction
+	transaction_begin
+			-- Begin the transaction of a table database object.
+		require
+			is_open_database_writer: is_open_mode_writer
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tctdbtranbegin (tdb)
+			if not l_b  then
+				has_error := True
+			end
+		end
 
 
+	transaction_commit
+			-- Commit the transaction of a table database object.
+		require
+			is_open_database_writer: is_open_mode_writer
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tctdbtrancommit (tdb)
+			if not l_b  then
+				has_error := True
+			end
+		end
+
+
+	transaction_abort
+			-- Abort the transaction of a table database object.
+		require
+			is_open_database_writer: is_open_mode_writer
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tctdbtranabort (tdb)
+			if not l_b  then
+				has_error := True
+			end
+		end
 feature {NONE} -- Implementation
 
 	is_open_mode_reader_implementation : BOOLEAN
