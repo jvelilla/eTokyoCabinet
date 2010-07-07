@@ -104,13 +104,13 @@ feature -- Initialization
 			print ("%N================ traverse records ======================%N")
 			from
 				fdb.iterator_init
-				l_key := fdb.iterator_next_string
+				l_key := fdb.iterator_next
 			until
 				l_key = Void
 			loop
 				print ("%NKey :" + l_key)
 				print ("%NValue:" + fdb.retrieve (l_key) )
-				l_key := fdb.iterator_next_string
+				l_key := fdb.iterator_next
 			end
 
 			fdb.close
@@ -146,13 +146,13 @@ feature -- Initialization
 			print ("%N================ traverse records ======================%N")
 			from
 				bdb.iterator_init
-				l_key := bdb.iterator_next_string
+				l_key := bdb.iterator_next
 			until
 				l_key = Void
 			loop
 				print ("%NKey :" + l_key)
 				print ("%NValue:" + bdb.retrieve (l_key) )
-				l_key := bdb.iterator_next_string
+				l_key := bdb.iterator_next
 			end
 
 			bdb.close
@@ -170,7 +170,7 @@ feature -- Initialization
 			create hdb.make
 
 			print ("%N================ open database ======================%N")
-			hdb.open_writer ("casket2.tch")
+			hdb.open_writer_create ("casket2.tch")
 			check not hdb.has_error	end
 
 			print ("%N================ store records ======================%N")
@@ -189,13 +189,13 @@ feature -- Initialization
 			print ("%N================ traverse records ======================%N")
 			from
 				hdb.iterator_init
-				l_key := hdb.iterator_next_string
+				l_key := hdb.iterator_next
 			until
 				l_key = Void
 			loop
 				print ("%NKey :" + l_key)
 				print ("%NValue:" + hdb.retrieve (l_key) )
-				l_key := hdb.iterator_next_string
+				l_key := hdb.iterator_next
 			end
 
 			hdb.close
@@ -232,13 +232,13 @@ feature -- Initialization
 			print ("%N================ traverse records ======================%N")
 			from
 				tdb.iterator_init
-				l_key := tdb.iterator_next_string
+				l_key := tdb.iterator_next
 			until
 				l_key = Void
 			loop
 				print ("%NKey :" + l_key)
 				print ("%NValue:" + tdb.retrieve (l_key) )
-				l_key := tdb.iterator_next_string
+				l_key := tdb.iterator_next
 			end
 
 			tdb.close

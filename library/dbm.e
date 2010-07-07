@@ -143,7 +143,7 @@ feature -- Iterator
 			end
 		end
 
-	iterator_next_string: STRING
+	iterator_next: STRING
 			-- get the next key of the iterator
 		require
 			is_open_database: is_open
