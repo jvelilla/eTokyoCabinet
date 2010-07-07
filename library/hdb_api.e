@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {HDB_API}."
+	description: "Hash database is a file containing a hash table  {HDB_API}."
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -28,7 +28,10 @@ feature {NONE} -- Initialization
 		end
 
 feature -- Access
-	forward_matching_string_keys (a_prefix : STRING) : LIST[STRING]
+	forward_matching_keys (a_prefix : STRING) : LIST[STRING]
+			-- Get forward matching string keys in a hash database object.
+			-- The return value is a list object of the corresponding keys.
+			-- It returns an empty list even if no key corresponds.
 		require
 			is_databse_open : is_open
 		local
@@ -302,7 +305,8 @@ feature -- Close and Delete
 
 feature -- Change Element
 
-	put_asyncrhonic_string ( a_key : STRING; a_value : STRING)
+	put_asynchronic ( a_key : STRING; a_value : STRING)
+			-- Store a string record into a hash database object in asynchronous fashion.
 		require
 			is_open_database_writer: is_open_mode_writer
 			is_valid_key: a_key /= Void and (not a_key.is_empty)
@@ -321,20 +325,20 @@ feature -- Change Element
 		end
 feature -- Database Control
 
-	tune (a_bnum: INTEGER_64; an_apow, an_fpow: INTEGER_8; an_opts: NATURAL_8)
+	set_tune (a_bnum: INTEGER_64; an_apow, an_fpow: INTEGER_8; an_opts: NATURAL_8)
 			--	Set the tuning parameters of a hash database object.
-			--   `a_bnum' specifies the number of elements of the bucket array.  If it is not more than 0, the
-			--   default value is specified.  The default value is 131071.  Suggested size of the bucket array
-			--   is about from 0.5 to 4 times of the number of all records to be stored.
-			--   `an_apow' specifies the size of record alignment by power of 2.  If it is negative, the default
-			--   value is specified.  The default value is 4 standing for 2^4=16.
-			--   `an_fpow' specifies the maximum number of elements of the free block pool by power of 2.  If it
-			--   is negative, the default value is specified.  The default value is 10 standing for 2^10=1024.
-			--   `an_opts' specifies options by bitwise-or: `HDBTLARGE' specifies that the size of the database
-			--   can be larger than 2GB by using 64-bit bucket array, `HDBTDEFLATE' specifies that each record
-			--   is compressed with Deflate encoding, `HDBTBZIP' specifies that each record is compressed with
-			--   BZIP2 encoding, `HDBTTCBS' specifies that each record is compressed with TCBS encoding.
-			--   Note that the tuning parameters should be set before the database is opened.
+			--  `a_bnum' specifies the number of elements of the bucket array.  If it is not more than 0, the
+			--  default value is specified.  The default value is 131071.  Suggested size of the bucket array
+			--  is about from 0.5 to 4 times of the number of all records to be stored.
+			--  `an_apow' specifies the size of record alignment by power of 2.  If it is negative, the default
+			--  value is specified.  The default value is 4 standing for 2^4=16.
+			--  `an_fpow' specifies the maximum number of elements of the free block pool by power of 2.  If it
+			--  is negative, the default value is specified.  The default value is 10 standing for 2^10=1024.
+			--  `an_opts' specifies options by bitwise-or: `HDBTLARGE' specifies that the size of the database
+			--  can be larger than 2GB by using 64-bit bucket array, `HDBTDEFLATE' specifies that each record
+			--  is compressed with Deflate encoding, `HDBTBZIP' specifies that each record is compressed with
+			--  BZIP2 encoding, `HDBTTCBS' specifies that each record is compressed with TCBS encoding.
+			--  Note that the tuning parameters should be set before the database is opened.
 		require
 			is_database_closed : not is_open
 		local
@@ -349,8 +353,8 @@ feature -- Database Control
 	set_cache (a_rcnum: INTEGER_32)
 			--	Set the caching parameters of a hash database object.
 			--  `a_rcnum' specifies the maximum number of records to be cached.  If it is not more than 0, the
-			--   record cache is disabled.  It is disabled by default.
-			--   Note that the caching parameters should be set before the database is opened.
+			--  record cache is disabled.  It is disabled by default.
+			--  Note that the caching parameters should be set before the database is opened.
 		require
 			is_database_close : not is_open
 		local
@@ -365,8 +369,8 @@ feature -- Database Control
 	set_extra_mapped_memory (a_xmsiz: INTEGER_64)
 			--	Set the size of the extra mapped memory of a hash database object.
 			--  `a_xmsiz' specifies the size of the extra mapped memory.  If it is not more than 0, the extra
-			--   mapped memory is disabled.  The default size is 67108864.
-			--   Note that the mapping parameters should be set before the database is opened.
+			--  mapped memory is disabled.  The default size is 67108864.
+			--  Note that the mapping parameters should be set before the database is opened.
 		require
 			is_database_close : not is_open
 		local
@@ -382,8 +386,8 @@ feature -- Database Control
 	set_defragmentation_unit (a_dfunit: INTEGER_32)
 			-- Set the unit step number of auto defragmentation of a hash database object.
 			-- `a_dfunit' specifie the unit step number.  If it is not more than 0, the auto defragmentation
-			--  is disabled.  It is disabled by default.
-			--  Note that the defragmentation parameters should be set before the database is opened.
+			-- is disabled.  It is disabled by default.
+			-- Note that the defragmentation parameters should be set before the database is opened.
 		require
 			is_database_close : not is_open
 		local
@@ -395,21 +399,21 @@ feature -- Database Control
 			end
 		end
 
-	optimize (a_bnum : INTEGER_64; an_apow: INTEGER_8; a_fpow : INTEGER_8; an_opts : NATURAL_8)
+	set_optimize (a_bnum : INTEGER_64; an_apow: INTEGER_8; a_fpow : INTEGER_8; an_opts : NATURAL_8)
 			-- Optimize the file of a hash database object.
 			-- `a_bnum' specifies the number of elements of the bucket array.  If it is not more than 0, the
-			--  default value is specified.  The default value is two times of the number of records.
+			-- default value is specified.  The default value is two times of the number of records.
 			-- `an_apow' specifies the size of record alignment by power of 2.  If it is negative, the current
-			--  setting is not changed.
-			--  `a_fpow' specifies the maximum number of elements of the free block pool by power of 2.  If it
-			--  is negative, the current setting is not changed.
-			--  `an_opts' specifies options by bitwise-or: `HDBTLARGE' specifies that the size of the database
-			--   can be larger than 2GB by using 64-bit bucket array, `HDBTDEFLATE' specifies that each record
-			--   is compressed with Deflate encoding, `HDBTBZIP' specifies that each record is compressed with
-			--   BZIP2 encoding, `HDBTTCBS' specifies that each record is compressed with TCBS encoding.  If it
-			--   is `UINT8_MAX', the current setting is not changed.
-			--   This function is useful to reduce the size of the database file with data fragmentation by
-			--   successive updating.
+			-- setting is not changed.
+			-- `a_fpow' specifies the maximum number of elements of the free block pool by power of 2.  If it
+			-- is negative, the current setting is not changed.
+			-- `an_opts' specifies options by bitwise-or: `HDBTLARGE' specifies that the size of the database
+			-- can be larger than 2GB by using 64-bit bucket array, `HDBTDEFLATE' specifies that each record
+			-- is compressed with Deflate encoding, `HDBTBZIP' specifies that each record is compressed with
+			-- BZIP2 encoding, `HDBTTCBS' specifies that each record is compressed with TCBS encoding.  If it
+			-- is `UINT8_MAX', the current setting is not changed.
+			-- This function is useful to reduce the size of the database file with data fragmentation by
+			-- successive updating.
 		require
 			is_database_open_writer : is_open_mode_writer
 		local
@@ -427,12 +431,12 @@ feature -- Database Control
 		require
 			is_database_open_writer : is_open_mode_writer
 		do
-			optimize(-1, -1, -1, 0xff)
+			set_optimize(-1, -1, -1, 0xff)
 		end
 
 	db_copy (a_path : STRING)
 			-- Copy the database file of a hash database object.
-			--	`a_path' specifies the path of the destination file.  If it begins with `@', the trailing
+			-- `a_path' specifies the path of the destination file.  If it begins with `@', the trailing
 			--	substring is executed as a command line.
 			--  The database file is assured to be kept synchronized and not modified while the copying or
 			--	executing operation is in progress.  So, this function is useful to create a backup file of
@@ -483,7 +487,7 @@ feature -- Database Control
 
 
 feature -- Remove
-	vanish
+	vanish, wipe_out
 			-- Remove all records of a hash database object.
 		require
 			is_database_open_writer : is_open_mode_writer

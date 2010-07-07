@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {FDB_API}."
+	description: "Fixed-Length database is a file containing a fixed-length table {FDB_API}."
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -345,7 +345,7 @@ feature -- Database Control
 			end
 		end
 
-	optimize (a_width: INTEGER_32; a_limsiz: INTEGER_64)
+	set_optimize (a_width: INTEGER_32; a_limsiz: INTEGER_64)
 		--	Optimize the file of a fixed-length database object.
 		--  `a_width' specifies the width of the value of each record.  If it is not more than 0, the current
 		--   setting is not changed.
@@ -377,7 +377,7 @@ feature -- Database Control
 			end
 		end
 
-	tune (a_width: INTEGER_32; a_limsiz: INTEGER_64)
+	set_tune (a_width: INTEGER_32; a_limsiz: INTEGER_64)
 			-- Set the tuning parameters of a fixed-length database object.
 			-- `a_width' specifies the width of the value of each record.  If it is not more than 0, the
 			--  default value is specified.  The default value is 255.
@@ -396,7 +396,7 @@ feature -- Database Control
 		end
 
 feature -- Remove
-	vanish
+	vanish, wipe_out
 			-- Remove all records of a fixed database object.
 		require
 			is_database_open_writer : is_open_mode_writer

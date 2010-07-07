@@ -40,7 +40,7 @@ feature -- Access
 			result_not_empty: not Result.is_empty
 		end
 
-	get_string (a_key: STRING): STRING
+	retrieve (a_key: STRING): STRING
 			--  Retrieve a string record by `a_key'
 		require
 			is_open_database: is_open
@@ -76,7 +76,7 @@ feature -- Access
 
 feature -- Change Element
 
-	put_string (a_key: STRING; a_value: STRING)
+	put (a_key: STRING; a_value: STRING)
 			-- Is used in order to store a string record into a database object.
 		require
 			is_open_database_writer: is_open_mode_writer
@@ -95,7 +95,7 @@ feature -- Change Element
 			end
 		end
 
-	put_keep_string (a_key: STRING; a_value: STRING)
+	put_keep (a_key: STRING; a_value: STRING)
 			-- Is used in order to store a new string record into a database object.
 			-- If a record with the same key exists in the database, this function has no effect.
 		require
@@ -115,7 +115,7 @@ feature -- Change Element
 			end
 		end
 
-	out_string (a_key: STRING)
+	prune (a_key: STRING)
 			-- remove a record by a key `a_key'
 		require
 			is_open_database_writer: is_open_mode_writer

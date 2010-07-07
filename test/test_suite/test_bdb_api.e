@@ -84,7 +84,7 @@ feature -- Test routines
 
 	test_tune
 		do
-			bdb.tune (10, 64, 64, 10,10, bdb.bdbttcbs.as_natural_8)
+			bdb.set_tune (10, 64, 64, 10,10, bdb.bdbttcbs.as_natural_8)
 			bdb.open_writer_create ("casket.tcf")
 			assert ("Not has error", not bdb.has_error)
 		end
@@ -99,12 +99,12 @@ feature -- Test routines
 	test_put
 		do
 			bdb.open_writer_create ("casket.tcf")
-			bdb.put_string("key1", "val1")
-			bdb.put_string("key2", "val2")
-			bdb.put_string("key3", "val3")
+			bdb.put("key1", "val1")
+			bdb.put("key2", "val2")
+			bdb.put("key3", "val3")
 			assert ("three elements", bdb.records_number = 3)
-			assert ("expected value val1",bdb.get_string ("key1").is_equal ("val1"))
-			assert ("expected value val3",bdb.get_string ("key3").is_equal ("val3"))
+			assert ("expected value val1",bdb.retrieve ("key1").is_equal ("val1"))
+			assert ("expected value val3",bdb.retrieve ("key3").is_equal ("val3"))
 		end
 
 

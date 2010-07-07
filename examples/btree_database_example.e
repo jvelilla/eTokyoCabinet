@@ -26,17 +26,17 @@ feature -- Example
 			bdb.vanish
 
 			-- store records in the database, allowing duplicates
-			bdb.put_dup_string("key1", "value1")
-			bdb.put_dup_string("key1", "value2")
-			bdb.put_string("key2", "value3")
-			bdb.put_string("key3", "value4")
-			bdb.put_string("apples", "red")
-			bdb.put_string("ant", "build")
+			bdb.put_dup("key1", "value1")
+			bdb.put_dup("key1", "value2")
+			bdb.put("key2", "value3")
+			bdb.put("key3", "value4")
+			bdb.put("apples", "red")
+			bdb.put("ant", "build")
 
 
 			-- retrive all records
 			print ("%N Retrieve all records by key %N")
-			l_list := bdb.list_string ("key1")
+			l_list := bdb.retrieve_list ("key1")
 			from
 				i := 1
 			until
@@ -48,7 +48,7 @@ feature -- Example
 
 			-- range query, find all matching keys
 			print ("%N Range query %N")
-			l_list:= bdb.range_string("key1", true, "key3", true)
+			l_list:= bdb.range("key1", true, "key3", true)
 			from
 				i := 1
 			until
@@ -61,7 +61,7 @@ feature -- Example
 
 			-- forward matching keys,
 			print ("%N Forward matching 'a'%N")
-			l_list := bdb.forward_matching_string_keys ("a")
+			l_list := bdb.forward_matching_keys ("a")
 			from
 				i := 1
 			until
@@ -73,7 +73,7 @@ feature -- Example
 
 
 			print ("%N Forward matching 'an'%N")
-			l_list := bdb.forward_matching_string_keys ("an")
+			l_list := bdb.forward_matching_keys ("an")
 			from
 				i := 1
 			until
@@ -84,7 +84,7 @@ feature -- Example
 			end
 
 			print ("%N Forward matching 'e'%N")
-			l_list := bdb.forward_matching_string_keys ("e")
+			l_list := bdb.forward_matching_keys ("e")
 			from
 				i := 1
 			until

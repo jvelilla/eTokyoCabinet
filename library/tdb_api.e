@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {TDB_API}."
+	description: "Table database is a file containing records composed of the primary keys and arbitrary columns."
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -27,7 +27,10 @@ feature {NONE} -- Initialization
 		end
 feature -- Access
 
-	forward_matching_string_keys ( a_prefix : STRING) : LIST[STRING]
+	forward_matching_keys ( a_prefix : STRING) : LIST[STRING]
+			-- Get forward matching string primary keys in a table database object.
+			-- The return value is a list object of the corresponding keys.
+			-- It returns an empty list even if no key corresponds.
 		require
 			is_open_database : is_open
 		local
@@ -41,8 +44,11 @@ feature -- Access
 		end
 
 	query : TDB_QUERY
+			-- Create an object Query based on a table database
 		do
 			create Result.make_by_pointer (tdb)
+		ensure
+			query_created : Result /= Void
 		end
 
 	record_size ( a_key : STRING) :INTEGER_32
@@ -57,7 +63,7 @@ feature -- Access
 			Result := <<owriter,owriter.bit_or (ocreat),owriter.bit_or(otrunc),owriter.bit_or (otsync),owriter.bit_or (olcknb),owriter.bit_or (onolck),oreader,oreader.bit_or (olcknb),oreader.bit_or (onolck)>>
 		end
 
-	get_map ( a_key : STRING ) : HASH_TABLE [STRING,STRING]
+	retrieve_map ( a_key : STRING ) : HASH_TABLE [STRING,STRING]
 			-- Retrieve a record in a table database object.
 			-- The return value is a map object of the columns of the corresponding record `a_key'.
 		require
@@ -338,8 +344,8 @@ feature -- Close and Delete
 			is_open := False
 		ensure
 			is_database_closed : not is_open
-
 		end
+
 feature -- Change Element
 	put_map ( a_key : STRING; a_map : HASH_TABLE[STRING,STRING])
 			-- Store a record into a table database object.
@@ -351,7 +357,7 @@ feature -- Change Element
     	end
 
 
-	put_cat_string (a_key: STRING; a_value: STRING)
+	put_cat (a_key: STRING; a_value: STRING)
 		--	Concatenate columns in a table database object with with a tab separated column string.
 		--  `a_key' specifies the string of the primary key.
 		--  `a_value' specifies the string of the the tab separated column string where the name and the
@@ -409,21 +415,21 @@ feature -- Database Control
 			end
 		end
 
-	optimize (a_bnum : INTEGER_64; an_apow: INTEGER_8; a_fpow : INTEGER_8; an_opts : NATURAL_8)
+	set_optimize (a_bnum : INTEGER_64; an_apow: INTEGER_8; a_fpow : INTEGER_8; an_opts : NATURAL_8)
 			-- Optimize the file of a table database object.
 			-- `a_bnum' specifies the number of elements of the bucket array.  If it is not more than 0, the
-			--   default value is specified.  The default value is two times of the number of records.
+			--  default value is specified.  The default value is two times of the number of records.
 			-- `an_apow' specifies the size of record alignment by power of 2.  If it is negative, the current
-			--   setting is not changed.
-			--  `a_fpow' specifies the maximum number of elements of the free block pool by power of 2.  If it
-			--   is negative, the current setting is not changed.
-			--  `an_opts' specifies options by bitwise-or: `BDBTLARGE' specifies that the size of the database
-			--   can be larger than 2GB by using 64-bit bucket array, `BDBTDEFLATE' specifies that each record
-			--   is compressed with Deflate encoding, `BDBTBZIP' specifies that each record is compressed with
-			--   BZIP2 encoding, `BDBTTCBS' specifies that each record is compressed with TCBS encoding.  If it
-			--   is `UINT8_MAX', the current setting is not changed.
-			--   This function is useful to reduce the size of the database file with data fragmentation by
-			--   successive updating
+			--  setting is not changed.
+			-- `a_fpow' specifies the maximum number of elements of the free block pool by power of 2.  If it
+			--  is negative, the current setting is not changed.
+			-- `an_opts' specifies options by bitwise-or: `BDBTLARGE' specifies that the size of the database
+			--  can be larger than 2GB by using 64-bit bucket array, `BDBTDEFLATE' specifies that each record
+			--  is compressed with Deflate encoding, `BDBTBZIP' specifies that each record is compressed with
+			--  BZIP2 encoding, `BDBTTCBS' specifies that each record is compressed with TCBS encoding.  If it
+			--  is `UINT8_MAX', the current setting is not changed.
+			--  This function is useful to reduce the size of the database file with data fragmentation by
+			--  successive updating
 		require
 			is_database_open_writer : is_open_mode_writer
 		local
@@ -435,17 +441,17 @@ feature -- Database Control
 			end
 		end
 
-	default_optimize
+	set_default_optimize
 			-- Optimize the database file.
 			-- Call optimize(-1, -1, -1, 0xff)
 		require
 			is_database_open_writer : is_open_mode_writer
 		do
-			optimize(-1, -1, -1, 0xff)
+			set_optimize(-1, -1, -1, 0xff)
 		end
 
 	path  : STRING
-			--Get the file path of a table database object.
+			-- Get the file path of a table database object.
 			--  The return value is the path of the database file.
 		require
 			is_open_database : is_open
@@ -456,21 +462,21 @@ feature -- Database Control
 			if r /= default_pointer then
 				create Result.make_from_c (r)
 			end
-		end
+	 	end
 
-	tune (a_bnum : INTEGER_64; an_apow : INTEGER_8; a_fpow : INTEGER_8; an_opts : NATURAL_8)
+	set_tune (a_bnum : INTEGER_64; an_apow : INTEGER_8; a_fpow : INTEGER_8; an_opts : NATURAL_8)
 			-- Set the tuning parameters of a table database object.
 			-- `a_bnum' specifies the number of elements of the bucket array.  If it is not more than 0, the
-			--   default value is specified.  The default value is 131071.  Suggested size of the bucket array
-			--   is about from 0.5 to 4 times of the number of all records to be stored.
+			--  default value is specified.  The default value is 131071.  Suggested size of the bucket array
+			--  is about from 0.5 to 4 times of the number of all records to be stored.
 			-- `an_apow' specifies the size of record alignment by power of 2.  If it is negative, the default
-			--   value is specified.  The default value is 4 standing for 2^4=16.
+			--  value is specified.  The default value is 4 standing for 2^4=16.
 			-- `an_fpow' specifies the maximum number of elements of the free block pool by power of 2.  If it
 			--  is negative, the default value is specified.  The default value is 10 standing for 2^10=1024.
-			--  `an_opts' specifies options by bitwise-or: `TDBTLARGE' specifies that the size of the database
-			--   can be larger than 2GB by using 64-bit bucket array, `TDBTDEFLATE' specifies that each record
-			--   is compressed with Deflate encoding, `TDBTBZIP' specifies that each record is compressed with
-			--   BZIP2 encoding, `TDBTTCBS' specifies that each record is compressed with TCBS encoding.
+			-- `an_opts' specifies options by bitwise-or: `TDBTLARGE' specifies that the size of the database
+			--  can be larger than 2GB by using 64-bit bucket array, `TDBTDEFLATE' specifies that each record
+			--  is compressed with Deflate encoding, `TDBTBZIP' specifies that each record is compressed with
+			--  BZIP2 encoding, `TDBTTCBS' specifies that each record is compressed with TCBS encoding.
 		require
 			is_database_close : not is_open
 		local
@@ -478,19 +484,19 @@ feature -- Database Control
 		do
 			b := tctdbtune (tdb, a_bnum, an_apow, a_fpow, an_opts)
 			if not b then
-				has_error := true
+		 		has_error := true
 			end
 		end
 
 
 	set_cache ( a_rcnum : INTEGER_32; a_lcnum : INTEGER_32; a_ncnum : INTEGER_32)
-			--Set the caching parameters of a table database object.
+			-- Set the caching parameters of a table database object.
 			-- `a_rcnum' specifies the maximum number of records to be cached.  If it is not more than 0, the
-			--   record cache is disabled.  It is disabled by default.
-			--  `a_lcnum' specifies the maximum number of leaf nodes to be cached.  If it is not more than 0,
-			--   the default value is specified.  The default value is 4096.
-			--  `a_ncnum' specifies the maximum number of non-leaf nodes to be cached.  If it is not more than 0,
-			--   the default value is specified.  The default value is 512.
+			--  record cache is disabled.  It is disabled by default.
+			-- `a_lcnum' specifies the maximum number of leaf nodes to be cached.  If it is not more than 0,
+			--  the default value is specified.  The default value is 4096.
+			-- `a_ncnum' specifies the maximum number of non-leaf nodes to be cached.  If it is not more than 0,
+			--  the default value is specified.  The default value is 512.
 		require
 			is_database_close : not is_open
 		local
@@ -517,7 +523,7 @@ feature -- Database Control
 
 
 	set_defragmentation_unit (a_dfunit : INTEGER_32)
-			--Set the unit step number of auto defragmentation of a table database object.
+			-- Set the unit step number of auto defragmentation of a table database object.
 			--`a_dfunit' specifie the unit step number.  If it is not more than 0, the auto defragmentation
 			-- is disabled.  It is disabled by default.
 		require
@@ -533,8 +539,8 @@ feature -- Database Control
 
 
 feature -- Remove
-	vanish
-		--Remove all records of a table database object.
+	vanish , wipe_out
+			--Remove all records of a table database object.
 		require
 			is_database_open_writer : is_open_mode_writer
 		local

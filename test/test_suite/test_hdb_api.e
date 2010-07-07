@@ -80,7 +80,7 @@ feature -- Test routines
 
 	test_tune
 		do
-			hdb.tune (100, 32, 64, hdb.ttcbs.as_natural_8)
+			hdb.set_tune (100, 32, 64, hdb.ttcbs.as_natural_8)
 			hdb.open_writer_create ("casket.tch")
 			assert ("Not has error", not hdb.has_error)
 		end
@@ -95,26 +95,26 @@ feature -- Test routines
 	test_put
 		do
 			hdb.open_writer_create ("casket.tch")
-			hdb.put_string("key1", "val1")
-			hdb.put_string("key2", "val2")
-			hdb.put_string("key3", "val3")
+			hdb.put("key1", "val1")
+			hdb.put("key2", "val2")
+			hdb.put("key3", "val3")
 			assert ("three elements", hdb.records_number = 3)
-			assert ("expected value val1",hdb.get_string ("key1").is_equal ("val1"))
-			assert ("expected value val3",hdb.get_string ("key3").is_equal ("val3"))
+			assert ("expected value val1",hdb.retrieve ("key1").is_equal ("val1"))
+			assert ("expected value val3",hdb.retrieve ("key3").is_equal ("val3"))
 		end
 
 
 	test_put_async
 		do
 			hdb.open_writer_create ("casket.tch")
-			hdb.put_string("key1", "val1")
-			hdb.put_string("key2", "val2")
-			hdb.put_string("key3", "val3")
+			hdb.put("key1", "val1")
+			hdb.put("key2", "val2")
+			hdb.put("key3", "val3")
 			assert ("three elements", hdb.records_number = 3)
-			assert ("expected value val1",hdb.get_string ("key1").is_equal ("val1"))
-			assert ("expected value val3",hdb.get_string ("key3").is_equal ("val3"))
-			hdb.put_asyncrhonic_string ("key4", "val4")
-			assert ("Expected val4",hdb.get_string ("key4").is_equal ("val4"))
+			assert ("expected value val1",hdb.retrieve ("key1").is_equal ("val1"))
+			assert ("expected value val3",hdb.retrieve ("key3").is_equal ("val3"))
+			hdb.put_asynchronic ("key4", "val4")
+			assert ("Expected val4",hdb.retrieve ("key4").is_equal ("val4"))
 		end
 
 	test_fwd_keys
@@ -122,15 +122,15 @@ feature -- Test routines
 			l_list : LIST[STRING]
 		do
 			hdb.open_writer_create ("casket.tch")
-			hdb.put_string("key1", "val1")
-			hdb.put_string("key2", "val2")
-			hdb.put_string("key3", "val3")
+			hdb.put("key1", "val1")
+			hdb.put("key2", "val2")
+			hdb.put("key3", "val3")
 			assert ("three elements", hdb.records_number = 3)
-			assert ("expected value val1",hdb.get_string ("key1").is_equal ("val1"))
-			assert ("expected value val3",hdb.get_string ("key3").is_equal ("val3"))
-			l_list := hdb.forward_matching_string_keys ("k")
+			assert ("expected value val1",hdb.retrieve ("key1").is_equal ("val1"))
+			assert ("expected value val3",hdb.retrieve ("key3").is_equal ("val3"))
+			l_list := hdb.forward_matching_keys ("k")
 			assert("Expected three values", l_list.count = 3)
-			l_list := hdb.forward_matching_string_keys ("ap")
+			l_list := hdb.forward_matching_keys ("ap")
 			assert("Expected empty", l_list.is_empty)
 		end
 

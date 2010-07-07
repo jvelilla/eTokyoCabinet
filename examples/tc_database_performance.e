@@ -18,7 +18,7 @@ feature -- HAST TABLE
 			l_start_time, l_finish_time : TIME
 		do
 			create hdb.make
-			hdb.optimize (-1, -1, -1, hdb.tbzip.as_natural_8)
+			hdb.set_optimize (-1, -1, -1, hdb.tbzip.as_natural_8)
 			hdb.open_writer_create ("hash.tch")
 			hdb.vanish
 			create l_start_time.make_now
@@ -28,7 +28,7 @@ feature -- HAST TABLE
 				i > 1000
 			loop
 				key := i.out
-				hdb.put_string (key,key)
+				hdb.put (key,key)
 				i := i + 1
 			end
 			create l_finish_time.make_now
@@ -54,7 +54,7 @@ feature -- HAST TABLE
 				i > 1000
 			loop
 				key := i.out
-				bdb.put_string (key,key)
+				bdb.put (key,key)
 				i := i + 1
 			end
 			create l_finish_time.make_now
@@ -79,7 +79,7 @@ feature -- HAST TABLE
 				i > 1000
 			loop
 				key := i.out
-				tdb.put_string (key,key)
+				tdb.put (key,key)
 				i := i + 1
 			end
 			create l_finish_time.make_now
@@ -103,7 +103,7 @@ feature -- HAST TABLE
 				i > 1000
 			loop
 				key := i.out
-				fdb.put_string (key,key)
+				fdb.put (key,key)
 				i := i + 1
 			end
 			create l_finish_time.make_now

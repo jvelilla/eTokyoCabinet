@@ -1,5 +1,8 @@
 note
-	description: "Summary description for {ADB_API}."
+	description: "[
+				Abstract database is a set of interfaces to use on-memory hash database, on-memory tree database, 
+				hash database, B+ tree database, fixed-length database, and table database with the same API {ADB_API}.
+			]"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -55,7 +58,7 @@ feature -- Access
 			result_not_empty: not Result.is_empty
 		end
 
-	get_string (a_key: STRING): STRING
+	retrieve (a_key: STRING): STRING
 			--  Retrieve a string record by `a_key'
 		require
 			is_open_database: is_open
@@ -85,104 +88,6 @@ feature -- Access
 			is_open_database: is_open
 		do
 			Result := file_size_implementation
-		end
-
-
-feature -- Change Element
-
-	put_string (a_key: STRING; a_value: STRING)
-			-- Is used in order to store a string record into a database object.
-		require
-			is_open_database_writer: is_open_mode_writer
-			is_valid_key: a_key /= Void and (not a_key.is_empty)
-			is_valid_value: a_value /= Void and (not a_value.is_empty)
-		local
-			c_key: C_STRING
-			c_value: C_STRING
-			l_b: BOOLEAN
-		do
-			create c_key.make (a_key)
-			create c_value.make (a_value)
-			l_b := put_string_implementation (c_key.item, c_value.item)
-			if not l_b then
-				has_error := True
-			end
-		end
-
-	put_keep_string (a_key: STRING; a_value: STRING)
-			-- Is used in order to store a new string record into a database object.
-			-- If a record with the same key exists in the database, this function has no effect.
-		require
-			is_open_database_writer: is_open_mode_writer
-			is_valid_key: a_key /= Void and (not a_key.is_empty)
-			is_valid_value: a_value /= Void and (not a_value.is_empty)
-		local
-			c_key: C_STRING
-			c_value: C_STRING
-			l_b: BOOLEAN
-		do
-			create c_key.make (a_key)
-			create c_value.make (a_value)
-			l_b := put_keep_string_implementation (c_key.item, c_value.item)
-			if not l_b then
-				has_error := True
-			end
-		end
-
-	out_string (a_key: STRING)
-			-- remove a record by a key `a_key'
-		require
-			is_open_database_writer: is_open_mode_writer
-			is_valid_key: a_key /= Void and (not a_key.is_empty)
-		local
-			c_key: C_STRING
-			l_b: BOOLEAN
-		do
-			create c_key.make (a_key)
-			l_b := out_string_implementation (c_key.item)
-		end
-
-feature -- Iterator
-
-	iterator_init
-			-- Initialize the iterator
-		require
-			is_open_database: is_open
-		local
-			l_b: BOOLEAN
-		do
-			l_b := iterator_init_implementation
-			if not l_b then
-				has_error := True
-			end
-		end
-
-	iterator_next_string: STRING
-			-- get the next key of the iterator
-		require
-			is_open_database: is_open
-		local
-			r: POINTER
-		do
-			r := iterator_next_string_implementation
-			if r /= default_pointer then
-				create Result.make_from_c (r)
-			end
-		end
-
-feature -- Status Report
-
-	has_error: BOOLEAN
-			-- Did an error occur?
-
-feature -- Status Settings
-
-	clean_error is
-			-- Reset the last error.
-		do
-			has_error := False
-		ensure
-			no_error: not has_error
 		end
 
 feature -- Open Database
@@ -257,6 +162,107 @@ feature -- Close and Delete
 			is_database_closed : not is_open
 
 		end
+
+feature -- Change Element
+
+	put (a_key: STRING; a_value: STRING)
+			-- Is used in order to store a string record into a database object.
+		require
+			is_open_database_writer: is_open_mode_writer
+			is_valid_key: a_key /= Void and (not a_key.is_empty)
+			is_valid_value: a_value /= Void and (not a_value.is_empty)
+		local
+			c_key: C_STRING
+			c_value: C_STRING
+			l_b: BOOLEAN
+		do
+			create c_key.make (a_key)
+			create c_value.make (a_value)
+			l_b := put_string_implementation (c_key.item, c_value.item)
+			if not l_b then
+				has_error := True
+			end
+		end
+
+	put_keep (a_key: STRING; a_value: STRING)
+			-- Is used in order to store a new string record into a database object.
+			-- If a record with the same key exists in the database, this function has no effect.
+		require
+			is_open_database_writer: is_open_mode_writer
+			is_valid_key: a_key /= Void and (not a_key.is_empty)
+			is_valid_value: a_value /= Void and (not a_value.is_empty)
+		local
+			c_key: C_STRING
+			c_value: C_STRING
+			l_b: BOOLEAN
+		do
+			create c_key.make (a_key)
+			create c_value.make (a_value)
+			l_b := put_keep_string_implementation (c_key.item, c_value.item)
+			if not l_b then
+				has_error := True
+			end
+		end
+
+	prune (a_key: STRING)
+			-- remove a record by a key `a_key'
+		require
+			is_open_database_writer: is_open_mode_writer
+			is_valid_key: a_key /= Void and (not a_key.is_empty)
+		local
+			c_key: C_STRING
+			l_b: BOOLEAN
+		do
+			create c_key.make (a_key)
+			l_b := out_string_implementation (c_key.item)
+		end
+
+feature -- Iterator
+
+	iterator_init
+			-- Initialize the iterator
+		require
+			is_open_database: is_open
+		local
+			l_b: BOOLEAN
+		do
+			l_b := iterator_init_implementation
+			if not l_b then
+				has_error := True
+			end
+		end
+
+	iterator_next: STRING
+			-- get the next key of the iterator
+		require
+			is_open_database: is_open
+		local
+			r: POINTER
+		do
+			r := iterator_next_string_implementation
+			if r /= default_pointer then
+				create Result.make_from_c (r)
+			end
+		end
+
+feature -- Status Report
+
+	has_error: BOOLEAN
+			-- Did an error occur?
+
+feature -- Status Settings
+
+	clean_error is
+			-- Reset the last error.
+		do
+			has_error := False
+		ensure
+			no_error: not has_error
+		end
+
+
+
+
 feature -- Error Messages
 
 	error_message (a_code: INTEGER_32): STRING

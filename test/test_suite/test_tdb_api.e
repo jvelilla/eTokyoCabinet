@@ -84,12 +84,12 @@ feature -- Test routines
 	test_put_invalid_operation_in_open_mode_reader
 		do
 			tdb.open_writer_create ("casket.tct")
-			tdb.put_string ("key", "value")
+			tdb.put ("key", "value")
 			assert ("One element", tdb.records_number = 1)
 			tdb.close
 			assert ("Database is closed", not tdb.is_open)
 			tdb.open_reader ("casket.tct")
-			tdb.put_string ("key1", "value2")
+			tdb.put ("key1", "value2")
 			assert ("Has error", tdb.has_error)
 			assert ("Invalid Operation", tdb.error_code = 2)
 			assert ("Expected Message",tdb.error_message (tdb.error_code).is_equal ("invalid operation"))
@@ -122,11 +122,11 @@ feature -- Test routines
 			tdb.put_map ("key2", l_cols)
 			assert ("Two Elements", tdb.records_number = 2)
 
-			r_cols  := tdb.get_map ("key")
+			r_cols  := tdb.retrieve_map ("key")
 			assert ("Expected Name", r_cols.at ("name").is_equal ("javier"))
 			assert ("Expected age", r_cols.at ("age").is_equal ("30"))
 
-			str := tdb.get_string ("key")
+			str := tdb.retrieve ("key")
 			assert ("Tab string record", str.is_equal ("age%T30%Tname%Tjavier%Tlang%Tes,en"))
 		end
 
@@ -160,7 +160,7 @@ feature -- Test routines
 			tdb.put_map ("key2", l_cols)
 			assert ("Two Elements", tdb.records_number = 2)
 
-			r_cols := tdb.get_map ("key")
+			r_cols := tdb.retrieve_map ("key")
 			assert ("Expected Name", r_cols.at ("name").is_equal ("javier"))
 			assert ("Expected age", r_cols.at ("age").is_equal ("30"))
 
@@ -174,10 +174,10 @@ feature -- Test routines
 			l_list := qry.search
 			assert ("two elements", l_list.count = 2)
 			assert ("Expected key2",l_list.at (1).is_equal ("key2"))
-			r_cols := tdb.get_map (l_list.at (1))
+			r_cols := tdb.retrieve_map (l_list.at (1))
 			assert ("Expected Name diego",r_cols.at ("name").is_equal ("diego"))
 			assert ("Expected Age 50",r_cols.at ("age").is_equal ("50"))
-			str := tdb.get_string ("key")
+			str := tdb.retrieve ("key")
 			assert ("Tab string record", str.is_equal ("age%T30%Tname%Tjavier%Tlang%Tes,en"))
 		end
 

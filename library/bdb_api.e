@@ -35,18 +35,18 @@ feature -- Access
 			Result := <<owriter,owriter.bit_or (ocreat),owriter.bit_or(otrunc),owriter.bit_or (otsync),owriter.bit_or (olcknb),owriter.bit_or (onolck),oreader,oreader.bit_or (olcknb),oreader.bit_or (onolck)>>
 		end
 
-	range_string ( a_start_key : STRING; key_start_inclusive:BOOLEAN; an_end_key : STRING; key_end_inclusive:BOOLEAN) : LIST[STRING]
-			--	 Get string keys of ranged records in a B+ tree database object.
-			--   `a_start_key' specifies the string of the key of the beginning border.  If it is `NULL', the first
-			--   record is specified.
-			--   `key_start_inclusive' specifies whether the beginning border is inclusive or not.
-			--   `an_end_key' specifies the string of the key of the ending border.  If it is `NULL', the last
-			--   record is specified.
-			--   `key_end_inclusive' specifies whether the ending border is inclusive or not.
-			--   The return value is a list object of the keys of the corresponding records.
-			--   It returns an empty list even if no record corresponds.
-			--   Because the object of the return value is created with the function `tclistnew', it should
-			--   be deleted with the function `tclistdel' when it is no longer in use.
+	range ( a_start_key : STRING; key_start_inclusive:BOOLEAN; an_end_key : STRING; key_end_inclusive:BOOLEAN) : LIST[STRING]
+			--	Get string keys of ranged records in a B+ tree database object.
+			-- `a_start_key' specifies the string of the key of the beginning border.  If it is `NULL', the first
+			-- record is specified.
+			-- `key_start_inclusive' specifies whether the beginning border is inclusive or not.
+			-- `an_end_key' specifies the string of the key of the ending border.  If it is `NULL', the last
+			-- record is specified.
+			-- `key_end_inclusive' specifies whether the ending border is inclusive or not.
+			-- The return value is a list object of the keys of the corresponding records.
+			-- It returns an empty list even if no record corresponds.
+			-- Because the object of the return value is created with the function `tclistnew', it should
+			-- be deleted with the function `tclistdel' when it is no longer in use.
 		require
 			is_database_open : is_open
 		local
@@ -63,7 +63,7 @@ feature -- Access
 		end
 
 
-	list_string ( a_key : STRING ) : LIST[STRING]
+	retrieve_list ( a_key : STRING ) : LIST[STRING]
 			-- retrieve records in a B+ tree database object.
 			-- If successful, the return value is a list object of the values of the corresponding records. `NULL' is returned if no record corresponds.
 		require
@@ -79,10 +79,10 @@ feature -- Access
 		end
 
 
-	forward_matching_string_keys ( a_prefix : STRING) : LIST[STRING]
+	forward_matching_keys ( a_prefix : STRING) : LIST[STRING]
 			--  Get forward matching string keys in a B+ tree database object.
 			--   `a_prefix' specifies the string of the prefix.
-			--   The return value is a list object of the corresponding keys.  This function does never fail.
+			--   The return value is a list object of the corresponding keys.
 			--   It returns an empty list even if no key corresponds.
 		require
 			is_open_database : is_open
@@ -99,8 +99,6 @@ feature -- Access
 		end
 
 feature -- Open Database
-
-
 
 	open_writer (a_path : STRING)
 		require
@@ -353,7 +351,7 @@ feature -- Close and Delete
 		end
 
 feature -- Change Element
-	put_dup_string ( a_key : STRING; a_value : STRING)
+	put_dup ( a_key : STRING; a_value : STRING)
 			--	Store a string record into a B+ tree database object with allowing duplication of keys.
 			--  `a_key' specifies the string of the key.
 			--  `a_value' specifies the string of the value.
@@ -379,7 +377,7 @@ feature -- Change Element
 
 feature -- Database Control
 
-	tune (a_lmemb : INTEGER_32; a_nmemb : INTEGER_32; a_bnum : INTEGER_64; an_apow : INTEGER_8; a_fpow : INTEGER_8; a_opts :NATURAL_8 )
+	set_tune (a_lmemb : INTEGER_32; a_nmemb : INTEGER_32; a_bnum : INTEGER_64; an_apow : INTEGER_8; a_fpow : INTEGER_8; a_opts :NATURAL_8 )
 			-- Set the tuning parameters of a B+ tree database object.
 			-- `a_lmemb' specifies the number of members in each leaf page.  If it is not more than 0, the
 			--  default value is specified.  The default value is 128.
@@ -513,7 +511,7 @@ feature -- Database Control
 			end
 		end
 feature -- Remove
-	vanish
+	vanish, wipe_out
 			-- Remove all records of a btree database object.
 		require
 			is_database_open_writer : is_open_mode_writer

@@ -46,28 +46,28 @@ feature -- Initialization
 			check not adb.has_error	end
 
 			print ("%N================ store records ======================%N")
-			adb.put_string ("foo", "hop")
+			adb.put ("foo", "hop")
 			check not adb.has_error	end
-			adb.put_string ("bar", "step")
+			adb.put ("bar", "step")
 			check not adb.has_error	end
-			adb.put_string ("baz", "jump")
+			adb.put ("baz", "jump")
 			check not adb.has_error	end
 
 			print ("%N================ retrieve records ======================%N")
-			print ("%Nkey: foo  -- value:" + adb.get_string ("foo") )
-			check adb.get_string ("notexist") = Void end
+			print ("%Nkey: foo  -- value:" + adb.retrieve ("foo") )
+			check adb.retrieve ("notexist") = Void end
 
 
 			print ("%N================ traverse records ======================%N")
 			from
 				adb.iterator_init
-				l_key := adb.iterator_next_string
+				l_key := adb.iterator_next
 			until
 				l_key = Void
 			loop
 				print ("%NKey :" + l_key)
-				print ("%NValue:" + adb.get_string (l_key) )
-				l_key := adb.iterator_next_string
+				print ("%NValue:" + adb.retrieve (l_key) )
+				l_key := adb.iterator_next
 			end
 
 			adb.close
@@ -89,16 +89,16 @@ feature -- Initialization
 			check not fdb.has_error	end
 
 			print ("%N================ store records ======================%N")
-			fdb.put_string ("1", "hop")
+			fdb.put ("1", "hop")
 			check not fdb.has_error	end
-			fdb.put_string ("2", "step")
+			fdb.put ("2", "step")
 			check not fdb.has_error	end
-			fdb.put_string ("3", "jump")
+			fdb.put ("3", "jump")
 			check not fdb.has_error	end
 
 			print ("%N================ retrieve records ======================%N")
-			print ("%Nkey: foo  -- value:" + fdb.get_string ("1") )
-			check fdb.get_string ("4") = Void end
+			print ("%Nkey: foo  -- value:" + fdb.retrieve ("1") )
+			check fdb.retrieve ("4") = Void end
 
 
 			print ("%N================ traverse records ======================%N")
@@ -109,7 +109,7 @@ feature -- Initialization
 				l_key = Void
 			loop
 				print ("%NKey :" + l_key)
-				print ("%NValue:" + fdb.get_string (l_key) )
+				print ("%NValue:" + fdb.retrieve (l_key) )
 				l_key := fdb.iterator_next_string
 			end
 
@@ -131,16 +131,16 @@ feature -- Initialization
 			check not bdb.has_error	end
 
 			print ("%N================ store records ======================%N")
-			bdb.put_string ("foo", "hop")
+			bdb.put ("foo", "hop")
 			check not bdb.has_error	end
-			bdb.put_string ("bar", "step")
+			bdb.put ("bar", "step")
 			check not bdb.has_error	end
-			bdb.put_string ("baz", "jump")
+			bdb.put ("baz", "jump")
 			check not bdb.has_error	end
 
 			print ("%N================ retrieve records ======================%N")
-			print ("%Nkey: foo  -- value:" + bdb.get_string ("foo") )
-			check bdb.get_string ("notexist") = Void end
+			print ("%Nkey: foo  -- value:" + bdb.retrieve ("foo") )
+			check bdb.retrieve ("notexist") = Void end
 
 
 			print ("%N================ traverse records ======================%N")
@@ -151,7 +151,7 @@ feature -- Initialization
 				l_key = Void
 			loop
 				print ("%NKey :" + l_key)
-				print ("%NValue:" + bdb.get_string (l_key) )
+				print ("%NValue:" + bdb.retrieve (l_key) )
 				l_key := bdb.iterator_next_string
 			end
 
@@ -174,16 +174,16 @@ feature -- Initialization
 			check not hdb.has_error	end
 
 			print ("%N================ store records ======================%N")
-			hdb.put_string ("foo", "hop")
+			hdb.put ("foo", "hop")
 			check not hdb.has_error	end
-			hdb.put_string ("bar", "step")
+			hdb.put ("bar", "step")
 			check not hdb.has_error	end
-			hdb.put_string ("baz", "jump")
+			hdb.put ("baz", "jump")
 			check not hdb.has_error	end
 
 			print ("%N================ retrieve records ======================%N")
-			print ("%Nkey: foo  -- value:" + hdb.get_string ("foo") )
-			check hdb.get_string ("notexist") = Void end
+			print ("%Nkey: foo  -- value:" + hdb.retrieve ("foo") )
+			check hdb.retrieve ("notexist") = Void end
 
 
 			print ("%N================ traverse records ======================%N")
@@ -194,7 +194,7 @@ feature -- Initialization
 				l_key = Void
 			loop
 				print ("%NKey :" + l_key)
-				print ("%NValue:" + hdb.get_string (l_key) )
+				print ("%NValue:" + hdb.retrieve (l_key) )
 				l_key := hdb.iterator_next_string
 			end
 
@@ -217,16 +217,16 @@ feature -- Initialization
 			check not tdb.has_error	end
 
 			print ("%N================ store records ======================%N")
-			tdb.put_string ("foo", "hop")
+			tdb.put ("foo", "hop")
 			check not tdb.has_error	end
-			tdb.put_string ("bar", "step")
+			tdb.put ("bar", "step")
 			check not tdb.has_error	end
-			tdb.put_string ("baz", "jump")
+			tdb.put ("baz", "jump")
 			check not tdb.has_error	end
 
 			print ("%N================ retrieve records ======================%N")
-			print ("%Nkey: foo  -- value:" + tdb.get_string ("foo") )
-			check tdb.get_string ("notexist") = Void end
+			print ("%Nkey: foo  -- value:" + tdb.retrieve ("foo") )
+			check tdb.retrieve ("notexist") = Void end
 
 
 			print ("%N================ traverse records ======================%N")
@@ -237,7 +237,7 @@ feature -- Initialization
 				l_key = Void
 			loop
 				print ("%NKey :" + l_key)
-				print ("%NValue:" + tdb.get_string (l_key) )
+				print ("%NValue:" + tdb.retrieve (l_key) )
 				l_key := tdb.iterator_next_string
 			end
 

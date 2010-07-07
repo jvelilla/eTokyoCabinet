@@ -81,7 +81,7 @@ feature
 			end
 
 			-- Show element
-			map := tdb.get_map (list_of_keys.at (1))
+			map := tdb.retrieve_map (list_of_keys.at (1))
 			print ("%Nname:" + map.at ("name"))
 			print ("%Nage :" + map.at ("age"))
 
