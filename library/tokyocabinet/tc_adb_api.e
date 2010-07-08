@@ -242,6 +242,27 @@ feature -- Retrive Records
                	 tcadbvsiz2((TCADB *)$an_adb, (const char *)$a_kstr)
              }"
 		end
+
+
+	tcadbfwmkeys2(adb : POINTER; a_pstr : POINTER; a_max : INTEGER) : POINTER
+		--	/* Get forward matching string keys in an abstract database object.
+		--   `adb' specifies the abstract database object.
+		--   `pstr' specifies the string of the prefix.
+		--   `max' specifies the maximum number of keys to be fetched.  If it is negative, no limit is
+		--   specified.
+		--   The return value is a list object of the corresponding keys.  This function does never fail.
+		--   It returns an empty list even if no key corresponds.
+		--   Because the object of the return value is created with the function `tclistnew', it should be
+		--   deleted with the function `tclistdel' when it is no longer in use.  Note that this function
+		--   may be very slow because every key in the database is scanned. */
+		--TCLIST *tcadbfwmkeys2(TCADB *adb, const char *pstr, int max);
+		external
+	                "C inline use <tcadb.h>"
+        alias
+                "{
+               	 tcadbfwmkeys2((TCADB *)$adb, (const char *)$a_pstr, (int)$a_max)
+             }"
+		end
 feature -- Remove Records
 
 	tcadbout2 (an_adb:POINTER; a_kstr:POINTER) : BOOLEAN

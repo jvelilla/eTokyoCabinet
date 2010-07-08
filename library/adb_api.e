@@ -1,14 +1,15 @@
 note
 	description: "[
-				Abstract database is a set of interfaces to use on-memory hash database, on-memory tree database, 
-				hash database, B+ tree database, fixed-length database, and table database with the same API {ADB_API}.
-			]"
+		Abstract database is a set of interfaces to use on-memory hash database, on-memory tree database, 
+		hash database, B+ tree database, fixed-length database, and table database with the same API ADB_API.
+	]"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
 
 class
 	ADB_API
+
 inherit
 	TC_ADB_API
 
@@ -30,22 +31,21 @@ feature -- Access
 	is_open: BOOLEAN
 			-- is the database open?
 
-
-	is_open_mode_reader : BOOLEAN
-   			-- is the database open in a reader mode?
+	is_open_mode_reader: BOOLEAN
+			-- is the database open in a reader mode?
 		require
-   			is_database_open : is_open
-   		do
-   			Result := is_open_mode_reader_implementation
-   		end
+			is_database_open: is_open
+		do
+			Result := is_open_mode_reader_implementation
+		end
 
-	is_open_mode_writer : BOOLEAN
-   			-- is the database open in a writer mode?
+	is_open_mode_writer: BOOLEAN
+			-- is the database open in a writer mode?
 		require
-   			is_database_open : is_open
-   		do
-   			Result := not is_open_mode_reader
-   		end
+			is_database_open: is_open
+		do
+			Result := not is_open_mode_reader
+		end
 
 	error_description: STRING
 			-- Textual description of error
@@ -90,9 +90,26 @@ feature -- Access
 			Result := file_size_implementation
 		end
 
+
+	forward_matching_keys ( a_prefix : STRING) : LIST[STRING]
+			-- Get forward matching string keys in an abstract database object.
+			-- The return value is a list object of the corresponding keys.
+			-- It returns an empty list even if no key corresponds.
+		require
+			is_open_database : is_open
+		local
+			l_api : LIST_API
+			c_prefix : C_STRING
+		do
+			create c_prefix.make (a_prefix)
+			create l_api.make_by_pointer (tcadbfwmkeys2 (adb, c_prefix.item, -1))
+			Result := l_api.as_list
+			l_api.delete
+		end
+
 feature -- Open Database
 
-	open (a_name : STRING)
+	open (a_name: STRING)
 			--	/* Open an abstract database.
 			--   `name' specifies the name of the database.  If it is "*", the database will be an on-memory
 			--   hash database.  If it is "+", the database will be an on-memory tree database.  If its suffix
@@ -117,14 +134,14 @@ feature -- Open Database
 			--   For example, "casket.tch#bnum=1000000#opts=ld" means that the name of the database file is
 			--   "casket.tch", and the bucket number is 1000000, and the options are large and Deflate. */
 		require
-			is_database_closed : not is_open
-			is_valid_name : a_name /= Void and not a_name.is_empty
+			is_database_closed: not is_open
+			is_valid_name: a_name /= Void and not a_name.is_empty
 		local
-			c_name : C_STRING
-			l_b : BOOLEAN
+			c_name: C_STRING
+			l_b: BOOLEAN
 		do
 			create c_name.make (a_name)
-			l_b := tcadbopen (adb,c_name.item)
+			l_b := tcadbopen (adb, c_name.item)
 			if not l_b then
 				has_error := True
 				internal_message := "Open Abstract Database Error"
@@ -136,11 +153,11 @@ feature -- Open Database
 feature -- Close and Delete
 
 	close
-		-- Close an Abstract Database
+			-- Close an Abstract Database
 		require
-			is_database_open : is_open
+			is_database_open: is_open
 		local
-			l_b : BOOLEAN
+			l_b: BOOLEAN
 		do
 			l_b := tcadbclose (adb)
 			if not l_b then
@@ -150,17 +167,16 @@ feature -- Close and Delete
 				is_open := False
 			end
 		ensure
-			is_database_closed : not is_open
+			is_database_closed: not is_open
 		end
 
 	delete
-		-- Delete an Abstract Database
+			-- Delete an Abstract Database
 		do
 			tcadbdel (adb)
 			is_open := False
 		ensure
-			is_database_closed : not is_open
-
+			is_database_closed: not is_open
 		end
 
 feature -- Change Element
@@ -252,16 +268,13 @@ feature -- Status Report
 
 feature -- Status Settings
 
-	clean_error is
+	clean_error
 			-- Reset the last error.
 		do
 			has_error := False
 		ensure
 			no_error: not has_error
 		end
-
-
-
 
 feature -- Error Messages
 
@@ -275,17 +288,16 @@ feature -- Error Messages
 		do
 		end
 
-
 feature {NONE} -- Implementation
-	is_open_mode_reader_implementation : BOOLEAN
-   			-- is the database open in a reader mode?
+
+	is_open_mode_reader_implementation: BOOLEAN
+			-- is the database open in a reader mode?
 		do
-   			-- Check this!!!
-   		end
+		end
 
-	internal_message : STRING
+	internal_message: STRING
 
-	full_message_implementation : STRING
+	full_message_implementation: STRING
 		do
 		end
 
@@ -323,13 +335,11 @@ feature {NONE} -- Implementation
 	error_message_implementation (a_code: INTEGER_32): POINTER
 			-- Deferred Implementation of error message
 		do
-
 		end
 
 	error_code_implementation: INTEGER_32
 			-- Deferred implementation of error_code
 		do
-
 		end
 
 	file_size_implementation: NATURAL_64
@@ -350,14 +360,14 @@ feature {NONE} -- Implementation
 		end
 
 	adb: POINTER
-		-- Abstract database object
-
+			-- Abstract database object
 
 invariant
 	abstract_database_created: adb /= default_pointer
 	non_empty_description: has_error implies (error_description /= Void and (not error_description.is_empty))
-	not_open_as_reader_and_writer : is_open implies (not (is_open_mode_reader and is_open_mode_writer))
-	open_as_reader                : (is_open and then is_open_mode_reader) implies (not is_open_mode_writer)
-	open_as_writer				  : (is_open and then is_open_mode_writer) implies (not is_open_mode_reader)
+	not_open_as_reader_and_writer: is_open implies (not (is_open_mode_reader and is_open_mode_writer))
+	open_as_reader: (is_open and then is_open_mode_reader) implies (not is_open_mode_writer)
+	open_as_writer: (is_open and then is_open_mode_writer) implies (not is_open_mode_reader)
 
-end
+end -- class ADB_API
+
