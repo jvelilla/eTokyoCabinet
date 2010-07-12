@@ -6,6 +6,8 @@ note
 
 deferred class
 	DBM
+	inherit
+		WRAPPER_BASE
 
 feature -- Access
 
@@ -153,6 +155,7 @@ feature -- Iterator
 			r := iterator_next_string_implementation
 			if r /= default_pointer then
 				create Result.make_from_c (r)
+				free(r)
 			end
 		end
 
@@ -239,13 +242,6 @@ feature {DBM} -- Implementation
 		deferred
 		end
 
-	free (a_object: POINTER) is
-			-- Delete c object
-		external
-			"C inline use %"eif_lmalloc.h%""
-		alias
-			"eif_free((void *)$a_object)"
-		end
 
 invariant
 	non_empty_description: has_error implies (error_description /= Void and (not error_description.is_empty))

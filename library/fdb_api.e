@@ -28,6 +28,19 @@ feature {NONE} -- Initialization
 		end
 
 feature -- Access
+
+	record_size ( a_key : STRING) : INTEGER
+			-- Get the size of the string value with a decimal key in a fixed-length database object.
+			-- If successful, the return value is the size of the value of the corresponding: record, else,
+			-- it is -1.
+		local
+			c_key : C_STRING
+		do
+			create c_key.make (a_key)
+			Result := tcfdbvsiz3 (fdb,c_key.item)
+		end
+
+
 	range ( lower_key : STRING; upper_key : STRING) : LIST [STRING]
 			--	`lower_key' specifies the string of the lower key.
 			--  `upper_key' specifies the string of the upper key.
@@ -308,7 +321,47 @@ feature -- Close and Delete
 
 		end
 
+feature -- Change Element
+
+	put_cat ( a_key : STRING; a_value : STRING)
+			-- Concatenate a string value with a decimal key in a fixed-length database object.
+			-- `a_key' specifies the string of the decimal key.
+			-- `a_value' specifies the string of the value.
+			-- If there is no corresponding record, a new record is created.
+		require
+			is_open_database_writer: is_open_mode_writer
+			is_valid_key: a_key /= Void and (not a_key.is_empty) -- check that is a decimal value
+			is_valid_value: a_value /= Void and (not a_value.is_empty)
+		local
+			c_key: C_STRING
+			c_value: C_STRING
+			l_b: BOOLEAN
+
+		do
+			create c_key.make (a_key)
+			create c_value.make (a_value)
+			l_b := tcfdbputcat3 (fdb, c_key.item,c_value.item)
+			if not l_b then
+				has_error := True
+			end
+		end
+
+
+
 feature -- Database Control
+	set_mutex
+		-- Set mutual exclusion control of a fixed-length database object for threading.
+		require
+			is_database_closed : not is_open
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tcfdbsetmutex (fdb)
+			if not l_b then
+				has_error := true
+			end
+		end
+
 
 	db_copy (a_path : STRING)
 		-- Copy the database file of a fixed-length database object.

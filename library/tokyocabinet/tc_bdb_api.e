@@ -712,6 +712,38 @@ feature-- Mutual Exclusion
 		end
 
 feature -- Database Control
+	tcbdboptimize ( bdb : POINTER; a_lmemb : INTEGER_32; a_nmemb : INTEGER_32; a_bnum : INTEGER_64; an_apow : INTEGER_8; a_fpow:INTEGER_8; an_opts : NATURAL_8) : BOOLEAN
+		--	 Optimize the file of a B+ tree database object.
+		--   `bdb' specifies the B+ tree database object connected as a writer.
+		--   `lmemb' specifies the number of members in each leaf page.  If it is not more than 0, the
+		--   current setting is not changed.
+		--   `nmemb' specifies the number of members in each non-leaf page.  If it is not more than 0, the
+		--   current setting is not changed.
+		--   `bnum' specifies the number of elements of the bucket array.  If it is not more than 0, the
+		--   default value is specified.  The default value is two times of the number of pages.
+		--   `apow' specifies the size of record alignment by power of 2.  If it is negative, the current
+		--   setting is not changed.
+		--   `fpow' specifies the maximum number of elements of the free block pool by power of 2.  If it
+		--   is negative, the current setting is not changed.
+		--   `opts' specifies options by bitwise-or: `BDBTLARGE' specifies that the size of the database
+		--   can be larger than 2GB by using 64-bit bucket array, `BDBTDEFLATE' specifies that each record
+		--   is compressed with Deflate encoding, `BDBTBZIP' specifies that each page is compressed with
+		--   BZIP2 encoding, `BDBTTCBS' specifies that each page is compressed with TCBS encoding.  If it
+		--   is `UINT8_MAX', the current setting is not changed.
+		--   If successful, the return value is true, else, it is false.
+		--   This function is useful to reduce the size of the database file with data fragmentation by
+		--   successive updating. */
+		-- bool tcbdboptimize(TCBDB *bdb, int32_t lmemb, int32_t nmemb,
+		--                   int64_t bnum, int8_t apow, int8_t fpow, uint8_t opts);
+		external
+			"C inline use <tcbdb.h>"
+		alias
+			"{
+	 			tcbdboptimize((TCBDB *)$bdb, (int32_t)$a_lmemb, (int32_t)$a_nmemb,
+		                   (int64_t)$a_bnum, (int8_t)$an_apow, (int8_t)$a_fpow, (uint8_t)$an_opts)
+
+			}"
+		end
 
 
 	tcbdbtune(an_bdb : POINTER; a_lmemb : INTEGER_32; a_nmemb : INTEGER_32; a_bnum : INTEGER_64; an_apow : INTEGER_8; a_fpow : INTEGER_8; a_opts :NATURAL_8 ) : BOOLEAN

@@ -104,6 +104,17 @@ feature -- Test routines
 		end
 
 
+	test_record_size
+		local
+			value : STRING
+		do
+			assert("Expected -1",hdb.record_size ("key")=-1)
+			hdb.open_writer_create ("casket.tch")
+			value := "val1"
+			hdb.put("key1", value)
+			assert("Expected >0",hdb.record_size ("key1") = value.capacity)
+		end
+
 	test_put_async
 		do
 			hdb.open_writer_create ("casket.tch")

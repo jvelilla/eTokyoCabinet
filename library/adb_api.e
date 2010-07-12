@@ -12,7 +12,7 @@ class
 
 inherit
 	TC_ADB_API
-
+	WRAPPER_BASE
 create
 	make
 
@@ -31,28 +31,12 @@ feature -- Access
 	is_open: BOOLEAN
 			-- is the database open?
 
-	is_open_mode_reader: BOOLEAN
-			-- is the database open in a reader mode?
-		require
-			is_database_open: is_open
-		do
-			Result := is_open_mode_reader_implementation
-		end
-
-	is_open_mode_writer: BOOLEAN
-			-- is the database open in a writer mode?
-		require
-			is_database_open: is_open
-		do
-			Result := not is_open_mode_reader
-		end
-
 	error_description: STRING
 			-- Textual description of error
 		require
 			has_error: has_error
 		do
-			Result := full_message_implementation
+			Result := internal_message
 		ensure
 			result_exists: Result /= Void
 			result_not_empty: not Result.is_empty
@@ -71,6 +55,7 @@ feature -- Access
 			r := get_string_implementation (c_key.item)
 			if r /= default_pointer then
 				create Result.make_from_c (r)
+				free (r)
 			end
 		end
 
@@ -82,8 +67,11 @@ feature -- Access
 			Result := records_number_implementation
 		end
 
-	file_size: NATURAL_64
-			-- Get the size of the database file. 	
+	size: NATURAL_64
+		-- Get the size of the database of an abstract database object.
+		-- The return value is the size of the database or 0 if the object does not connect to any
+		-- database instance
+
 		require
 			is_open_database: is_open
 		do
@@ -107,10 +95,20 @@ feature -- Access
 			l_api.delete
 		end
 
+	record_size ( a_key : STRING) : INTEGER_32
+			-- Get the size of the value of a string record in an abstract database object.
+			-- If successful, the return value is the size of the value of the corresponding record, else,
+			-- it is -1.
+		local
+			c_key : C_STRING
+		do
+			create c_key.make (a_key)
+			Result := tcadbvsiz2 (adb, c_key.item)
+		end
 feature -- Open Database
 
 	open (a_name: STRING)
-			--	/* Open an abstract database.
+			--	 Open an abstract database.
 			--   `name' specifies the name of the database.  If it is "*", the database will be an on-memory
 			--   hash database.  If it is "+", the database will be an on-memory tree database.  If its suffix
 			--   is ".tch", the database will be a hash database.  If its suffix is ".tcb", the database will
@@ -184,7 +182,7 @@ feature -- Change Element
 	put (a_key: STRING; a_value: STRING)
 			-- Is used in order to store a string record into a database object.
 		require
-			is_open_database_writer: is_open_mode_writer
+			is_open_database_writer: is_open
 			is_valid_key: a_key /= Void and (not a_key.is_empty)
 			is_valid_value: a_value /= Void and (not a_value.is_empty)
 		local
@@ -197,6 +195,7 @@ feature -- Change Element
 			l_b := put_string_implementation (c_key.item, c_value.item)
 			if not l_b then
 				has_error := True
+				internal_message := "Abstract Database put Error"
 			end
 		end
 
@@ -204,7 +203,7 @@ feature -- Change Element
 			-- Is used in order to store a new string record into a database object.
 			-- If a record with the same key exists in the database, this function has no effect.
 		require
-			is_open_database_writer: is_open_mode_writer
+			is_open_database_writer: is_open
 			is_valid_key: a_key /= Void and (not a_key.is_empty)
 			is_valid_value: a_value /= Void and (not a_value.is_empty)
 		local
@@ -217,13 +216,37 @@ feature -- Change Element
 			l_b := put_keep_string_implementation (c_key.item, c_value.item)
 			if not l_b then
 				has_error := True
+				internal_message := "Abstract Database put_keep Error"
+			end
+		end
+
+
+
+	put_cat (a_key: STRING; a_value: STRING)
+			-- Concatenate a string value at the end of the existing record in an abstract database object.
+			-- If there is no corresponding record, a new record is created.
+		require
+			is_open_database_writer: is_open
+			is_valid_key: a_key /= Void and (not a_key.is_empty)
+			is_valid_value: a_value /= Void and (not a_value.is_empty)
+		local
+			c_key: C_STRING
+			c_value: C_STRING
+			l_b: BOOLEAN
+		do
+			create c_key.make (a_key)
+			create c_value.make (a_value)
+			l_b := tcadbputcat2 (adb,c_key.item, c_value.item)
+			if not l_b then
+				has_error := True
+				internal_message := "Abstract Database put_cat Error"
 			end
 		end
 
 	prune (a_key: STRING)
 			-- remove a record by a key `a_key'
 		require
-			is_open_database_writer: is_open_mode_writer
+			is_open_database_writer: is_open
 			is_valid_key: a_key /= Void and (not a_key.is_empty)
 		local
 			c_key: C_STRING
@@ -231,6 +254,56 @@ feature -- Change Element
 		do
 			create c_key.make (a_key)
 			l_b := out_string_implementation (c_key.item)
+			if not l_b then
+				has_error := True
+				internal_message := "Abstract Database prune Error"
+			end
+		end
+
+feature -- Database Control
+	synchronize
+			-- Synchronize updated contents of an abstract database object with the file and the device.
+			--  If not successful, has_error will be true.
+		local
+			b : BOOLEAN
+		do
+			 b := tcadbsync (adb)
+			 if not b then
+			 	has_error := True
+			 	internal_message := "Abstract Database synchronize Error"
+			 end
+		end
+
+
+	path  : STRING
+			--  The return value is the path of the database file or `NULL' if the object does not connect to
+			--  any database.
+			--  "*" stands for on-memory hash database.
+			--	"+" stands for on-memory tree database.
+		require
+			is_open_database : is_open
+		local
+			r : POINTER
+		do
+			r := tcadbpath (adb)
+			if r /= default_pointer then
+				create Result.make_from_c (r)
+			end
+	 	end
+
+feature -- Remove
+	vanish , wipe_out
+			--Remove all records of a abstract database object.
+		require
+			is_database_open_writer : is_open
+		local
+			b : BOOLEAN
+		do
+		 	b := tcadbvanish (adb)
+		 	if not b then
+		 		has_error := True
+		 		internal_message := "Abstract Database wipe_out Error"
+		 	end
 		end
 
 feature -- Iterator
@@ -245,6 +318,7 @@ feature -- Iterator
 			l_b := iterator_init_implementation
 			if not l_b then
 				has_error := True
+				internal_message := "Abstract Database iterator_init Error"
 			end
 		end
 
@@ -258,6 +332,7 @@ feature -- Iterator
 			r := iterator_next_string_implementation
 			if r /= default_pointer then
 				create Result.make_from_c (r)
+				free(r)
 			end
 		end
 
@@ -276,30 +351,57 @@ feature -- Status Settings
 			no_error: not has_error
 		end
 
-feature -- Error Messages
 
-	error_message (a_code: INTEGER_32): STRING
-			-- Get the message string corresponding to an error code.
+feature -- Transaction
+
+	transaction_begin
+			-- Begin the transaction of a abstract database object.
+		require
+			is_open_database_writer: is_open
+		local
+			l_b : BOOLEAN
 		do
+			l_b := tcadbtranbegin (adb)
+			if not l_b  then
+				has_error := True
+				internal_message := "Abstract Database transaction_begin Error"
+			end
 		end
 
-	error_code: INTEGER_32
-			-- 	Get the last happened error code of a database object.
+
+	transaction_commit
+			-- Commit the transaction of a abstract database object.
+		require
+			is_open_database_writer: is_open
+		local
+			l_b : BOOLEAN
 		do
+			l_b := tcadbtrancommit (adb)
+			if not l_b  then
+				has_error := True
+				internal_message := "Abstract Database transaction_commit Error"
+			end
+		end
+
+
+	transaction_abort
+			-- Abort the transaction of a abstract database object.
+		require
+			is_open_database_writer: is_open
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tcadbtranabort (adb)
+			if not l_b  then
+				has_error := True
+				internal_message := "Abstract Database transaction_abort Error"
+			end
 		end
 
 feature {NONE} -- Implementation
 
-	is_open_mode_reader_implementation: BOOLEAN
-			-- is the database open in a reader mode?
-		do
-		end
-
 	internal_message: STRING
 
-	full_message_implementation: STRING
-		do
-		end
 
 	get_string_implementation (a_key: POINTER): POINTER
 			-- Deferred implementation of get_string
@@ -365,9 +467,6 @@ feature {NONE} -- Implementation
 invariant
 	abstract_database_created: adb /= default_pointer
 	non_empty_description: has_error implies (error_description /= Void and (not error_description.is_empty))
-	not_open_as_reader_and_writer: is_open implies (not (is_open_mode_reader and is_open_mode_writer))
-	open_as_reader: (is_open and then is_open_mode_reader) implies (not is_open_mode_writer)
-	open_as_writer: (is_open and then is_open_mode_writer) implies (not is_open_mode_reader)
 
 end -- class ADB_API
 

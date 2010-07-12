@@ -8,37 +8,15 @@ note
 deferred class
 	WRAPPER_BASE
 
-inherit
-	DISPOSABLE
+feature -- Remove	
 
-feature -- Initialization
-
-	make (a_item: POINTER) is
-			-- Create.
-		do
-			item := a_item
-		end
-
-feature -- Destruction
-
-	dispose is
-			-- Delete C object.
-		do
-			delete (item)
-		end
-
-feature {WRAPPER_BASE} -- C object
-
-		-- Pointer to the c object.
-	item: POINTER
-
-feature {NONE} -- C methods
-
-	delete (a_object: POINTER) is
+	free (a_object: POINTER)
 			-- Delete c object
-		deferred
+		external
+			"C inline use %"eif_lmalloc.h%""
+		alias
+			"eif_free((void *)$a_object)"
 		end
-
-end -- WRAPPER_BASE
-
+	
+end -- class WRAPPER_BASE
 

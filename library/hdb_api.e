@@ -50,6 +50,16 @@ feature -- Access
 			Result := <<owriter,owriter.bit_or (ocreat),owriter.bit_or(otrunc),owriter.bit_or (otsync),owriter.bit_or (olcknb),owriter.bit_or (onolck),oreader,oreader.bit_or (olcknb),oreader.bit_or (onolck)>>
 		end
 
+	record_size ( a_key : STRING) :INTEGER_32
+			-- Get the size of the value of a record in a hash database object.
+			-- Or -1 if there was an error or the key `a_key' doesn't exist.
+		local
+			c_key : C_STRING
+		do
+			create c_key.make (a_key)
+	        Result := tchdbvsiz2 (hdb, c_key.item)
+    	end
+
 feature -- Open Database
 
 
@@ -304,6 +314,28 @@ feature -- Close and Delete
 		end
 
 feature -- Change Element
+	
+	put_cat ( a_key : STRING; a_value : STRING)
+			-- Concatenate a string value at the end of the existing record in a hash database object.
+			-- If there is no corresponding record, a new record is created.
+		require
+			is_open_database_writer: is_open_mode_writer
+			is_valid_key: a_key /= Void and (not a_key.is_empty)
+			is_valid_value: a_value /= Void and (not a_value.is_empty)
+		local
+			c_key: C_STRING
+			c_value: C_STRING
+			l_b: BOOLEAN
+		do
+			create c_key.make (a_key)
+			create c_value.make (a_value)
+			l_b := tchdbputcat2 (hdb, c_key.item,c_value.item)
+			if not l_b then
+				has_error := True
+			end
+		end
+
+
 
 	put_asynchronic ( a_key : STRING; a_value : STRING)
 			-- Store a string record into a hash database object in asynchronous fashion.
@@ -324,6 +356,19 @@ feature -- Change Element
 			end
 		end
 feature -- Database Control
+
+	set_mutex
+		-- Set mutual exclusion control of a hash database object for threading.
+		require
+			is_database_closed : not is_open
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tchdbsetmutex (hdb)
+			if not l_b then
+				has_error := true
+			end
+		end
 
 	set_tune (a_bnum: INTEGER_64; an_apow, an_fpow: INTEGER_8; an_opts: NATURAL_8)
 			--	Set the tuning parameters of a hash database object.

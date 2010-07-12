@@ -98,6 +98,26 @@ feature -- Access
 			l_list.delete
 		end
 
+	record_size ( a_key : STRING) :INTEGER_32
+			-- Get the size of the value of a record in a B+tree database object.
+			-- Or -1 if there was an error or the key `a_key' doesn't exist.
+		local
+			c_key : C_STRING
+		do
+			create c_key.make (a_key)
+	        Result := tcbdbvsiz2 (bdb, c_key.item)
+    	end
+
+    records_by_key ( a_key : STRING) :INTEGER_32
+			-- Number of records corresponding a string key in a B+ tree database object.
+			-- The return value is the number of the corresponding records, else, it is 0
+		local
+			c_key : C_STRING
+		do
+			create c_key.make (a_key)
+	        Result := tcbdbvnum2 (bdb, c_key.item)
+    	end
+
 feature -- Open Database
 
 	open_writer (a_path : STRING)
@@ -351,6 +371,31 @@ feature -- Close and Delete
 		end
 
 feature -- Change Element
+
+	put_cat ( a_key : STRING; a_value : STRING)
+			-- Concatenate a string value at the end of the existing record in a B+ tree database object.
+			-- `a_key' specifies the string of the key.
+			-- `a_value' specifies the string of the value.
+			-- If there is no corresponding record, a new record is created.
+		require
+			is_open_database_writer: is_open_mode_writer
+			is_valid_key: a_key /= Void and (not a_key.is_empty)
+			is_valid_value: a_value /= Void and (not a_value.is_empty)
+		local
+			c_key: C_STRING
+			c_value: C_STRING
+			l_b: BOOLEAN
+
+		do
+			create c_key.make (a_key)
+			create c_value.make (a_value)
+			l_b := tcbdbputcat2 (bdb, c_key.item,c_value.item)
+			if not l_b then
+				has_error := True
+			end
+		end
+
+
 	put_dup ( a_key : STRING; a_value : STRING)
 			--	Store a string record into a B+ tree database object with allowing duplication of keys.
 			--  `a_key' specifies the string of the key.
@@ -376,6 +421,18 @@ feature -- Change Element
 		end
 
 feature -- Database Control
+	set_mutex
+		-- Set mutual exclusion control of a B+tree database object for threading.
+		require
+			is_database_closed : not is_open
+		local
+			l_b : BOOLEAN
+		do
+			l_b := tcbdbsetmutex (bdb)
+			if not l_b then
+				has_error := true
+			end
+		end
 
 	set_tune (a_lmemb : INTEGER_32; a_nmemb : INTEGER_32; a_bnum : INTEGER_64; an_apow : INTEGER_8; a_fpow : INTEGER_8; a_opts :NATURAL_8 )
 			-- Set the tuning parameters of a B+ tree database object.
@@ -403,6 +460,37 @@ feature -- Database Control
 			b := tcbdbtune (bdb, a_lmemb, a_nmemb, a_bnum, an_apow, a_fpow, a_opts)
 			if not b then
 				has_error := True
+			end
+		end
+
+
+	set_optimize ( a_lmemb : INTEGER_32; a_nmemb: INTEGER_32; a_bnum: INTEGER_64; an_apow, a_fpow: INTEGER_8; an_opts: NATURAL_8)
+			--	 Optimize the file of a B+ tree database object.
+			--   `a_lmemb' specifies the number of members in each leaf page.  If it is not more than 0, the
+			--   current setting is not changed.
+			--   `a_nmemb' specifies the number of members in each non-leaf page.  If it is not more than 0, the
+			--   current setting is not changed.
+			--   `a_bnum' specifies the number of elements of the bucket array.  If it is not more than 0, the
+			--   default value is specified.  The default value is two times of the number of pages.
+			--   `an_apow' specifies the size of record alignment by power of 2.  If it is negative, the current
+			--   setting is not changed.
+			--   `an_fpow' specifies the maximum number of elements of the free block pool by power of 2.  If it
+			--   is negative, the current setting is not changed.
+			--   `an_opts' specifies options by bitwise-or: `BDBTLARGE' specifies that the size of the database
+			--   can be larger than 2GB by using 64-bit bucket array, `BDBTDEFLATE' specifies that each record
+			--   is compressed with Deflate encoding, `BDBTBZIP' specifies that each page is compressed with
+			--   BZIP2 encoding, `BDBTTCBS' specifies that each page is compressed with TCBS encoding.  If it
+			--   is `UINT8_MAX', the current setting is not changed.
+			--   This function is useful to reduce the size of the database file with data fragmentation by
+			--   successive updating.
+		require
+			is_database_open_writer : is_open_mode_writer
+		local
+			b : BOOLEAN
+		do
+			b := tcbdboptimize (bdb, a_lmemb, a_nmemb, a_bnum, an_apow, a_fpow,an_opts)
+			if not b then
+				has_error := true
 			end
 		end
 
@@ -459,6 +547,7 @@ feature -- Database Control
 				has_error := True
 			end
 		end
+
 
 
 	synchronize
@@ -680,7 +769,7 @@ feature {NONE} -- Implementation
 		end
 
 	file_size_implementation: NATURAL_64
-			-- Deferred implementation of full_size
+			-- Deferred implementation of file_size
 		do
 			Result := tcbdbfsiz (bdb)
 		end
